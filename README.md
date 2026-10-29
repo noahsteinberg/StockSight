@@ -11,7 +11,7 @@ A University of Connecticut CSE 4095 Agentic Programming team project exploring 
 - Next-trading-day direction predictions with a precisely defined target
 - Prediction history and evaluation against observed outcomes
 
-See [SPECIFICATION.md](SPECIFICATION.md) for scope and open decisions, and [TODO.md](TODO.md) for the phased roadmap.
+See [SPECIFICATION.md](SPECIFICATION.md) for scope and open decisions, [TODO.md](TODO.md) for the existing checklist, and [team roadmap](docs/ROADMAP.md) for the proposed team milestones, responsibilities, and professor-demo acceptance criteria.
 
 ## Architecture and structure
 
