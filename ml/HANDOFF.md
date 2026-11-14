@@ -35,7 +35,7 @@ python -m venv .venv
 ```
 
 **The dataset is not in git** (78 MB). Get it one of two ways:
-- **Same snapshot:** copy `data/clean/prices_clean.parquet` from the author. The reports match it only if its SHA-256 starts with `ee0b2ed66c8a`. Then copy `ml/reports/gates_frozen.json` to `data/reports/` and run `pytest`. The data-marked tests check the hash.
+- **Same snapshot:** copy `data/clean/prices_clean.parquet` from the author. The reports match it only if its SHA-256 starts with `ee0b2ed66c8a`. Then copy `ml/reports/gates_frozen.json`, `model_selection.json` and `validation_access_log.jsonl` to `data/reports/`. This is required: `judge` refuses to run if the local log has fewer validation accesses than the tracked one. Rebuild features with `python -m stocksight_data.features`, then run `pytest`. Optionally, copy `data/models/oof/` (394 MB) from the author; it is needed only for `rescore`, or for `judge` on the calibrated RF. The data-marked tests check the hash.
 - **Rebuild:** run `universe`, then `download`, then `clean --end-date 2026-11-12`, then `baselines`. A rebuild gets newer Yahoo data: the constituent list changes, and back-adjusted prices are revised after every dividend. The hash will therefore differ, and `load_frozen_gates` will **refuse** the old gates. That refusal is intentional. If you rebuild, re-freeze deliberately with `baselines --freeze-gates` after deleting the old file, and record why in the observation ledger.
 
 Features are rebuilt from the cleaned data with `python -m stocksight_data.features` (about 1 minute, 535 MB, not in git). The train-only report is rebuilt with `python -m stocksight_data.feature_report`.
