@@ -1,0 +1,7 @@
+# ML / data-pipeline dependencies. Kept separate from backend/requirements.txt.
+yfinance>=0.2.54
+pandas>=2.2
+pyarrow>=15
+requests>=2.31
+lxml>=5.0
+exchange_calendars>=4.5

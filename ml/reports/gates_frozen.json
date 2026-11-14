@@ -1,0 +1,28 @@
+{
+  "frozen_at": "2026-11-14T06:57:17+00:00",
+  "dataset_sha256": "ee0b2ed66c8abb87e0cf36798a32258bc902c0e1687ddee2a485c80b44216e89",
+  "code": {
+    "commit": "89fa1c8fa57aacef60cfd30e506ca0147226ea83",
+    "dirty": true
+  },
+  "split": "validation",
+  "best_baseline": "reversal_5d",
+  "majority_class": 0,
+  "train_beat_rate": 0.48702690402741944,
+  "n_boot": 1000,
+  "seed": 0,
+  "block": 10,
+  "reference": {
+    "rows": 363472,
+    "best_baseline_bal_acc": 0.5047649920316817,
+    "always_beat_acc": 0.5079015715103227,
+    "constant_brier": 0.24996328552803854
+  },
+  "rules": [
+    "balanced accuracy > best_baseline balanced accuracy on the model's rows",
+    "block-bootstrap 95% CI lower bound of (model - best_baseline) balanced accuracy > 0",
+    "accuracy >= always_beat accuracy on the model's rows",
+    "Brier < constant(train_beat_rate) Brier on the model's rows",
+    "every validation year balanced accuracy >= 0.50"
+  ]
+}
