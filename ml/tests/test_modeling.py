@@ -523,6 +523,33 @@ def test_fit_base_rate_uses_all_strided_rows_including_the_hgb_holdout(frame):
     assert diag[0]["fit_beat_rate"] == pytest.approx(m.fit_base_rate(fold_rows, spec))
 
 
+def test_a_fresh_clone_without_the_local_access_log_is_refused(tmp_path):
+    """data/ is gitignored: a new machine must not see 'validation never used' when the tracked
+    copy in ml/reports says otherwise."""
+    tracked, local = tmp_path / "tracked.jsonl", tmp_path / "local.jsonl"
+    m.record_validation_access(tracked, [m.ModelSpec("a", "lr", "rank", ())], reason=None)
+    with pytest.raises(RuntimeError, match="copy"):
+        m.check_access_log_in_sync(local, tracked)
+    local.write_text(tracked.read_text())
+    m.check_access_log_in_sync(local, tracked)  # in sync: fine
+    m.check_access_log_in_sync(local, tmp_path / "absent.jsonl")  # no tracked copy: fine
+
+
+def test_sync_tracked_copies_reports_into_the_repo(tmp_path):
+    src, dst = tmp_path / "data", tmp_path / "repo"
+    src.mkdir()
+    (src / "validation_access_log.jsonl").write_text("{}\n")
+    m.sync_tracked([src / "validation_access_log.jsonl", src / "missing.json"], dst)
+    assert (dst / "validation_access_log.jsonl").read_text() == "{}\n"
+    assert not (dst / "missing.json").exists()
+
+
+def test_missing_oof_files_are_reported_by_name(tmp_path, monkeypatch):
+    monkeypatch.setattr(m, "OOF_DIR", tmp_path)
+    (tmp_path / "a.parquet").write_bytes(b"x")
+    assert m.missing_oof(["a", "b"]) == ["b"]
+
+
 def test_too_many_finalists_are_refused(tmp_path):
     specs = [m.ModelSpec(f"s{i}", "lr", "rank", (("C", float(i + 1)),)) for i in range(m.MAX_FINALISTS + 1)]
     with pytest.raises(ValueError, match="finalists"):

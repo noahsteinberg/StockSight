@@ -26,10 +26,12 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import shutil
 import time
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from importlib import metadata
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -78,6 +80,9 @@ OOF_DIR = MODELS_DIR / "oof"
 SELECTION_REPORT = REPORTS_DIR / "model_selection.json"
 VALIDATION_REPORT = REPORTS_DIR / "model_validation.json"
 VALIDATION_ACCESS_LOG = REPORTS_DIR / "validation_access_log.jsonl"
+# Tracked copies (in git): data/ is gitignored, so these let a fresh clone see the selection
+# results and, above all, how often validation has been used.
+TRACKED_REPORTS_DIR = Path(__file__).resolve().parents[1] / "reports"
 
 ESTIMATORS = {"lr": LogisticRegression, "hgb": HistGradientBoostingClassifier, "rf": RandomForestClassifier}
 DEFAULTS = {
@@ -703,7 +708,41 @@ def run_rescore() -> dict:
     return _finish(frame, report)
 
 
+def missing_oof(names) -> list[str]:
+    """Spec names whose out-of-fold prediction file is absent (data/ is not in git)."""
+    return [n for n in names if not _oof_path(n).exists()]
+
+
+def check_access_log_in_sync(local, tracked) -> None:
+    """Refuse when the tracked copy (ml/reports, in git) records validation accesses that the
+    local log (data/reports, gitignored) lacks, e.g. on a fresh clone. Otherwise the guard would
+    believe validation was never used."""
+    if not tracked.exists():
+        return
+    def started(path):
+        return [e for e in _log_entries(path) if e.get("status", "started") == "started"]
+    if len(started(local)) < len(started(tracked)):
+        raise RuntimeError(
+            f"{tracked} records {len(started(tracked))} validation access(es) but {local} has "
+            f"{len(started(local))}: copy the tracked file to {local} before judging (see ml/HANDOFF.md)"
+        )
+
+
+def sync_tracked(paths, dest=None) -> None:
+    """Copy reports that must survive a fresh clone into ml/reports (tracked in git)."""
+    dest = TRACKED_REPORTS_DIR if dest is None else dest
+    dest.mkdir(parents=True, exist_ok=True)
+    for path in paths:
+        if path.exists():
+            shutil.copyfile(path, dest / path.name)
+
+
 def _load_oof(frame: pd.DataFrame, name: str) -> pd.DataFrame:
+    if not _oof_path(name).exists():
+        raise FileNotFoundError(
+            f"{_oof_path(name)} is missing (data/ is not in git). Copy data/models/oof/ from the author, "
+            f"or rerun `python -m stocksight_data.modeling select --only {name} --rerun`"
+        )
     o = pd.read_parquet(_oof_path(name))
     if not (o["date"].equals(frame.loc[o.index, "date"]) and o["ticker"].equals(frame.loc[o.index, "ticker"])):
         raise ValueError(f"OOF predictions for {name} do not align with the train frame; rerun select")
@@ -792,6 +831,12 @@ def run_judge(names: list[str] | None, reason: str | None) -> dict:
         raise SystemExit(f"not in the selection report (only selected configs may be judged): {unknown}")
     check_judge_names(names, summary, reason)
     gates = load_frozen_gates(GATES_FILE, sha256_file(CLEAN_FILE))
+    # Check everything judge needs BEFORE logging the access, so a missing file cannot consume it.
+    check_access_log_in_sync(VALIDATION_ACCESS_LOG, TRACKED_REPORTS_DIR / VALIDATION_ACCESS_LOG.name)
+    absent = missing_oof({m for n in names for m in candidates[n]["members"]})
+    if absent:
+        raise SystemExit(f"out-of-fold predictions missing for {sorted(absent)}: copy data/models/oof/ "
+                         "or rerun `select --only <names> --rerun` first")
 
     # Each judged candidate is logged under one pseudo-spec whose id covers members and calibration.
     def candidate_spec(n):
@@ -853,6 +898,8 @@ def run_judge(names: list[str] | None, reason: str | None) -> dict:
     previous["runs"].append(out)
     VALIDATION_REPORT.write_text(json.dumps(previous, indent=2, default=str))
     mark_validation_completed(VALIDATION_ACCESS_LOG, n_access)
+    sync_tracked([VALIDATION_ACCESS_LOG, VALIDATION_REPORT, SELECTION_REPORT])
+    print(f"tracked copies updated in {TRACKED_REPORTS_DIR}: commit them")
     print(f"report: {VALIDATION_REPORT}")
     return out
 
