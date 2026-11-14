@@ -27,7 +27,7 @@ v0.2 replaces the next-day up/down target with **"does this stock beat the marke
 | Threshold or config plan | Predict beat when `p_beat ≥ 0.5`; no threshold tuning on test. |
 | Eval slices | Year, GICS sector, volatility tercile, years since joining the index. Slices only; sector and membership are never model inputs (3.4 rule 7). |
 | Known risks | Survivorship bias; weak signal; **overlapping labels** (section 3.6); regime shift (2008, 2020). |
-| Next experiment | Features (section 8). |
+| Next experiment | Models done, none passes the gates (section 9); team decision on the next step. |
 | Rollback or fallback | No prediction shown when any input is missing, stale, or touches a `bad_bar`; never a placeholder. |
 
 ## 2. Prediction contract
@@ -152,7 +152,34 @@ A candidate model "beats baseline" only if **all** hold on validation, judged by
 - Purged walk-forward folds inside train are in `stocksight_data.folds`.
 - Train-only screening: the dominant signal is short-term reversal (best per-date IC about −0.027), and it roughly halves between 2000–09 and 2010–18. 12-1 momentum is not significant after Benjamini-Hochberg adjustment.
 
-## 9. Next experiment (MLE-05: first model)
-1. **Logistic regression** on `model_features()`, with train-fitted winsorisation or ranks and a missing-value strategy. Hyperparameters are chosen on purged walk-forward folds inside train.
-2. **One validation run** through `gate_model`, recorded in the observation ledger with the number of finalists.
-3. **Random forest** next, regularised for overlapping labels, then error analysis by year, sector (as a slice only) and volatility.
+## 9. Models (MLE-05): done; no model passes the gates
+
+Full record: [ledger.md](ledger.md). Code: `stocksight_data.modeling`. Reports: `ml/reports/model_selection.json`, `model_validation.json`, `validation_access_log.jsonl`.
+
+- **Selection (train only):**
+  - 34 configurations were tried on the six purged walk-forward folds: 22 LR/HGB/RF configs, 6 market-state configs, and 6 calibrated or averaged candidates.
+  - Labels are built from prices cut at the train end. Per-date ranks are computed before the label join. Transforms are fitted on fit rows only. Models fit on every 5th date.
+  - Fold results: balanced accuracy 0.505–0.510, against reversal at about 0.5065 on the same rows. Per-date AUC 0.511–0.515.
+- **Why the gates conflict:**
+  - Class-balanced models beat reversal, but miss the accuracy and Brier gates.
+  - Calibrated models pass Brier, but lose balanced accuracy.
+  - The date-level beat-rate (SD 0.047) dominates Brier, and per-date ranks cannot see it. Three market-state features did not fix this.
+- **Finalist rule:** fixed before any validation access and reviewed by `mle-reviewer`.
+  - Eligible if the fold-mean analogue of the three point gates holds.
+  - Ranked by the share of folds passing all gate proxies.
+  - One per family, at most 3, compared on folds 1–5.
+- **Validation (access #1, 3 finalists judged):**
+
+| Finalist | Bal. acc. | − reversal_5d (95% CI) | Accuracy | Brier | Gates passed |
+|---|---|---|---|---|---|
+| LR (winsorised, balanced) + HGB (raw) average | 0.5103 | +0.0055 [−0.0036, +0.0145] | 0.5104 | 0.24978 | 4/5: not significant |
+| HGB (raw values, balanced) | 0.5100 | +0.0052 [−0.0035, +0.0135] | 0.5098 | 0.24980 | 4/5: not significant |
+| RF (stride 1) + Platt | 0.5085 | +0.0037 [−0.0047, +0.0117] | 0.5137 | 0.24975 | 4/5: not significant |
+
+- **Result:** no evidence of skill beyond the reversal baseline. Point estimates are positive and every validation year is at least 0.50 (2021 only just), but no CI excludes zero.
+- **Test split:** untouched.
+- **Next:**
+  - The team decides between two options:
+    - Accept "no passing model" for the report and pick a model to evaluate once on test.
+    - Run the next recorded experiment: a feature for the date-level beat-rate.
+  - Review whether the single-p, 0.5-threshold gate design fits the app (section 6).

@@ -1,6 +1,6 @@
 # ML handoff (branch `feature/ml-sp500-dataset`, 2026-11-14)
 
-Status: data pipeline, labels, baselines, frozen promotion gates and **59 point-in-time features** are done and tested. **No models exist yet.** Nothing on this branch is merged; decisions in ADR-0003 to ADR-0006 are still *proposed* and need team review.
+Status: data pipeline, labels, baselines, frozen promotion gates, **59 point-in-time features** and **model selection plus one validation judgment** are done and tested. **No model passes the frozen gates.** All three finalists beat reversal 5d on the point estimate, but none is significant. The test split is untouched. Nothing on this branch is merged; decisions in ADR-0003 to ADR-0006 are still *proposed* and need team review.
 
 ## Read first
 1. [docs/prediction-contract.md](docs/prediction-contract.md): the target, label rules, leakage rules, splits, baselines and gates.
@@ -18,10 +18,13 @@ Status: data pipeline, labels, baselines, frozen promotion gates and **59 point-
 | Features (59) and the default model set (54) | `stocksight_data/features.py` | registry with hypotheses; `model_features()`; catalog in [docs/features.md](docs/features.md) |
 | Train-only feature report | `stocksight_data/feature_report.py` | per-date rank IC, block-bootstrap CIs, BH-adjusted; never computes validation outcomes |
 | Purged walk-forward folds | `stocksight_data/folds.py` | six 2-year evaluation blocks inside train, for model selection |
-| Tests | `tests/` | 400 unit tests plus 3 real-data tests; `pytest -m "not data"` runs without the dataset |
+| Models: selection and the validation judgment | `stocksight_data/modeling.py` | LR, HGB and RF; `select`, `rescore`, `judge`; validation-access guard; every experiment in [docs/ledger.md](docs/ledger.md) |
+| Tests | `tests/` | 447 unit tests plus 3 real-data tests; `pytest -m "not data"` runs without the dataset |
 | Frozen gates, baseline and feature reports | `reports/` | tracked copies of `data/reports/` and `data/features/features.meta.json` (which are gitignored) |
 
 Key numbers (validation, 2019–2021): beat-rate 0.4921. Best baseline is reversal 5d, with balanced accuracy 0.5048, which is not significant. A model must reach balanced accuracy above 0.50476 with a block-bootstrap CI lower bound above 0 against reversal 5d, accuracy of at least 0.5079, Brier below 0.24996, and no validation year below 0.50.
+
+Models (validation access #1, 3 finalists, 34 configs tried): the best was an average of LR and HGB. Balanced accuracy 0.5103, +0.0055 vs reversal 5d with CI [−0.0036, +0.0145]; accuracy 0.5104; Brier 0.24978. That passes 4 of 5 gates and fails significance. HGB alone scored 0.5100 and RF+Platt 0.5085, with the same pattern.
 
 ## Reproducing
 ```powershell
@@ -38,15 +41,24 @@ python -m venv .venv
 Features are rebuilt from the cleaned data with `python -m stocksight_data.features` (about 1 minute, 535 MB, not in git). The train-only report is rebuilt with `python -m stocksight_data.feature_report`.
 
 ## Next steps
-1. **Team review of ADR-0003 to ADR-0006** (price basis, target, splits and gates, feature design), plus the open questions in contract section 6.
-2. **Logistic regression** on `model_features()`:
-   - Use train-fitted winsorisation or ranks, and a missing-value strategy (see "Recommendations" in docs/features.md).
-   - Choose hyperparameters on `purged_walk_forward` folds inside train.
-3. **One validation run** through `gate_model`. Record it in an observation ledger, with the number of finalists judged on validation. Add per-date AUC or rank IC as a secondary report.
-4. **Random forest**, regularised for overlapping labels. Then error analysis by year, sector (as a slice only) and volatility.
-5. **The test split, once**, for the final model only: `baselines --include-test` writes `baselines_test.json` and logs the access.
+1. **Team review** of ADR-0003 to ADR-0006 and of contract section 6. The gate design needs particular attention:
+   - A single `p_beat` with a 0.5 threshold has to pass balanced accuracy, accuracy and Brier at once.
+   - At this signal strength those three conflict (see [docs/ledger.md](docs/ledger.md), iterations 1–2).
+2. **Decide the outcome of MLE-05.** Two options:
+   - Report "no model passes" and pick one model for the single test run (`baselines --include-test`, plus a test scorer for that model, which does not exist yet).
+   - Run the next recorded experiment first: a feature for the date-level beat-rate (cross-sectional skew of trailing returns), added to the feature registry with its leakage tests. It counts as a success if fold Brier improves by more than about 6e-5 without losing balanced accuracy.
+3. **Re-judging validation:**
+   - Validation access #1 used 3 of the 3 allowed candidates.
+   - Any further `judge` run needs `--reason`. Record it in the ledger, and count it with the 34 configurations already tried.
+4. **Model artifact and serving.** Not started:
+   - Save a versioned bundle (estimator, preprocessor, spec, data SHA).
+   - Batch-score after each close.
+   - Follow the output schema in contract section 2.
 
 ## Gotchas
+- `modeling.select` takes about 25 minutes (the stride-1 RF alone about 8). `rescore` recomputes metrics from `data/models/oof/*.parquet` without refitting.
+- Eligibility and ranking use **folds 1–5**: fold 0 cannot be calibrated. All-fold summaries are kept as `summary_all_folds`.
+- The fold margins behind the finalists are noise-sized (the Brier gap for HGB is about 0.3 bootstrap SE). Treat the finalist order as weak evidence.
 - `label_frame` returns forward-looking columns (`r5`, `excess_ret`, `status`, `n_valid`, …) next to the feature-safe `ret`. Never join it into features without `check_feature_columns`.
 - Sector, date added and other `tickers.csv` fields are today's membership: evaluation slices only, never features (survivorship, ADR-0001).
 - The size and liquidity ranks (`rank_dollar_vol_63d`, `rank_amihud_21d`) show strong train IC, but that partly reflects survivorship (today's small members are past winners). Their importance in a model is not evidence of skill.

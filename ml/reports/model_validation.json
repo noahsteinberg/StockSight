@@ -1,0 +1,565 @@
+{
+  "runs": [
+    {
+      "provenance": {
+        "created_at": "2026-11-14T09:05:53+00:00",
+        "dataset_sha256": "ee0b2ed66c8abb87e0cf36798a32258bc902c0e1687ddee2a485c80b44216e89",
+        "features_sha256": "8dde591d2820cff5b5806f622ead5fd0236056a7cab5cb1d6f8f2474e87d18b8",
+        "code": {
+          "commit": "4e8882aed4193dfccf132b98221836f86178ebb6",
+          "dirty": true
+        },
+        "environment": {
+          "python": "3.12.5",
+          "packages": {
+            "pandas": "3.1.1",
+            "numpy": "2.5.4",
+            "pyarrow": "26.0.1",
+            "exchange_calendars": "4.13.2",
+            "yfinance": "1.8.0",
+            "scikit-learn": "1.9.1",
+            "scipy": "1.18.1"
+          }
+        },
+        "seed": 0
+      },
+      "validation_access": 1,
+      "n_finalists": 3,
+      "n_configs_tried": 34,
+      "frozen_gates": {
+        "frozen_at": "2026-11-14T06:57:17+00:00",
+        "dataset_sha256": "ee0b2ed66c8abb87e0cf36798a32258bc902c0e1687ddee2a485c80b44216e89",
+        "code": {
+          "commit": "89fa1c8fa57aacef60cfd30e506ca0147226ea83",
+          "dirty": true
+        },
+        "split": "validation",
+        "best_baseline": "reversal_5d",
+        "majority_class": 0,
+        "train_beat_rate": 0.48702690402741944,
+        "n_boot": 1000,
+        "seed": 0,
+        "block": 10,
+        "reference": {
+          "rows": 363472,
+          "best_baseline_bal_acc": 0.5047649920316817,
+          "always_beat_acc": 0.5079015715103227,
+          "constant_brier": 0.24996328552803854
+        },
+        "rules": [
+          "balanced accuracy > best_baseline balanced accuracy on the model's rows",
+          "block-bootstrap 95% CI lower bound of (model - best_baseline) balanced accuracy > 0",
+          "accuracy >= always_beat accuracy on the model's rows",
+          "Brier < constant(train_beat_rate) Brier on the model's rows",
+          "every validation year balanced accuracy >= 0.50"
+        ]
+      },
+      "results": {
+        "hgb_raw_wide_bal": {
+          "raw_score_spread": {
+            "oof_mean": 0.49715396576920773,
+            "oof_sd": 0.02468093813297782,
+            "final_mean": 0.4998012073623189,
+            "final_sd": 0.023283760141005434
+          },
+          "gate": {
+            "rows": 363472,
+            "coverage_of_frozen_rows": 1.0,
+            "model": {
+              "accuracy": 0.5098219395166615,
+              "balanced_accuracy": 0.5099630364847536,
+              "brier": 0.24979935296368722
+            },
+            "thresholds_on_these_rows": {
+              "best_baseline_bal_acc": 0.5047649920316817,
+              "always_beat_acc": 0.5079015715103227,
+              "constant_brier": 0.24996328552803848
+            },
+            "model_minus_reversal_5d_bal_acc": {
+              "point": 0.005198044453071926,
+              "ci95": [
+                -0.003540001936156534,
+                0.013518612198611292
+              ]
+            },
+            "yearly_bal_acc": {
+              "2019": 0.5102303823067782,
+              "2020": 0.5204478488337945,
+              "2021": 0.5006044993979263
+            },
+            "gates": {
+              "beats_best_baseline": true,
+              "significant": false,
+              "accuracy_at_least_always_beat": true,
+              "better_than_constant_brier": true,
+              "no_year_below_half": true,
+              "passed": false
+            }
+          },
+          "secondary": {
+            "rows": 363613,
+            "dates": 752,
+            "accuracy": 0.5098415073168451,
+            "majority_acc": 0.5079246341577446,
+            "bal_acc": 0.5099822115098702,
+            "brier": 0.24979895629968918,
+            "constant_brier": 0.24996293442971404,
+            "log_loss": 0.6927446848700776,
+            "auc_date": 0.5162122404271615,
+            "ic_date": 0.03247335439975724,
+            "pred_beat_share": 0.5087194352237131,
+            "mean_p": 0.4998012073623189,
+            "reversal_bal_acc": 0.5047649920316817,
+            "bal_acc_minus_reversal": 0.005198044453071926
+          },
+          "slices": {
+            "year": {
+              "2019": {
+                "rows": 120504,
+                "beat_rate": 0.5033110934076878,
+                "bal_acc": 0.5102537841179589,
+                "auc_date": 0.5194511439332703
+              },
+              "2020": {
+                "rows": 122183,
+                "beat_rate": 0.48419174516913155,
+                "bal_acc": 0.5204692375580453,
+                "auc_date": 0.5282141575248777
+              },
+              "2021": {
+                "rows": 120926,
+                "beat_rate": 0.48884441724691136,
+                "bal_acc": 0.500608649056416,
+                "auc_date": 0.5006143104301508
+              }
+            },
+            "vol_tercile": {
+              "high": {
+                "rows": 120662,
+                "beat_rate": 0.4983093268800451,
+                "bal_acc": 0.5119796786677913,
+                "auc_date": 0.5156835891519943
+              },
+              "low": {
+                "rows": 120656,
+                "beat_rate": 0.4851147062723777,
+                "bal_acc": 0.5093314725198728,
+                "auc_date": 0.5183594114416267
+              },
+              "mid": {
+                "rows": 120603,
+                "beat_rate": 0.49293135328308585,
+                "bal_acc": 0.5064691936215041,
+                "auc_date": 0.5107000233392732
+              }
+            },
+            "sector": {
+              "Communication Services": {
+                "rows": 15122,
+                "beat_rate": 0.46508398360005293,
+                "bal_acc": 0.5130585221073456,
+                "auc_date": 0.5157072640718208
+              },
+              "Consumer Discretionary": {
+                "rows": 34365,
+                "beat_rate": 0.496551724137931,
+                "bal_acc": 0.5062002678072558,
+                "auc_date": 0.5048048437478273
+              },
+              "Consumer Staples": {
+                "rows": 24058,
+                "beat_rate": 0.4696150968492809,
+                "bal_acc": 0.5082487829010711,
+                "auc_date": 0.5127402335232831
+              },
+              "Energy": {
+                "rows": 15255,
+                "beat_rate": 0.46214355948869223,
+                "bal_acc": 0.5001675159153085,
+                "auc_date": 0.5147926261542773
+              },
+              "Financials": {
+                "rows": 55923,
+                "beat_rate": 0.4894766017559859,
+                "bal_acc": 0.5029022981023076,
+                "auc_date": 0.5178242432303187
+              },
+              "Health Care": {
+                "rows": 43616,
+                "beat_rate": 0.4972945707997065,
+                "bal_acc": 0.5099510226506048,
+                "auc_date": 0.5159095423278954
+              },
+              "Industrials": {
+                "rows": 58122,
+                "beat_rate": 0.4905543511923196,
+                "bal_acc": 0.5078393164164441,
+                "auc_date": 0.5134184187146977
+              },
+              "Information Technology": {
+                "rows": 54911,
+                "beat_rate": 0.5221904536431681,
+                "bal_acc": 0.5091805912448358,
+                "auc_date": 0.5148390629331457
+              },
+              "Materials": {
+                "rows": 17133,
+                "beat_rate": 0.4826942158407751,
+                "bal_acc": 0.5169365367018381,
+                "auc_date": 0.5136715024925762
+              },
+              "Real Estate": {
+                "rows": 22548,
+                "beat_rate": 0.5036366861805925,
+                "bal_acc": 0.5265788745848504,
+                "auc_date": 0.5255505650705882
+              },
+              "Utilities": {
+                "rows": 22560,
+                "beat_rate": 0.47007978723404253,
+                "bal_acc": 0.5139213706278317,
+                "auc_date": 0.5094421270617208
+              }
+            }
+          }
+        },
+        "rf_d10_l500_bal_stride1+platt": {
+          "raw_score_spread": {
+            "oof_mean": 0.5000503894826165,
+            "oof_sd": 0.018261831047520948,
+            "final_mean": 0.50113745295887,
+            "final_sd": 0.015474275585334839
+          },
+          "gate": {
+            "rows": 363472,
+            "coverage_of_frozen_rows": 1.0,
+            "model": {
+              "accuracy": 0.513657173042215,
+              "balanced_accuracy": 0.5084873755112115,
+              "brier": 0.24974778590686278
+            },
+            "thresholds_on_these_rows": {
+              "best_baseline_bal_acc": 0.5047649920316817,
+              "always_beat_acc": 0.5079015715103227,
+              "constant_brier": 0.24996328552803848
+            },
+            "model_minus_reversal_5d_bal_acc": {
+              "point": 0.0037223834795298005,
+              "ci95": [
+                -0.0046973138275482745,
+                0.011748306647777129
+              ]
+            },
+            "yearly_bal_acc": {
+              "2019": 0.5091515752167733,
+              "2020": 0.5155633771817769,
+              "2021": 0.5005812752257187
+            },
+            "gates": {
+              "beats_best_baseline": true,
+              "significant": false,
+              "accuracy_at_least_always_beat": true,
+              "better_than_constant_brier": true,
+              "no_year_below_half": true,
+              "passed": false
+            }
+          },
+          "secondary": {
+            "rows": 363613,
+            "dates": 752,
+            "accuracy": 0.5136780038117449,
+            "majority_acc": 0.5079246341577446,
+            "bal_acc": 0.5084920627775561,
+            "brier": 0.24974649000756838,
+            "constant_brier": 0.24996293442971404,
+            "log_loss": 0.6926399362706956,
+            "auc_date": 0.5143447698958316,
+            "ic_date": 0.02936279124132929,
+            "pred_beat_share": 0.17266159350738286,
+            "mean_p": 0.4898355615282356,
+            "reversal_bal_acc": 0.5047649920316817,
+            "bal_acc_minus_reversal": 0.0037223834795298005
+          },
+          "slices": {
+            "year": {
+              "2019": {
+                "rows": 120504,
+                "beat_rate": 0.5033110934076878,
+                "bal_acc": 0.5091772607971722,
+                "auc_date": 0.5170636754110282
+              },
+              "2020": {
+                "rows": 122183,
+                "beat_rate": 0.48419174516913155,
+                "bal_acc": 0.515552880004517,
+                "auc_date": 0.5266596303215717
+              },
+              "2021": {
+                "rows": 120926,
+                "beat_rate": 0.48884441724691136,
+                "bal_acc": 0.5005817456020433,
+                "auc_date": 0.4989568189746101
+              }
+            },
+            "vol_tercile": {
+              "high": {
+                "rows": 120662,
+                "beat_rate": 0.4983093268800451,
+                "bal_acc": 0.5095080216273423,
+                "auc_date": 0.5139172165403311
+              },
+              "low": {
+                "rows": 120656,
+                "beat_rate": 0.4851147062723777,
+                "bal_acc": 0.5048846996861899,
+                "auc_date": 0.5166138201151357
+              },
+              "mid": {
+                "rows": 120603,
+                "beat_rate": 0.49293135328308585,
+                "bal_acc": 0.5085442763868449,
+                "auc_date": 0.5125995196577552
+              }
+            },
+            "sector": {
+              "Communication Services": {
+                "rows": 15122,
+                "beat_rate": 0.46508398360005293,
+                "bal_acc": 0.5116974817532317,
+                "auc_date": 0.5275489561506086
+              },
+              "Consumer Discretionary": {
+                "rows": 34365,
+                "beat_rate": 0.496551724137931,
+                "bal_acc": 0.5120886557617094,
+                "auc_date": 0.5094171228652786
+              },
+              "Consumer Staples": {
+                "rows": 24058,
+                "beat_rate": 0.4696150968492809,
+                "bal_acc": 0.5033313175522508,
+                "auc_date": 0.5044482098248269
+              },
+              "Energy": {
+                "rows": 15255,
+                "beat_rate": 0.46214355948869223,
+                "bal_acc": 0.4909827946114849,
+                "auc_date": 0.4921073824769089
+              },
+              "Financials": {
+                "rows": 55923,
+                "beat_rate": 0.4894766017559859,
+                "bal_acc": 0.5049984065881581,
+                "auc_date": 0.5103250887579629
+              },
+              "Health Care": {
+                "rows": 43616,
+                "beat_rate": 0.4972945707997065,
+                "bal_acc": 0.5125987210343758,
+                "auc_date": 0.5153933744402429
+              },
+              "Industrials": {
+                "rows": 58122,
+                "beat_rate": 0.4905543511923196,
+                "bal_acc": 0.50390594351144,
+                "auc_date": 0.5073720594198621
+              },
+              "Information Technology": {
+                "rows": 54911,
+                "beat_rate": 0.5221904536431681,
+                "bal_acc": 0.5084551942195621,
+                "auc_date": 0.509079747569777
+              },
+              "Materials": {
+                "rows": 17133,
+                "beat_rate": 0.4826942158407751,
+                "bal_acc": 0.5065711411693328,
+                "auc_date": 0.4983906602169769
+              },
+              "Real Estate": {
+                "rows": 22548,
+                "beat_rate": 0.5036366861805925,
+                "bal_acc": 0.5160779909717629,
+                "auc_date": 0.5238835133354937
+              },
+              "Utilities": {
+                "rows": 22560,
+                "beat_rate": 0.47007978723404253,
+                "bal_acc": 0.5022707146140318,
+                "auc_date": 0.5108175255082978
+              }
+            }
+          }
+        },
+        "lr_winsor_c1e-02_bal+hgb_raw_wide_bal": {
+          "raw_score_spread": {
+            "oof_mean": 0.49845027626853766,
+            "oof_sd": 0.02431974358515145,
+            "final_mean": 0.5003796008409775,
+            "final_sd": 0.02270772963641615
+          },
+          "gate": {
+            "rows": 363472,
+            "coverage_of_frozen_rows": 1.0,
+            "model": {
+              "accuracy": 0.5103831932033279,
+              "balanced_accuracy": 0.510266626654123,
+              "brier": 0.24977665486990813
+            },
+            "thresholds_on_these_rows": {
+              "best_baseline_bal_acc": 0.5047649920316817,
+              "always_beat_acc": 0.5079015715103227,
+              "constant_brier": 0.24996328552803848
+            },
+            "model_minus_reversal_5d_bal_acc": {
+              "point": 0.005501634622441354,
+              "ci95": [
+                -0.0036130597809260895,
+                0.014488495899160472
+              ]
+            },
+            "yearly_bal_acc": {
+              "2019": 0.5089035457695967,
+              "2020": 0.5229763437532469,
+              "2021": 0.5007020369512539
+            },
+            "gates": {
+              "beats_best_baseline": true,
+              "significant": false,
+              "accuracy_at_least_always_beat": true,
+              "better_than_constant_brier": true,
+              "no_year_below_half": true,
+              "passed": false
+            }
+          },
+          "secondary": {
+            "rows": 363613,
+            "dates": 752,
+            "accuracy": 0.5104162942469054,
+            "majority_acc": 0.5079246341577446,
+            "bal_acc": 0.5102983813698362,
+            "brier": 0.2497753543063181,
+            "constant_brier": 0.24996293442971404,
+            "log_loss": 0.6926958037438614,
+            "auc_date": 0.5158491052564844,
+            "ic_date": 0.032698913221457675,
+            "pred_beat_share": 0.49239713651602113,
+            "mean_p": 0.5003796008409775,
+            "reversal_bal_acc": 0.5047649920316817,
+            "bal_acc_minus_reversal": 0.005501634622441354
+          },
+          "slices": {
+            "year": {
+              "2019": {
+                "rows": 120504,
+                "beat_rate": 0.5033110934076878,
+                "bal_acc": 0.5089814689936859,
+                "auc_date": 0.5166222909827553
+              },
+              "2020": {
+                "rows": 122183,
+                "beat_rate": 0.48419174516913155,
+                "bal_acc": 0.5229728706586261,
+                "auc_date": 0.5306283837273086
+              },
+              "2021": {
+                "rows": 120926,
+                "beat_rate": 0.48884441724691136,
+                "bal_acc": 0.5007141955247212,
+                "auc_date": 0.4999219787134126
+              }
+            },
+            "vol_tercile": {
+              "high": {
+                "rows": 120662,
+                "beat_rate": 0.4983093268800451,
+                "bal_acc": 0.5112082481497422,
+                "auc_date": 0.5148929657639176
+              },
+              "low": {
+                "rows": 120656,
+                "beat_rate": 0.4851147062723777,
+                "bal_acc": 0.5109075145023463,
+                "auc_date": 0.5203229105257433
+              },
+              "mid": {
+                "rows": 120603,
+                "beat_rate": 0.49293135328308585,
+                "bal_acc": 0.5061320051702654,
+                "auc_date": 0.5119076647229318
+              }
+            },
+            "sector": {
+              "Communication Services": {
+                "rows": 15122,
+                "beat_rate": 0.46508398360005293,
+                "bal_acc": 0.5050051118882413,
+                "auc_date": 0.5130854084924371
+              },
+              "Consumer Discretionary": {
+                "rows": 34365,
+                "beat_rate": 0.496551724137931,
+                "bal_acc": 0.5107299513836708,
+                "auc_date": 0.5099102992486306
+              },
+              "Consumer Staples": {
+                "rows": 24058,
+                "beat_rate": 0.4696150968492809,
+                "bal_acc": 0.5126998092707618,
+                "auc_date": 0.5131284507423277
+              },
+              "Energy": {
+                "rows": 15255,
+                "beat_rate": 0.46214355948869223,
+                "bal_acc": 0.4909879808627329,
+                "auc_date": 0.5093834735051518
+              },
+              "Financials": {
+                "rows": 55923,
+                "beat_rate": 0.4894766017559859,
+                "bal_acc": 0.503810608111346,
+                "auc_date": 0.5181360055689281
+              },
+              "Health Care": {
+                "rows": 43616,
+                "beat_rate": 0.4972945707997065,
+                "bal_acc": 0.5120639619909325,
+                "auc_date": 0.518052466831511
+              },
+              "Industrials": {
+                "rows": 58122,
+                "beat_rate": 0.4905543511923196,
+                "bal_acc": 0.5057172535895941,
+                "auc_date": 0.5118039978996264
+              },
+              "Information Technology": {
+                "rows": 54911,
+                "beat_rate": 0.5221904536431681,
+                "bal_acc": 0.5124680844143956,
+                "auc_date": 0.5142476389052699
+              },
+              "Materials": {
+                "rows": 17133,
+                "beat_rate": 0.4826942158407751,
+                "bal_acc": 0.5087704600774302,
+                "auc_date": 0.5098965174642334
+              },
+              "Real Estate": {
+                "rows": 22548,
+                "beat_rate": 0.5036366861805925,
+                "bal_acc": 0.521123092502293,
+                "auc_date": 0.5308511219480405
+              },
+              "Utilities": {
+                "rows": 22560,
+                "beat_rate": 0.47007978723404253,
+                "bal_acc": 0.5213485033751628,
+                "auc_date": 0.5139855226113804
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

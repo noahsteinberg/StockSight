@@ -1,0 +1,2 @@
+{"status": "started", "at": "2026-11-14T09:02:24+00:00", "n_finalists": 3, "names": ["hgb_raw_wide_bal", "rf_d10_l500_bal_stride1+platt", "lr_winsor_c1e-02_bal+hgb_raw_wide_bal"], "config_ids": ["d15ad2c17d94", "974d737c183a", "a7c8c8aedd87"], "member_ids": ["008a1a17ab18", "7bcc56c61cfe", "d15ad2c17d94"], "reason": null, "seed": 0, "dataset_sha256": "ee0b2ed66c8abb87e0cf36798a32258bc902c0e1687ddee2a485c80b44216e89", "n_configs_tried": 34}
+{"status": "completed", "access": 1, "at": "2026-11-14T09:05:53+00:00"}

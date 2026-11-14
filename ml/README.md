@@ -1,6 +1,6 @@
 # Machine learning foundation
 
-A raw-data download pipeline exists (below). No features, labels, training, fake predictions, or model artifacts are included yet.
+The pipeline covers download, cleaning, labels, baselines, features and model selection (below). No model artifact is saved and nothing is served yet: the trained models are judged against frozen gates, but none is wired to the backend.
 
 The prediction target, label rules, split policy, baselines and promotion gates are drafted in [docs/prediction-contract.md](docs/prediction-contract.md), pending team review.
 
@@ -107,6 +107,27 @@ Definitions and thresholds are in [docs/prediction-contract.md](docs/prediction-
 - The default model set is `features.model_features()` (54 features).
 - `folds.purged_walk_forward` gives six purged 2-year evaluation folds inside train, for model selection.
 - The feature catalog, train-only signal and modelling recommendations are in [docs/features.md](docs/features.md).
+
+### Models: selection and the validation judgment
+
+```powershell
+.\.venv\Scripts\python.exe -m stocksight_data.modeling select    # every config on train folds (~25 min) -> data/reports/model_selection.json
+.\.venv\Scripts\python.exe -m stocksight_data.modeling rescore   # recompute fold metrics from stored out-of-fold predictions (no refit)
+.\.venv\Scripts\python.exe -m stocksight_data.modeling judge     # finalists, ONCE, on validation -> data/reports/model_validation.json
+```
+
+- `stocksight_data/modeling.py` holds the harness. It fits logistic regression, HistGradientBoosting and random forests on `model_features()`.
+- **Selection:**
+  - Selection runs on `purged_walk_forward` folds and never computes a validation outcome. Labels are built from prices cut at the train end.
+  - Per-date cross-sectional ranks are computed on every ticker before labels are joined.
+  - Winsorising bounds, the missing-value indicator set and Platt maps are fitted on fit rows only.
+  - Models fit on every 5th date, because adjacent labels share 4 of 5 return days.
+- **Judging:**
+  - `judge` scores at most 3 finalists through `baselines.gate_model`, and recomputes them with the finalist rule first.
+  - Every access is logged to `data/reports/validation_access_log.jsonl`.
+  - Re-judging, or judging more than 3 candidates in total, needs `--reason`.
+  - The test split is refused everywhere in this module.
+- Every experiment, the finalist rule and the validation result are in [docs/ledger.md](docs/ledger.md). Tracked copies of the reports are in `reports/`.
 
 Data caveats to keep in mind when defining targets and features:
 
