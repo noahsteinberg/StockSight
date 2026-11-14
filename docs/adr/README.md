@@ -9,3 +9,4 @@ Short records of significant decisions: context, the decision, rejected alternat
 | [0003](0003-price-basis-adj-close.md) | adj_close as the price basis for returns and labels | proposed | 2026-11-13 |
 | [0004](0004-prediction-target.md) | 5-session market-relative target | proposed | 2026-11-14 |
 | [0005](0005-chronological-split-and-gates.md) | Chronological split, 5-session purge, block bootstrap and frozen gates | proposed | 2026-11-14 |
+| [0006](0006-feature-design.md) | Point-in-time feature design and train-only selection | proposed | 2026-11-14 |

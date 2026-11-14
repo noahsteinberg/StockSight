@@ -1,0 +1,433 @@
+{
+  "created_at": "2026-11-14T07:44:01+00:00",
+  "dataset_sha256": "ee0b2ed66c8abb87e0cf36798a32258bc902c0e1687ddee2a485c80b44216e89",
+  "features_sha256": "8dde591d2820cff5b5806f622ead5fd0236056a7cab5cb1d6f8f2474e87d18b8",
+  "code": {
+    "commit": "42980d4d728d5c7fd597cc585ecaee9d1ebd4c38",
+    "dirty": true
+  },
+  "environment": {
+    "python": "3.12.5",
+    "packages": {
+      "pandas": "3.1.1",
+      "numpy": "2.5.4",
+      "pyarrow": "26.0.1",
+      "exchange_calendars": "4.13.2",
+      "yfinance": "1.8.0"
+    }
+  },
+  "min_tickers_per_date": 150,
+  "rows": 2947953,
+  "features": {
+    "ret_1d": {
+      "lookback": 1,
+      "family": "momentum",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "ret_5d": {
+      "lookback": 5,
+      "family": "momentum",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "ret_10d": {
+      "lookback": 10,
+      "family": "momentum",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "ret_21d": {
+      "lookback": 21,
+      "family": "momentum",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "ret_63d": {
+      "lookback": 63,
+      "family": "momentum",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "ret_126d": {
+      "lookback": 126,
+      "family": "momentum",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "ret_252d": {
+      "lookback": 252,
+      "family": "momentum",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "mom_12_1": {
+      "lookback": 252,
+      "family": "momentum",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "ex_ret_1d": {
+      "lookback": 1,
+      "family": "momentum",
+      "scope": "cross_section",
+      "caveat": ""
+    },
+    "ex_ret_5d": {
+      "lookback": 5,
+      "family": "momentum",
+      "scope": "cross_section",
+      "caveat": ""
+    },
+    "ex_ret_21d": {
+      "lookback": 21,
+      "family": "momentum",
+      "scope": "cross_section",
+      "caveat": ""
+    },
+    "ex_ret_63d": {
+      "lookback": 63,
+      "family": "momentum",
+      "scope": "cross_section",
+      "caveat": ""
+    },
+    "rank_ret_5d": {
+      "lookback": 5,
+      "family": "momentum",
+      "scope": "cross_section",
+      "caveat": ""
+    },
+    "rank_ret_21d": {
+      "lookback": 21,
+      "family": "momentum",
+      "scope": "cross_section",
+      "caveat": ""
+    },
+    "rank_mom_12_1": {
+      "lookback": 252,
+      "family": "momentum",
+      "scope": "cross_section",
+      "caveat": ""
+    },
+    "zret_5d": {
+      "lookback": 21,
+      "family": "momentum",
+      "scope": "cross_section",
+      "caveat": ""
+    },
+    "ex_ret_1d_lag1": {
+      "lookback": 2,
+      "family": "momentum",
+      "scope": "cross_section",
+      "caveat": ""
+    },
+    "ex_ret_1d_lag2": {
+      "lookback": 3,
+      "family": "momentum",
+      "scope": "cross_section",
+      "caveat": ""
+    },
+    "ex_ret_1d_lag3": {
+      "lookback": 4,
+      "family": "momentum",
+      "scope": "cross_section",
+      "caveat": ""
+    },
+    "ex_ret_1d_lag4": {
+      "lookback": 5,
+      "family": "momentum",
+      "scope": "cross_section",
+      "caveat": ""
+    },
+    "frac_up_21d": {
+      "lookback": 21,
+      "family": "momentum",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "vol_21d": {
+      "lookback": 21,
+      "family": "risk",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "vol_63d": {
+      "lookback": 63,
+      "family": "risk",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "vol_ratio_21_63": {
+      "lookback": 63,
+      "family": "risk",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "skew_63d": {
+      "lookback": 63,
+      "family": "risk",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "max_ret_21d": {
+      "lookback": 21,
+      "family": "risk",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "min_ret_21d": {
+      "lookback": 21,
+      "family": "risk",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "beta_63d": {
+      "lookback": 63,
+      "family": "risk",
+      "scope": "cross_section",
+      "caveat": ""
+    },
+    "xvol_63d": {
+      "lookback": 63,
+      "family": "risk",
+      "scope": "cross_section",
+      "caveat": ""
+    },
+    "rank_vol_63d": {
+      "lookback": 63,
+      "family": "risk",
+      "scope": "cross_section",
+      "caveat": ""
+    },
+    "corr_mkt_63d": {
+      "lookback": 63,
+      "family": "risk",
+      "scope": "cross_section",
+      "caveat": ""
+    },
+    "parkinson_vol_21d": {
+      "lookback": 20,
+      "family": "risk",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "hl_range_1d": {
+      "lookback": 0,
+      "family": "range",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "avg_range_21d": {
+      "lookback": 20,
+      "family": "range",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "close_loc_1d": {
+      "lookback": 0,
+      "family": "range",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "gap_1d": {
+      "lookback": 1,
+      "family": "range",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "intraday_ret_1d": {
+      "lookback": 0,
+      "family": "range",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "overnight_ret_5d": {
+      "lookback": 5,
+      "family": "range",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "intraday_ret_5d": {
+      "lookback": 4,
+      "family": "range",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "dist_ma_10": {
+      "lookback": 9,
+      "family": "trend",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "dist_ma_50": {
+      "lookback": 49,
+      "family": "trend",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "dist_ma_200": {
+      "lookback": 199,
+      "family": "trend",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "ma_ratio_50_200": {
+      "lookback": 199,
+      "family": "trend",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "ppo_12_26": {
+      "lookback": 25,
+      "family": "trend",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "dist_high_21": {
+      "lookback": 20,
+      "family": "trend",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "dist_high_252": {
+      "lookback": 251,
+      "family": "trend",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "dist_low_252": {
+      "lookback": 251,
+      "family": "trend",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "rsi_14": {
+      "lookback": 14,
+      "family": "trend",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "bb_pos_20": {
+      "lookback": 19,
+      "family": "trend",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "volu_ratio_1_21": {
+      "lookback": 21,
+      "family": "volume",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "volu_ratio_5_63": {
+      "lookback": 62,
+      "family": "volume",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "rank_volu_ratio_1_21": {
+      "lookback": 21,
+      "family": "volume",
+      "scope": "cross_section",
+      "caveat": ""
+    },
+    "ret_x_volume_1d": {
+      "lookback": 21,
+      "family": "volume",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "rank_dollar_vol_63d": {
+      "lookback": 62,
+      "family": "volume",
+      "scope": "cross_section",
+      "caveat": "survivorship"
+    },
+    "rank_amihud_21d": {
+      "lookback": 21,
+      "family": "volume",
+      "scope": "cross_section",
+      "caveat": "survivorship"
+    },
+    "div_yield_252d": {
+      "lookback": 251,
+      "family": "income",
+      "scope": "ticker",
+      "caveat": ""
+    },
+    "mkt_ret_21d": {
+      "lookback": 21,
+      "family": "market",
+      "scope": "market",
+      "caveat": ""
+    },
+    "mkt_vol_21d": {
+      "lookback": 21,
+      "family": "market",
+      "scope": "market",
+      "caveat": ""
+    },
+    "xs_dispersion_21d": {
+      "lookback": 21,
+      "family": "market",
+      "scope": "market",
+      "caveat": ""
+    }
+  },
+  "default_model_features": [
+    "ret_1d",
+    "ret_5d",
+    "ret_10d",
+    "ret_21d",
+    "ret_63d",
+    "ret_126d",
+    "ret_252d",
+    "mom_12_1",
+    "ex_ret_1d",
+    "ex_ret_5d",
+    "ex_ret_21d",
+    "ex_ret_63d",
+    "rank_ret_5d",
+    "rank_ret_21d",
+    "rank_mom_12_1",
+    "zret_5d",
+    "ex_ret_1d_lag1",
+    "ex_ret_1d_lag2",
+    "ex_ret_1d_lag3",
+    "ex_ret_1d_lag4",
+    "frac_up_21d",
+    "vol_21d",
+    "vol_63d",
+    "vol_ratio_21_63",
+    "skew_63d",
+    "max_ret_21d",
+    "min_ret_21d",
+    "beta_63d",
+    "xvol_63d",
+    "rank_vol_63d",
+    "corr_mkt_63d",
+    "parkinson_vol_21d",
+    "hl_range_1d",
+    "avg_range_21d",
+    "close_loc_1d",
+    "gap_1d",
+    "intraday_ret_1d",
+    "overnight_ret_5d",
+    "intraday_ret_5d",
+    "dist_ma_10",
+    "dist_ma_50",
+    "dist_ma_200",
+    "ma_ratio_50_200",
+    "ppo_12_26",
+    "dist_high_21",
+    "dist_high_252",
+    "dist_low_252",
+    "rsi_14",
+    "bb_pos_20",
+    "volu_ratio_1_21",
+    "volu_ratio_5_63",
+    "rank_volu_ratio_1_21",
+    "ret_x_volume_1d",
+    "div_yield_252d"
+  ]
+}

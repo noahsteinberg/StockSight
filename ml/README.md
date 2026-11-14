@@ -96,6 +96,18 @@ If a check fails, only the log is written and the command exits with an error.
 
 Definitions and thresholds are in [docs/prediction-contract.md](docs/prediction-contract.md) and the ADRs in `docs/adr/`.
 
+### Features
+
+```powershell
+.\.venv\Scripts\python.exe -m stocksight_data.features         # data/features/features.parquet + features.meta.json (~1 min)
+.\.venv\Scripts\python.exe -m stocksight_data.feature_report   # train-only report -> data/reports/feature_report.json (~2 min)
+```
+
+- There are 59 point-in-time features: momentum and reversal, risk, candle and range, trend, volume, income, and market state.
+- The default model set is `features.model_features()` (54 features).
+- `folds.purged_walk_forward` gives six purged 2-year evaluation folds inside train, for model selection.
+- The feature catalog, train-only signal and modelling recommendations are in [docs/features.md](docs/features.md).
+
 Data caveats to keep in mind when defining targets and features:
 
 - `open/high/low/close/volume` are **split-adjusted** by Yahoo even with `auto_adjust=False`, so they are not the historical prints. `adj_close` is also dividend-adjusted.

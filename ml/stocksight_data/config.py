@@ -78,6 +78,11 @@ GATES_FILE = REPORTS_DIR / "gates_frozen.json"  # written once by --freeze-gates
 TEST_REPORT = REPORTS_DIR / "baselines_test.json"  # only with --include-test
 TEST_ACCESS_LOG = REPORTS_DIR / "test_access_log.jsonl"  # one line per test-split evaluation
 
+# Features (stocksight_data.features) and their train-only report.
+FEATURES_DIR = DATA_DIR.parent / "features"
+FEATURES_FILE = FEATURES_DIR / "features.parquet"
+FEATURE_REPORT = REPORTS_DIR / "feature_report.json"
+
 START_DATE = "2000-01-01"
 EXCHANGE = "XNYS"  # NYSE calendar; NASDAQ shares the same regular sessions.
 

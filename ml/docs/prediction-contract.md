@@ -86,6 +86,7 @@ Counts by `as_of_date` range (from `data/reports/baselines.json`):
 6. Features may use only data at or before t, including any cross-sectional statistics (market means, ranks) computed on date t.
 7. **No survivorship or membership inputs.** Fields from `tickers.csv` (current GICS sector, `date_added`, founded, …) describe today's index and are partly future knowledge (e.g. sectors were reclassified in 2018). They may define evaluation slices, never features. All results are conditional on today's survivors (ADR-0001).
 8. `labels.check_feature_columns` enforces rules 6–7 mechanically: it rejects every forward-looking column produced by `label_frame` (`r5`, `market_r5`, `excess_ret`, `label`, `status`, `n_valid`, `target_date`, `split`) and every membership column. Feature code must call it on its final column list.
+9. **Clarification of rule 2.** Dollar volume (close × volume) may be used as a cross-sectional rank. Close and volume are both split-adjusted, so their product is split-invariant, and close is not dividend-adjusted, so the product is point-in-time. Size and liquidity ranks are survivorship-suspect under rule 7 and are excluded from the default model set (ADR-0006).
 
 ### 3.5 Split policy (PROPOSED, [ADR-0005](../../docs/adr/0005-chronological-split-and-gates.md))
 
@@ -145,5 +146,13 @@ A candidate model "beats baseline" only if **all** hold on validation, judged by
 - `ml/tests/`: 87 tests. Mutation checks (each in a fresh process): label at t+1 → 10 failures; skip the `bad_bar` window check → 5; drop the purge → 3; trailing excess using the future → 3; significance CI accepted against any baseline → 1; `gate_model` scoring all rows → 1; undefined bootstrap draws dropped → 1.
 - Reviewed by the `mle-reviewer` agent (APPROVE WITH WARNINGS); its HIGH findings (significance baseline, test-split guard and frozen gates, survivorship inputs) are fixed above. Deferred to the features step: purged walk-forward folds and per-date ranking metrics (AUC / rank IC) as a secondary report.
 
-## 8. Next experiment (MLE-04: features)
-Ratio-only, cross-sectionally safe features from section 3.4 (trailing returns and excess returns, volatility, volume ratio, oscillators), each with a stated hypothesis and a leakage test, then Logistic Regression against the gates above.
+## 8. Features (MLE-04): done
+- There are 59 point-in-time features in `stocksight_data.features` (catalog and train-only signal in [features.md](features.md); design in ADR-0006).
+- The default model set is `model_features()`: 54 features, excluding market-state and survivorship-suspect ones.
+- Purged walk-forward folds inside train are in `stocksight_data.folds`.
+- Train-only screening: the dominant signal is short-term reversal (best per-date IC about −0.027), and it roughly halves between 2000–09 and 2010–18. 12-1 momentum is not significant after Benjamini-Hochberg adjustment.
+
+## 9. Next experiment (MLE-05: first model)
+1. **Logistic regression** on `model_features()`, with train-fitted winsorisation or ranks and a missing-value strategy. Hyperparameters are chosen on purged walk-forward folds inside train.
+2. **One validation run** through `gate_model`, recorded in the observation ledger with the number of finalists.
+3. **Random forest** next, regularised for overlapping labels, then error analysis by year, sector (as a slice only) and volatility.
