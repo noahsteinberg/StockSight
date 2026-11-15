@@ -126,3 +126,7 @@ Locations: frontend/src/Analysis.jsx:56–60 and frontend/src/styles.css (.price
 Recommendation: use responsive chart dimensions/tick typography or position readable labels outside the scaled SVG; reduce tick density on narrow layouts if necessary. Verify price and date labels at 390px before marking the responsive chart complete. No UI code was changed during this verification retry.
 
 Remaining checks: automated browser coverage, controlled ten-second timeout, rapid-request races, synthetic empty-response rendering, and fresh setup on another machine. The successful API-down/Retry check above supersedes the earlier manual-recovery gap for the running local environment only.
+
+## Remediation record November 15, 2026
+
+Issue #2 tracks follow-up implementation. Whitespace validation and responsive tick sizing were fixed in commit 749e436. Seven isolated Chromium tests now exercise the integrated real API flow and controlled failure/timeout/empty/cancellation cases. The development dependency chain was updated compatibly; npm audit reported zero after the update. Original findings above describe the reviewed e71db4f revision and are retained as historical evidence, not current unresolved defects. Second-machine and hosted CI results must still be recorded independently.

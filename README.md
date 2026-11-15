@@ -104,3 +104,7 @@ AI coding agents should read this file, [SPECIFICATION.md](SPECIFICATION.md), [T
 - [Security](docs/SECURITY.md) and [deployment plan](docs/DEPLOYMENT.md)
 
 StockSight is for education and research only, not financial advice. Predictions will be uncertain and must never be presented as guaranteed returns.
+
+### Browser regression tests
+
+With backend dependencies installed in backend/.venv, from frontend run `npx playwright install chromium` then `npm run test:e2e`. The suite starts isolated services on ports 5174/8101. See [Phase 1](docs/PHASE_1.md) for interpreter overrides, scope, and verification evidence. Normal manual development continues on ports 5173/8000.

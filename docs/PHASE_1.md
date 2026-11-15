@@ -34,3 +34,19 @@ Team handoff: Noah owns browser refinement; Gavin owns contract/API changes; Par
 ## Manual UI verification retry November 15, 2026
 
 Verified in a separate rendered browser tab: all range counts, keyboard first-date inspection, normalized search, unsupported-symbol recovery, observations table, API-down error and successful Retry after restart. A 390px viewport fit the controls but exposed very small chart tick labels. Whitespace-only search was reproduced as silent. See [review and evidence](reviews/PHASE_1_ADVERSARIAL_REVIEW.md). Automated browser tests and second-machine setup remain outstanding; no claim of isolated headless verification is made.
+
+## Phase 1 hardening implementation November 15, 2026
+
+Tracked by [GitHub issue #2](https://github.com/noahsteinberg/StockSight/issues/2). Whitespace-only ticker submission now produces accessible validation feedback. Chart dimensions track their container through ResizeObserver, keeping 12px tick labels readable on narrow screens. The date slider exposes the selected date and price as its accessible value.
+
+Seven Playwright regression tests now cover the real fixture-backed API flow, all range counts, keyboard inspection/table access, blank/unsupported/normalized ticker behavior, controlled API failure and Retry, empty responses, a virtual-clock timeout with recovery, canceled older range requests, and 390px chart label sizing/overflow. Tests start their own frontend/API on ports 5174/8101 and do not reuse the manual demo servers. Failure/empty/timeout scenarios use intercepted responses; the primary chart path and retry recovery use the actual FastAPI service.
+
+After installing backend/requirements-dev.txt in backend/.venv and running npm ci in frontend:
+
+    cd frontend
+    npx playwright install chromium
+    npm run test:e2e
+
+On Linux CI, use `npx playwright install --with-deps chromium`. If using another existing Python environment, set STOCKSIGHT_PYTHON to that interpreter's absolute path; do not commit machine-specific paths. The default is backend/.venv/Scripts/python.exe on Windows or backend/.venv/bin/python on Unix. STOCKSIGHT_API_TARGET configures only Vite's server-side development proxy and is set by the test runner for its isolated API.
+
+The GitHub Actions browser job installs both runtimes and runs the suite; failures retain trace artifacts. Local execution passed all seven tests, frontend lint/build, and the development dependency audit after compatible updates to ESLint 10.15.0 and minimatch 11.0.5. These are point-in-time results, not a claim that hosted CI has run or a teammate has verified another machine. A clean local setup is being verified separately before handoff.
