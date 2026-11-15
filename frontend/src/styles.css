@@ -384,3 +384,7 @@ table { border-collapse: collapse; width: 100%; font: 12px var(--mono); }
 th, td { padding: 10px; border-bottom: 1px solid var(--line); text-align: right; }
 th:first-child { text-align: left; }
 @media(max-width: 700px) { .analysis-toolbar fieldset { width: 100%; margin: 8px 0 0; } .analysis .section-heading { flex-wrap: wrap; } .analysis h1 { font-size: 28px; } .quote h2 span { display: block; margin: 6px 0; } .quote p { font-size: 10px; } }
+.plot-container { width: 100%; min-width: 0; }
+.price-plot { min-height: 0; }
+.price-plot text { font-size: 12px; }
+.validation-error { color: #a12323; margin-block: 12px; font-size: 14px; }
