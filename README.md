@@ -2,7 +2,7 @@
 
 A University of Connecticut CSE 4095 Agentic Programming team project exploring stock analysis and measurable machine-learning predictions.
 
-**Status: Phase 1 historical demo.** AAPL ticker lookup and daily price/volume charts now use the FastAPI historical-fixture API. Accounts, database persistence, indicators, and predictions remain planned. See [Phase 1 setup and acceptance](docs/PHASE_1.md).
+**Status: Phase 2 persistence foundation.** The historical AAPL chart can read PostgreSQL through FastAPI, with migrations and repeatable fixture import. Explicit fixture mode remains available. Accounts, indicators, predictions, and provider ingestion remain planned. See [database setup](docs/DATABASE.md) and [Phase 1 checks](docs/PHASE_1.md).
 
 ## Planned MVP
 
@@ -15,7 +15,7 @@ See [SPECIFICATION.md](SPECIFICATION.md) for scope and open decisions, [TODO.md]
 
 ## Architecture and structure
 
-React + Vite (JavaScript, plain CSS) will communicate with a Python FastAPI API. PostgreSQL and SQLAlchemy/Alembic are planned. ML research will remain separate from API request handling. The chart uses SVG and an accessible observations table. No router, chart library, database driver, or ML dependencies are installed yet.
+React + Vite (JavaScript, plain CSS) will communicate with a Python FastAPI API. PostgreSQL persistence uses SQLAlchemy and Alembic migrations. ML research will remain separate from API request handling. The chart uses SVG and an accessible observations table. No router, external chart library, or ML dependencies are installed.
 
 ```text
 StockSight/
@@ -36,7 +36,7 @@ StockSight/
 
 ## Local setup
 
-Use Node.js 24 LTS (or a version accepted by `frontend/package.json`), npm, Python 3.12+, and Git. CI uses Node 24 and Python 3.13. Run each service in its own terminal. No API keys or database are needed.
+Use Node.js 24 LTS (or a version accepted by `frontend/package.json`), npm, Python 3.12+, and Git. CI uses Node 24 and Python 3.13. Run each service in its own terminal. No API keys are needed; fixture mode works without a database. Database mode requires the local PostgreSQL setup.
 
 ### Frontend
 
@@ -85,7 +85,7 @@ Runtime-only environments can install `requirements.txt`; contributors and CI in
 
 ### Environment
 
-Defaults work without an environment file. Optionally copy root `.env.example` to `backend/.env`; `app/config.py` loads that exact location. `STOCKSIGHT_APP_NAME` overrides the API name and health response service field. A root `.env` is not loaded automatically. Tests explicitly set the expected service name.
+Defaults use the historical fixture without an environment file. Copy `backend/.env.example` to `backend/.env` for API settings; `app/config.py` loads that exact location. Root `.env.example` is for Docker Compose; see [database setup](docs/DATABASE.md). `STOCKSIGHT_APP_NAME` overrides the API name and health response service field. A root `.env` is not loaded automatically. Tests explicitly set the expected service name.
 
 Never commit `.env` files or credentials. Vite exposes `VITE_*` values to browsers, so they must never contain secrets. Database and provider settings will be introduced when those integrations are implemented.
 

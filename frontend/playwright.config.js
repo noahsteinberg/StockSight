@@ -13,7 +13,7 @@ export default defineConfig({
   reporter: 'list',
   use: { baseURL: 'http://127.0.0.1:5174', browserName: 'chromium', headless: true, trace: 'retain-on-failure' },
   webServer: [
-    { command: `"${python}" -m uvicorn app.main:app --host 127.0.0.1 --port 8101`, cwd: path.join(root, 'backend'), url: 'http://127.0.0.1:8101/api/health', reuseExistingServer: false },
+    { command: `"${python}" -m uvicorn app.main:app --host 127.0.0.1 --port 8101`, cwd: path.join(root, 'backend'), url: 'http://127.0.0.1:8101/api/health', env: { STOCKSIGHT_DATABASE_URL: process.env.STOCKSIGHT_E2E_DATABASE_URL || '' }, reuseExistingServer: false },
     { command: 'npm run dev -- --port 5174', url: 'http://127.0.0.1:5174', env: { STOCKSIGHT_API_TARGET: 'http://127.0.0.1:8101' }, reuseExistingServer: false },
   ],
 });

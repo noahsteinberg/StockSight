@@ -19,3 +19,7 @@ FastAPI supplies `/docs`, `/redoc`, and `/openapi.json`. There are no user, watc
 ## Phase 1 historical API
 
 GET /api/stocks?query=apple lists supported symbol/name matches. GET /api/stocks/AAPL/prices?range=3mo returns dated OHLCV bars and provenance. Ranges: 1mo (21 sessions), 3mo (63), 1y (252), all. Unknown symbol: 404; invalid range: 422. All ranges end at the latest bundled historical observation. See [Phase 1](PHASE_1.md) for the contract and data conventions.
+
+## Storage selection and readiness
+
+A nonempty STOCKSIGHT_DATABASE_URL selects database reads with the same history response. Missing/empty URL explicitly selects fixture mode. GET /api/ready checks storage/schema (200 or sanitized 503); /api/health remains liveness only. Stock routes return 503 DATA_UNAVAILABLE if database reads fail, without fixture fallback. Search is capped at 50 and all-history at the latest 2,000 daily bars.

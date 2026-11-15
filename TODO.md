@@ -1,6 +1,6 @@
 # Roadmap
 
-Only Phase 0 is complete. Later phases describe work to scope and review, not functionality currently available.
+The scaffold, historical chart/API slice, and PostgreSQL persistence foundation are implemented locally. This legacy phase list differs from the milestone numbering in [the team roadmap](docs/ROADMAP.md); use that roadmap and [database evidence](docs/DATABASE.md) for current gates and remaining provider work.
 
 ## Phase 0: Repository foundation
 
@@ -11,13 +11,14 @@ Only Phase 0 is complete. Later phases describe work to scope and review, not fu
 - [x] Document scope, architecture, collaboration, security, database, and ML
 - [x] Verify local install, lint, build, server startup, and health response
 
-Initial human review, commit, and first push remain owner actions; no commit or push is part of this scaffold task.
+Team review, second-machine verification, and pending pushes remain explicit handoff steps.
 
 ## Phase 1: Full-stack/database foundation
 
-- [ ] Agree on API conventions and add a real frontend/API integration
-- [ ] Design PostgreSQL schema and choose SQLAlchemy/Alembic setup
-- [ ] Add migrations, isolated database tests, and local configuration
+- [x] Agree on initial history API conventions and add a real frontend/API integration
+- [x] Design initial market-data schema and implement SQLAlchemy/Alembic
+- [x] Add migrations, isolated database tests, and local configuration
+- [ ] Select provider and implement reliable incremental ingestion for broader symbols
 
 ## Phase 2: Accounts and watchlists
 
