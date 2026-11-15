@@ -35,3 +35,5 @@ artifacts/
 Thumbs.db
 .idea/
 .vscode/
+
+!backend/app/fixtures/apple-source.csv

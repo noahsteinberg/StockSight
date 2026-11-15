@@ -273,3 +273,5 @@ The next action is a team review of this proposal: confirm dates and grading con
 At each review, replace TBD references with issue numbers, test paths, and demo steps. Keep the submitted proposal unchanged. Record scope decisions with date, owner, rationale, affected submission commitment, and approval evidence. Removing signup, reducing the required indicator set, or dropping integrated predictions requires explicit scope agreement; fallback demonstrations do not automatically satisfy the full MVP.
 
 Revision log: November 15, 2026 — corrected optional registration, added dashboard and prediction workflow gates, proposed a final indicator minimum, and introduced scheduling/traceability approval checks. Actual calendar and capacity remain unresolved until the team supplies them.
+
+Phase 1 implementation update (November 15, 2026): the local implementation now provides fixture-backed AAPL analysis through FastAPI; see [Phase 1](PHASE_1.md) for scope and verification. This is not approval of the undated schedule or completion of later milestones.

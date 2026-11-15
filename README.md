@@ -2,7 +2,7 @@
 
 A University of Connecticut CSE 4095 Agentic Programming team project exploring stock analysis and measurable machine-learning predictions.
 
-**Status: early scaffold (Phase 0).** The responsive informational landing page and `GET /api/health` work. No accounts, market data, watchlists, predictions, or database connection exist yet.
+**Status: Phase 1 historical demo.** AAPL ticker lookup and daily price/volume charts now use the FastAPI historical-fixture API. Accounts, database persistence, indicators, and predictions remain planned. See [Phase 1 setup and acceptance](docs/PHASE_1.md).
 
 ## Planned MVP
 
@@ -15,7 +15,7 @@ See [SPECIFICATION.md](SPECIFICATION.md) for scope and open decisions, [TODO.md]
 
 ## Architecture and structure
 
-React + Vite (JavaScript, plain CSS) will communicate with a Python FastAPI API. PostgreSQL and SQLAlchemy/Alembic are planned. ML research will remain separate from API request handling. No router, chart library, database driver, or ML dependencies are installed yet.
+React + Vite (JavaScript, plain CSS) will communicate with a Python FastAPI API. PostgreSQL and SQLAlchemy/Alembic are planned. ML research will remain separate from API request handling. The chart uses SVG and an accessible observations table. No router, chart library, database driver, or ML dependencies are installed yet.
 
 ```text
 StockSight/
@@ -46,7 +46,7 @@ npm install
 npm run dev
 ```
 
-Open <http://127.0.0.1:5173>. Navigation scrolls to informational sections; all four feature areas are explicitly marked coming soon. The page does not call the backend.
+Open <http://127.0.0.1:5173>. Start the backend too, then search AAPL and choose a range. Vite proxies /api to FastAPI on port 8000. The demo uses historical observations, not live prices.
 
 ```sh
 npm run lint
