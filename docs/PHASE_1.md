@@ -30,3 +30,7 @@ Team handoff: Noah owns browser refinement; Gavin owns contract/API changes; Par
 - Frontend: ESLint and production build passed.
 - Browser: initial AAPL chart rendered; 3M displayed 63 sessions, 1M displayed 21, both ending 2017-02-16; MSFT showed an unsupported-symbol error; searching AAPL recovered. Desktop screenshot inspected.
 - Outstanding M1 gate work: commit automated browser coverage, verify the network-failure/retry path and narrow viewport, and repeat setup on a second teammate machine. This first working implementation is not a claim that every roadmap M1 acceptance check has passed.
+
+## Manual UI verification retry November 15, 2026
+
+Verified in a separate rendered browser tab: all range counts, keyboard first-date inspection, normalized search, unsupported-symbol recovery, observations table, API-down error and successful Retry after restart. A 390px viewport fit the controls but exposed very small chart tick labels. Whitespace-only search was reproduced as silent. See [review and evidence](reviews/PHASE_1_ADVERSARIAL_REVIEW.md). Automated browser tests and second-machine setup remain outstanding; no claim of isolated headless verification is made.
