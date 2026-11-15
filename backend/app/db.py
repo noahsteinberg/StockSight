@@ -1,0 +1,74 @@
+"""Persistence models and engine construction; schema changes belong in Alembic."""
+
+from datetime import date, datetime
+from decimal import Decimal
+
+from sqlalchemy import (
+    BigInteger,
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    Numeric,
+    String,
+    create_engine,
+    event,
+)
+from sqlalchemy.engine import Engine
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+
+
+class Base(DeclarativeBase):
+    pass
+
+
+class StockRecord(Base):
+    __tablename__ = "stocks"
+    symbol: Mapped[str] = mapped_column(String(16), primary_key=True)
+    name: Mapped[str] = mapped_column(String(120))
+    exchange: Mapped[str] = mapped_column(String(32))
+    currency: Mapped[str] = mapped_column(String(3))
+
+
+class PriceSeries(Base):
+    __tablename__ = "price_series"
+    id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    symbol: Mapped[str] = mapped_column(ForeignKey("stocks.symbol"), unique=True)
+    source: Mapped[str] = mapped_column(String(160))
+    source_url: Mapped[str] = mapped_column(String(500))
+    mode: Mapped[str] = mapped_column(String(40))
+    adjustment: Mapped[str] = mapped_column(String(200))
+    fixture_sha256: Mapped[str] = mapped_column(String(64))
+    imported_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class DailyBar(Base):
+    __tablename__ = "daily_bars"
+    __table_args__ = (
+        CheckConstraint("low > 0 AND high >= low", name="ck_bar_bounds"),
+        CheckConstraint("open >= low AND open <= high", name="ck_bar_open"),
+        CheckConstraint("close >= low AND close <= high", name="ck_bar_close"),
+        CheckConstraint("volume >= 0", name="ck_bar_volume"),
+    )
+    series_id: Mapped[str] = mapped_column(
+        ForeignKey("price_series.id"), primary_key=True
+    )
+    session_date: Mapped[date] = mapped_column(primary_key=True)
+    open: Mapped[Decimal] = mapped_column(Numeric(18, 6))
+    high: Mapped[Decimal] = mapped_column(Numeric(18, 6))
+    low: Mapped[Decimal] = mapped_column(Numeric(18, 6))
+    close: Mapped[Decimal] = mapped_column(Numeric(18, 6))
+    volume: Mapped[int] = mapped_column(BigInteger)
+
+
+def database_engine(url: str) -> Engine:
+    options = (
+        {"connect_args": {"connect_timeout": 3}} if url.startswith("postgresql") else {}
+    )
+    engine = create_engine(url, pool_pre_ping=True, hide_parameters=True, **options)
+    if engine.dialect.name == "sqlite":
+
+        @event.listens_for(engine, "connect")
+        def enable_foreign_keys(connection, _):
+            connection.execute("PRAGMA foreign_keys=ON")
+
+    return engine

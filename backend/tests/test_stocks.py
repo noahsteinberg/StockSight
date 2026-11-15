@@ -1,8 +1,9 @@
 from fastapi.testclient import TestClient
 
+from app.config import Settings
 from app.main import create_app
 
-client = TestClient(create_app())
+client = TestClient(create_app(Settings(_env_file=None, database_url=None)))
 
 
 def test_history_uses_latest_ordered_real_observations():
