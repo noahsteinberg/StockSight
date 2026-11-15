@@ -130,3 +130,5 @@ Remaining checks: automated browser coverage, controlled ten-second timeout, rap
 ## Remediation record November 15, 2026
 
 Issue #2 tracks follow-up implementation. Whitespace validation and responsive tick sizing were fixed in commit 749e436. Seven isolated Chromium tests now exercise the integrated real API flow and controlled failure/timeout/empty/cancellation cases. The development dependency chain was updated compatibly; npm audit reported zero after the update. Original findings above describe the reviewed e71db4f revision and are retained as historical evidence, not current unresolved defects. Second-machine and hosted CI results must still be recorded independently.
+
+Clean-checkout follow-up: commit 6a3edce was cloned into a separate directory with a new Python virtual environment and npm ci. Four backend tests, lint/format, frontend lint/build, and seven headless Chromium tests passed there using the documented default paths. This supersedes the earlier clean-local-environment gap; second-machine and hosted Linux CI remain unverified.
