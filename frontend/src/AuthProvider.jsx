@@ -160,7 +160,10 @@ export default function AuthProvider({ children }) {
   return (
     <Auth0Provider domain={domain} clientId={clientId} cacheLocation="memory"
       authorizationParams={{ redirect_uri: window.location.origin, audience, scope: 'openid profile email' }}
-      onRedirectCallback={() => { window.history.replaceState({}, document.title, '/#watchlist'); }}>
+      onRedirectCallback={() => {
+        window.history.replaceState({}, document.title, '/#/dashboard');
+        window.dispatchEvent(new HashChangeEvent('hashchange'));
+      }}>
       <Session>{children}</Session>
     </Auth0Provider>
   );

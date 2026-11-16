@@ -120,7 +120,8 @@ export default function Analysis({ symbol, onSelectSymbol, watchlist }) {
           disabled={account.isLoading || watchlist.mutation.busy || (account.isAuthenticated && (watchlist.loading || Boolean(watchlist.error) || watchlist.items.some(stock => stock.symbol === result.data.symbol)))}
           onClick={() => account.isAuthenticated ? watchlist.save(result.data.symbol) : account.login()}>
           {!account.isAuthenticated ? 'Sign in to save' : watchlist.items.some(stock => stock.symbol === result.data.symbol) ? 'Saved to watchlist' : 'Save to watchlist'}
-        </button><a href="#watchlist">Your watchlist ↓</a></div>}
+        </button><a href="#/dashboard">Your watchlist ↗</a></div>}
+        <a className="forecast-link" href={`#/predictions?symbol=${encodeURIComponent(symbol)}`}>Predictions for {symbol} <span aria-hidden="true">↗</span></a>
         <div className="indicator-toolbar" role="group" aria-label="Technical indicators"><span className="muted">Indicators</span><button type="button" aria-pressed={showSma} onClick={() => setShowSma(value => !value)}><span className="legend-swatch sma" aria-hidden="true" />SMA 20</button><button type="button" aria-pressed={showRsi} onClick={() => setShowRsi(value => !value)}><span className="legend-swatch rsi" aria-hidden="true" />RSI 14</button><span className="price-legend"><span className="legend-swatch" aria-hidden="true" />Close</span></div>
         {indicators.loading && <p role="status" className="indicator-feedback">Loading indicators…</p>}
         {indicators.error && <div role="alert" className="indicator-feedback error-state"><p>{indicators.error}</p>{indicators.mismatch ? <button type="button" onClick={() => { reload(); setRetry(value => value + 1); indicators.retry(); }}>Reload prices & indicators</button> : <button type="button" onClick={indicators.retry}>Retry indicators</button>}</div>}

@@ -31,6 +31,15 @@ Gavin authorized this phase after the backend handoff. See
 
 ## Data and account follow-up
 
+App-view increment implemented; see [APP_VIEWS.md](docs/APP_VIEWS.md):
+
+- [x] Dashboard with real private watchlist filtering, saved dates, open/remove
+- [x] Shareable page navigation with refresh, history and keyboard focus
+- [x] Selected-stock Predictions view and Model performance view, honestly unavailable
+- [x] Data/methodology page and dashboard/session browser acceptance
+
+These views do not mark the ML/prediction items below complete.
+
 - [ ] Confirm upstream download/cleaning, usage rights, price adjustments and calendar
 - [ ] Enrich missing company/exchange metadata from a verified source
 - [ ] Implement reliable incremental refresh with correction/failure policy

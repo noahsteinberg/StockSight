@@ -123,7 +123,7 @@ test('mobile account and saved-stock actions fit the viewport', async ({ page })
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();
   await page.getByRole('button', { name: 'Save to watchlist', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Remove AAPL' })).toBeVisible();
-  await page.getByRole('link', { name: 'Watchlist', exact: true }).click();
+  await page.getByRole('link', { name: 'Dashboard', exact: true }).click();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   if (process.env.STOCKSIGHT_VISUAL_QA === '1') await page.screenshot({ path: '../.local-data/accounts-mobile.png', fullPage: true });
 });
@@ -153,4 +153,48 @@ test('invalid OAuth callback fails safely in the official SDK', async ({ page })
   await expect(page.getByRole('alert')).toContainText('Sign-in did not finish. Try again.');
   await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Open AAPL analysis' })).toHaveCount(0);
+});
+
+test('dashboard filters persisted stocks and opens analysis after refresh', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+  await page.getByRole('button', { name: 'Save to watchlist', exact: true }).click();
+  await expect(page.getByRole('link', { name: 'Open AAPL analysis' })).toBeVisible();
+  await page.getByRole('link', { name: 'Dashboard', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'My dashboard' })).toBeVisible();
+  await expect(page.getByRole('table', { name: 'Your saved stocks' })).toBeVisible();
+  await page.getByLabel('Filter saved stocks').fill('no-match');
+  await expect(page.getByText('No saved stocks match “no-match”.')).toBeVisible();
+  await page.getByRole('button', { name: 'Clear filter' }).click();
+  await page.getByLabel('Filter saved stocks').fill('apple');
+  await expect(page.getByRole('link', { name: 'Open AAPL analysis' })).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole('table', { name: 'Your saved stocks' })).toBeVisible();
+  await page.getByRole('link', { name: 'Open AAPL analysis' }).click();
+  await expect(page.getByRole('heading', { name: 'AAPL Apple Inc.' })).toBeVisible();
+  await page.getByRole('link', { name: 'Dashboard', exact: true }).click();
+  await page.getByRole('button', { name: 'Remove AAPL' }).click();
+  await expect(page.getByText('No saved stocks yet.')).toBeVisible();
+  await page.reload();
+  await expect(page.getByText('No saved stocks yet.')).toBeVisible();
+});
+
+test('dashboard loading, storage retry and sign-out preserve privacy', async ({ page }) => {
+  await page.goto('/#/dashboard');
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+  await page.getByRole('link', { name: 'Find a stock', exact: true }).click();
+  await page.getByRole('button', { name: 'Save to watchlist', exact: true }).click();
+  await expect(page.getByRole('link', { name: 'Open AAPL analysis' })).toBeVisible();
+  await page.route('**/api/watchlist', route => route.request().method() === 'GET' ? route.fulfill({ status: 503, json: { detail: { code: 'ACCOUNT_STORAGE_UNAVAILABLE' } } }) : route.continue());
+  await page.goto('/#/dashboard');
+  await page.reload();
+  await expect(page.getByRole('alert')).toContainText('Your watchlist is unavailable');
+  await page.unroute('**/api/watchlist');
+  await page.getByRole('button', { name: 'Retry watchlist' }).click();
+  await expect(page.getByRole('link', { name: 'Open AAPL analysis' })).toBeVisible();
+  await page.setViewportSize({ width: 320, height: 800 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.getByRole('button', { name: 'Sign out', exact: true }).click();
+  await expect(page.getByRole('link', { name: 'Open AAPL analysis' })).toHaveCount(0);
+  await expect(page.getByText('Sign in to keep your saved stocks here.')).toBeVisible();
 });

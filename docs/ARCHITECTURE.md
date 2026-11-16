@@ -6,7 +6,11 @@ and indicator integration are documented in [FRONTEND_REDESIGN.md](FRONTEND_REDE
 
 ## Implemented
 
-- `frontend/src/App.jsx`: React page with an Analysis workspace and anchor navigation. Analysis.jsx fetches historical bars through the Vite API proxy and renders SVG prices/volume with an accessible table.
+- `frontend/src/App.jsx`: shared shell and state with hash-based page navigation
+  through use-page-route.js. Pages.jsx provides Dashboard, Predictions, Model
+  performance and Methodology. Analysis.jsx preserves the existing API-driven
+  charts/indicators. See APP_VIEWS.md; prediction/evaluation pages are unavailable
+  views until real ML endpoints exist. No routing dependency was added.
 - `backend/app/main.py`: application factory and FastAPI instance. Routes mount under `/api`.
 - `backend/app/api/health.py`: Pydantic response schema and process health route.
 - `backend/app/config.py`: typed environment settings; optional `backend/.env` loading. Tests inject settings for a deterministic service name.

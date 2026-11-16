@@ -7,8 +7,8 @@ findings and are not current startup instructions.
 ## Checkout and delivery state
 
 Gavin's implementation checkout is on `feature/auth0-watchlists`, following
-`6e1c7e1` (indicator backend and prior handoff). The frontend redesign and
-SMA20/RSI14 UI are delivered in the local commit containing this update. Check
+`b0e256a` (frontend redesign and indicator UI). The new dashboard, navigation,
+ML-unavailable views and methodology page are delivered with this update. Check
 `git status --short`, `git branch --show-current` and `git log -3 --oneline` in
 the actual checkout. They have not been pushed or merged by this task.
 Gavin requests a local commit for every completed change going forward; run the
@@ -33,16 +33,19 @@ the configuration described below.
 | Search and charts | UConn-inspired responsive research workspace; React → FastAPI → PostgreSQL history, SVG chart, ranges, inspection, table and feedback | Metadata enrichment |
 | Data | Repeatable validated Parquet importer; 494 canonical series and 2,947,701 bars on Gavin's local database | Reproducible provider download, rights/adjustment/calendar review and incremental refresh |
 | Accounts | Auth0 signup/login/logout; username with optional recovery email; HttpOnly server sessions restore on refresh | Production reset/account-disable revocation policy and complete password-reset acceptance |
-| Watchlists | Private persistence, save/remove/open, capacity 100, account isolation; desktop sidebar/mobile stack and selected-stock state | Later product refinements |
+| Watchlists | Private persistence, save/remove/open, capacity 100, account isolation; compact sidebar and full dashboard with filtering/saved dates | Later product refinements |
 | Indicators | SMA20 overlay and RSI14 panel/toggles; independent retries, snapshot alignment, null handling and date inspection | Future indicators only if separately scoped |
-| ML / forecasts | Documentation and proposed target only | Features, chronological evaluation, trusted artifact, inference, persisted forecasts/outcomes and evaluation UI |
+| ML / forecasts | Navigable Predictions/Model performance unavailable states; selected-stock context; no ML calls or metrics | Vlad's ML, inference, persisted forecasts/outcomes and live evaluation UI integration |
 | Delivery | Local checks; CI definitions include disposable PostgreSQL and browser tests | Hosted CI on published head, second-machine setup and deployment/demo acceptance |
 
 **Phase boundary:** Gavin subsequently authorized a UConn-inspired frontend
 redesign and existing indicator integration. That phase is implemented and locally
 verified; see [FRONTEND_REDESIGN.md](FRONTEND_REDESIGN.md) for research, changes,
 evidence and limitations. ML remains for Vlad per Gavin's current direction.
-No ML/provider refresh work was bundled. The complete MVP is not finished.
+The following app-view phase adds Dashboard, Predictions, Model performance and
+Methodology navigation; see [APP_VIEWS.md](APP_VIEWS.md). ML pages deliberately
+remain unavailable until their real backend contracts exist. No ML/provider refresh
+work was bundled. The complete MVP is not finished.
 
 ## Local setup
 
@@ -91,6 +94,11 @@ their own explicit initial dataset choice; see [DATABASE.md](DATABASE.md).
 
 ## Contracts and source map
 
+App navigation uses `#/dashboard`, `#/analysis`, `#/predictions`, `#/performance`
+and `#/methodology`; optional validated `symbol` query context connects Analysis
+and Predictions. Root `/` remains Analysis. Legacy anchors are accepted. See
+APP_VIEWS.md for history, focus, Auth0 callback and dashboard contracts.
+
 | Contract / responsibility | Files to inspect |
 | --- | --- |
 | HTTP schema, bounded history, search/errors | `docs/API.md`, `backend/app/api/stocks.py`, `market.py`, `repository.py` |
@@ -138,6 +146,12 @@ close or label historical observations live. No recurring ingestion exists.
 
 These are dated local results, not a new run in the next conversation:
 
+- Latest app-view phase: lint/build passed; full 25 public browser and 11 account/
+  session cases passed. A final stock-context refinement and seventh page case
+  passed in the focused seven-case page run. Guest desktop/mobile screenshots
+  inspected; 1440/390/320px overflow checks and signed-test dashboard filtering,
+  persistence, removal and sign-out privacy passed. Fixtures/isolated SQLite only;
+  no new hosted Auth0, PostgreSQL or deployment verification. See APP_VIEWS.md.
 - Latest redesign: frontend lint/build passed; 19 chart/indicator browser tests
   passed against the real fixture API; nine account/session cases passed against
   the isolated SQLite harness, including SDK boundary checks. Desktop/mobile
@@ -215,6 +229,8 @@ Full MVP gates and unchanged team ownership remain in [ROADMAP.md](ROADMAP.md).
 > docs/CURRENT_HANDOFF.md, then inspect git status before changing files.
 > The UConn-inspired redesign and SMA20/RSI14 frontend integration are implemented
 > and locally verified; read docs/FRONTEND_REDESIGN.md. ML remains for Vlad.
+> Dashboard, navigation and explicit ML-unavailable pages are implemented;
+> read docs/APP_VIEWS.md before continuing. Do not invent forecasts or metrics.
 > Work in one digestible phase at a time. Before live operations run
 > the backend virtual-environment environment check. Preserve imported market
 > data, existing accounts/watchlists and uncommitted changes. Do not push or

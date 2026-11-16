@@ -46,6 +46,9 @@ Gavin subsequently authorized a UConn-inspired frontend redesign and existing
 indicator integration. That phase is implemented; see docs/FRONTEND_REDESIGN.md
 for reference research, changes and dated verification. Keep subsequent phases
 digestible and follow the current request. ML remains for Vlad per Gavin's direction.
+The following app-view phase adds hash navigation, a full private dashboard,
+methodology and explicit unavailable prediction/performance views. Read
+docs/APP_VIEWS.md before wiring ML; no prediction/evaluation APIs exist yet.
 Preserve the team ownership table in ROADMAP.md; it is coordination, not a ban
 on implementing across layers. Follow the current user's task scope.
 
