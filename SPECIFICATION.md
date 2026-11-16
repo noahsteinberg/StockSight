@@ -8,8 +8,8 @@ Build an educational full-stack stock analysis and prediction platform for stude
 
 The current implementation provides PostgreSQL-backed historical search/charts,
 repeatable snapshot import, and an Auth0/private-watchlist integration foundation.
-Real hosted sign-in and saved-watchlist retrieval are verified; additional account
-lifecycle checks remain. Indicators, inference,
+Real hosted sign-in, persistent sessions, username signup with optional recovery
+email and two-user private watchlists are locally verified. Indicators, inference,
 prediction history and evaluation remain planned. See
 [the account handoff](docs/AUTH0_WATCHLIST_HANDOFF.md) for its contract and limits.
 

@@ -1,5 +1,9 @@
 # Auth0 accounts and watchlist foundation
 
+**Current session behavior:** [SESSION_HANDOFF.md](SESSION_HANDOFF.md) records the
+refresh fix, cookie/CSRF contract, username signup with optional recovery email,
+and real two-account verification. It supersedes earlier refresh limitations below.
+
 This increment implements the account UI, Auth0 SDK integration, validated private
 API routes and PostgreSQL watchlists. Noah can continue from the existing React
 components and the OpenAPI contract. Indicators and ML remain separate work.
@@ -51,7 +55,7 @@ the StockSight SPA user access rather than broadening access for every applicati
 ## Local configuration and startup
 
 Implementation branch: `feature/auth0-watchlists` in the current worktree. Use a
-checkout containing migration 0003 for startup and Alembic commands: the shared
+checkout containing migration 0004 for startup and Alembic commands: the shared
 local development database has already been upgraded to that revision.
 
 Copy frontend/.env.example to ignored frontend/.env.local and set:
@@ -140,18 +144,16 @@ FastAPI's standard 422 validation structure:
   (plus nbf when supplied), with 10 seconds of clock tolerance. Client-credentials
   identities are rejected. JWKS comes only from the configured HTTPS issuer,
   never token-provided URLs; retrieval has a timeout and bounded cache.
-- Access tokens use the SDK's in-memory cache, not localStorage/sessionStorage.
-  Reloading may restore the Auth0 session silently. If browser cookie policy
-  prevents that, sign in again; database watchlists remain intact. Refresh tokens
-  and persistent token caching are not enabled in this increment.
+- Access tokens stay in SDK memory. An opaque, HttpOnly first-party app session
+  now restores login after refresh. No Auth0 token is persisted in browser storage
+  or the database. See SESSION_HANDOFF.md for the cookie and CSRF contract.
 - Logout clears the local login and Auth0 session, but an already copied access
   JWT can remain valid until expiration. The proposed 300-second lifetime limits
   that window. Immediate server-side revocation is not implemented; do not claim
   that logout invalidates every previously issued bearer token.
-- API authentication uses explicit Authorization headers rather than ambient
-  API cookies, so no API cookie-session CSRF scheme is introduced. Vite proxies
-  /api in development; production must provide same-origin routing. No permissive
-  CORS middleware was added.
+- Private APIs now accept either a verified bearer token or the app session.
+  Cookie-authenticated writes require an exact Origin and CSRF token. Vite proxies
+  /api; production must provide same-origin routing. No permissive CORS was added.
 - Auth0 owns password policies, duplicate signup, recovery, email delivery and
   identity-provider controls. Verify these in the configured tenant before a
   public release; local signed-token tests cannot prove hosted behavior.
@@ -198,11 +200,11 @@ Neither app.main nor app.demo exposes /api/test/identity. Screenshots, video and
 tracing are off in the account suite unless a one-off visual check is explicitly
 requested with STOCKSIGHT_VISUAL_QA=1.
 
-Remaining real-tenant acceptance: explicitly verify invalid/duplicate database
-signup, recovery, sign-out, expired sessions, removal and a second real user's
-isolation. Save/open, refresh persistence after reauthentication and hosted sign-in
-were verified as described below. Automated signed-token tests cover additional
-API/UI scenarios, but do not substitute for the remaining hosted lifecycle checks.
+Current real-tenant results are in SESSION_HANDOFF.md: signup/login/logout,
+refresh persistence, removal, two-user isolation, negative signup requests and
+recovery email delivery are verified. A full password change and production
+provider-revocation policy remain separate acceptance work; no real password was
+changed by the agent. The earlier evidence below is retained as history.
 
 ## Local verification November 16, 2026
 

@@ -14,7 +14,11 @@
   0003 adds identity/watchlist tables. No local password store is introduced.
 - Watchlist.jsx and use-watchlist.js provide the personal dashboard; App.jsx shares
   selected-stock state with the existing Analysis.jsx chart. Auth0 configuration
-  and pending real-tenant acceptance are documented in AUTH0_WATCHLIST_HANDOFF.md.
+  and current real-tenant acceptance are documented in AUTH0_WATCHLIST_HANDOFF.md.
+- Migration 0004 adds opaque app sessions. Auth0 JWTs bootstrap an HttpOnly cookie;
+  PostgreSQL stores its digest, expiry and CSRF state. The frontend restores the
+  session independently of Auth0's silent iframe flow. See SESSION_HANDOFF.md for
+  the cookie/bearer API contract and real-account verification.
 
 ## Planned boundary
 

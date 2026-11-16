@@ -5,12 +5,16 @@ from typing import Annotated
 
 import jwt
 from fastapi import Depends, HTTPException, Request
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi.security import APIKeyCookie, HTTPAuthorizationCredentials, HTTPBearer
 from jwt import PyJWKClient, PyJWKClientConnectionError, PyJWKClientError
 
 from app.config import Settings
+from app.sessions import COOKIE
 
 bearer = HTTPBearer(auto_error=False, scheme_name="Auth0AccessToken")
+session_cookie = APIKeyCookie(
+    name=COOKIE, auto_error=False, scheme_name="StockSightSession"
+)
 
 
 def unauthorized():
@@ -74,7 +78,7 @@ class TokenVerifier:
             raise unauthorized() from None
 
 
-def current_principal(
+def bearer_principal(
     request: Request,
     credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer)],
 ) -> Principal:
@@ -90,3 +94,22 @@ def current_principal(
             },
         )
     return verifier.verify(credentials.credentials)
+
+
+def current_principal(
+    request: Request,
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer)],
+    cookie: Annotated[str | None, Depends(session_cookie)],
+) -> Principal:
+    if request.headers.get("authorization") is not None:
+        # An explicitly invalid bearer token must never fall back to a cookie.
+        return bearer_principal(request, credentials)
+    from app.sessions import read_session, require_session_request
+
+    if not cookie:
+        raise unauthorized()
+    session = read_session(request)
+    if session is None:
+        raise unauthorized()
+    require_session_request(request, session)
+    return Principal(issuer=session["issuer"], subject=session["subject"])

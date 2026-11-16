@@ -2,6 +2,11 @@
 
 Local base URL: `http://127.0.0.1:8000`.
 
+Private endpoints accept an Auth0 bearer token or the first-party app session.
+Session creation/restoration/logout, CSRF headers and lifetimes are documented in
+[SESSION_HANDOFF.md](SESSION_HANDOFF.md). The frontend uses the app cookie so a
+page refresh does not require another Auth0 prompt.
+
 ## GET /api/health
 
 No authentication, parameters, database, or provider access. Returns HTTP 200 with `application/json`:

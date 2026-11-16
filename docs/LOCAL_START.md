@@ -6,7 +6,8 @@ API. A 404 for the API's `/` or favicon is expected.
 
 For the account/watchlist integration, configure Auth0 as described in
 [the handoff](AUTH0_WATCHLIST_HANDOFF.md). The historical chart remains available
-without Auth0. Normal database startup requires migration 0003 for watchlists.
+without Auth0. Normal database startup requires migration 0004 for app sessions.
+See SESSION_HANDOFF.md for session/origin settings and current verification.
 
 ## Explicit demo without PostgreSQL
 

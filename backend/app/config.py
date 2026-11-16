@@ -2,8 +2,9 @@
 
 import re
 from pathlib import Path
+from urllib.parse import urlsplit
 
-from pydantic import SecretStr, field_validator
+from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -19,6 +20,29 @@ class Settings(BaseSettings):
     database_url: SecretStr | None = None
     auth0_domain: str | None = None
     auth0_audience: str | None = None
+    app_origin: str = "http://127.0.0.1:5173"
+    session_max_age_seconds: int = Field(default=28800, ge=300, le=86400)
+
+    @field_validator("app_origin")
+    @classmethod
+    def valid_app_origin(cls, value):
+        value = value.rstrip("/")
+        parts = urlsplit(value)
+        if (
+            parts.scheme not in {"http", "https"}
+            or not parts.hostname
+            or parts.username
+            or parts.password
+            or parts.path
+            or parts.query
+            or parts.fragment
+            or (
+                parts.scheme == "http"
+                and parts.hostname not in {"localhost", "127.0.0.1", "::1"}
+            )
+        ):
+            raise ValueError("Use an exact HTTPS frontend origin; HTTP is local-only")
+        return value
 
     @field_validator("auth0_domain", "auth0_audience", mode="before")
     @classmethod

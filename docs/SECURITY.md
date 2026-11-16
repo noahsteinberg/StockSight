@@ -12,11 +12,13 @@ remaining hosted-authentication acceptance gate.
 - Auth0 Universal Login and the official React SDK handle signup and sign-in.
   The API validates signed access tokens against a fixed issuer and audience;
   never use an ID token or an unverified subject as API authentication.
-- Private API calls use bearer headers, not API session cookies. Keep frontend/API
-  routing same-origin; no broad CORS policy is enabled.
-- Access tokens stay in SDK memory. Logout clears the browser/Auth0 session;
-  copied JWTs remain valid until expiry. Configure a short API token lifetime;
-  immediate server-side revocation is not implemented.
+- Private APIs accept bearer tokens or an opaque HttpOnly app cookie. Cookie-based
+  writes require an exact Origin and a per-session CSRF token. Keep routing
+  same-origin; no broad CORS policy is enabled. See SESSION_HANDOFF.md.
+- Auth0 tokens stay in SDK memory; the app cookie is backed by a hashed identifier
+  in PostgreSQL with absolute expiry and immediate per-session logout revocation.
+  Copied Auth0 JWTs retain their provider expiry. Out-of-band Auth0 account changes
+  do not yet revoke all app sessions; apply the documented deployment policy.
 - Use HTTPS in deployment. Keep training artifacts trusted and versioned; never deserialize untrusted pickle/joblib files.
 - If a secret is exposed, revoke/rotate it and notify the team; deleting the file alone is insufficient.
 

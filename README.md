@@ -2,7 +2,7 @@
 
 A University of Connecticut CSE 4095 Agentic Programming team project exploring stock analysis and measurable machine-learning predictions.
 
-**Status: historical data and account/watchlist foundation.** Search and charts read the team snapshot from PostgreSQL. Real Auth0 sign-in and private-watchlist save/retrieval are verified. This local browser requires reauthentication after refresh; saved data persists. Additional hosted account-lifecycle checks remain. Indicators, predictions and refresh ingestion remain planned. See [account setup and API handoff](docs/AUTH0_WATCHLIST_HANDOFF.md) and [dataset status](docs/DATASET_HANDOFF.md).
+**Status: historical data and account/watchlist foundation.** PostgreSQL-backed charts, Auth0 sign-in, persistent sessions, username signup with optional email, and private watchlists are locally verified with two real accounts. Indicators, predictions and refresh ingestion remain planned. See [the session handoff](docs/SESSION_HANDOFF.md), [account setup](docs/AUTH0_WATCHLIST_HANDOFF.md) and [dataset status](docs/DATASET_HANDOFF.md).
 
 ## Planned MVP
 

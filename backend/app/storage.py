@@ -4,9 +4,16 @@ from sqlalchemy import inspect, select
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.db import DailyBar, PriceSeries, StockRecord, UserIdentity, WatchlistEntry
+from app.db import (
+    AuthSession,
+    DailyBar,
+    PriceSeries,
+    StockRecord,
+    UserIdentity,
+    WatchlistEntry,
+)
 
-MODELS = (StockRecord, PriceSeries, DailyBar, UserIdentity, WatchlistEntry)
+MODELS = (StockRecord, PriceSeries, DailyBar, UserIdentity, WatchlistEntry, AuthSession)
 
 
 def storage_problem(engine: Engine | None) -> dict[str, str] | None:

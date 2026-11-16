@@ -26,7 +26,10 @@ Team review, second-machine verification, and pending pushes remain explicit han
 - [x] Implement authorized persistent watchlist CRUD and UI
 - [x] Test ownership boundaries, concurrency, persistence and error states
 - [x] Configure Auth0 and verify real hosted sign-in and watchlist save/retrieval
-- [ ] Finish real hosted logout/recovery, invalid/duplicate signup and second-user acceptance
+- [x] Verify real logout, invalid/duplicate signup, recovery email delivery and two-user isolation
+- [x] Restore login after refresh with HttpOnly server-side sessions and CSRF protection
+- [x] Enable username signup with optional recovery email while preserving existing accounts
+- [ ] Complete production credential-reset acceptance and provider-driven session revocation policy before public release
 
 ## Phase 3: Stock data and analysis
 

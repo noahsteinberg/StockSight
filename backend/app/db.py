@@ -81,6 +81,18 @@ class WatchlistEntry(Base):
     added_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
+class AuthSession(Base):
+    __tablename__ = "auth_sessions"
+    token_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
+    user_id: Mapped[str] = mapped_column(
+        ForeignKey("user_identities.id", ondelete="CASCADE"), index=True
+    )
+    csrf_token: Mapped[str] = mapped_column(String(64))
+    audience: Mapped[str] = mapped_column(String(512))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+
+
 def database_engine(url: str) -> Engine:
     options = (
         {"connect_args": {"connect_timeout": 3}} if url.startswith("postgresql") else {}

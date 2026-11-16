@@ -4,6 +4,7 @@ from fastapi import FastAPI
 
 from app.api.accounts import router as accounts_router
 from app.api.health import router as health_router
+from app.api.sessions import router as sessions_router
 from app.api.stocks import router as stocks_router
 from app.auth import TokenVerifier
 from app.config import Settings
@@ -36,14 +37,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     application.include_router(health_router, prefix="/api")
     application.include_router(stocks_router, prefix="/api")
     application.include_router(accounts_router, prefix="/api")
+    application.include_router(sessions_router, prefix="/api")
 
     @application.middleware("http")
     async def private_response_headers(request, call_next):
         response = await call_next(request)
         if request.url.path == "/api/me" or request.url.path.startswith(
-            "/api/watchlist"
+            ("/api/watchlist", "/api/auth/")
         ):
             response.headers["Cache-Control"] = "no-store"
+            response.headers["X-Content-Type-Options"] = "nosniff"
         return response
 
     return application

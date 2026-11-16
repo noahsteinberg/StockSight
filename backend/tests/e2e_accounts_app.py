@@ -3,6 +3,7 @@
 import json
 import os
 import time
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Literal
 from uuid import uuid4
@@ -11,10 +12,11 @@ import jwt
 from alembic import command
 from alembic.config import Config
 from cryptography.hazmat.primitives.asymmetric import rsa
+from sqlalchemy import select, update
 from sqlalchemy.engine import make_url
 
 from app.config import Settings
-from app.db import database_engine
+from app.db import AuthSession, UserIdentity, database_engine
 from app.factory import create_app
 from app.seed import seed_fixture
 
@@ -49,6 +51,7 @@ def create_e2e_app():
             database_url=url,
             auth0_domain=domain,
             auth0_audience=audience,
+            app_origin="http://127.0.0.1:5175",
         )
     )
     private = rsa.generate_private_key(public_exponent=65537, key_size=2048)
@@ -72,5 +75,21 @@ def create_e2e_app():
             headers={"kid": "e2e-key"},
         )
         return {"access_token": token}
+
+    @application.post("/api/test/expire", include_in_schema=False)
+    def expire_test_session(user: Literal["alice", "bob"]):
+        with application.state.engine.begin() as connection:
+            connection.execute(
+                update(AuthSession)
+                .where(
+                    AuthSession.user_id.in_(
+                        select(UserIdentity.id).where(
+                            UserIdentity.subject == "auth0|" + user
+                        )
+                    )
+                )
+                .values(expires_at=datetime.now(UTC) - timedelta(seconds=1))
+            )
+        return {"expired": True}
 
     return application

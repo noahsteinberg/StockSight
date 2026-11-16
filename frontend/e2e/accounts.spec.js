@@ -22,8 +22,15 @@ test('account creation entry, save, refresh, open analysis and persistent remova
   await page.getByRole('button', { name: 'Save to watchlist', exact: true }).click();
   expect((await save).status()).toBe(201);
   await expect(page.getByRole('button', { name: 'Saved to watchlist' })).toBeDisabled();
+  // Drop all simulated SDK state: only the HttpOnly app cookie may restore login.
+  await page.evaluate(() => sessionStorage.removeItem('stocksight:e2e-user'));
+  let exchangedAfterRefresh = false;
+  await page.route('**/api/test/identity?*', route => { exchangedAfterRefresh = true; return route.abort(); });
   await page.reload();
   await expect(page.getByRole('link', { name: 'Open AAPL analysis' })).toBeVisible();
+  expect(exchangedAfterRefresh).toBe(false);
+  const cookie = (await page.context().cookies()).find(value => value.name === 'stocksight_session');
+  expect(cookie.httpOnly).toBe(true);
   await page.getByRole('link', { name: 'Open AAPL analysis' }).click();
   await expect(page.getByRole('heading', { name: 'AAPL Apple Inc.' })).toBeVisible();
   await page.getByRole('button', { name: 'Remove AAPL' }).click();
@@ -37,6 +44,7 @@ test('two users have isolated lists; sign-out removes private UI', async ({ page
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();
   await page.getByRole('button', { name: 'Save to watchlist', exact: true }).click();
   await expect(page.getByRole('link', { name: 'Open AAPL analysis' })).toBeVisible();
+  const priorCookie = (await page.context().cookies()).find(cookie => cookie.name === 'stocksight_session');
   const context = await browser.newContext({ baseURL: 'http://127.0.0.1:5175' });
   try {
     const bob = await context.newPage();
@@ -54,6 +62,38 @@ test('two users have isolated lists; sign-out removes private UI', async ({ page
   await expect(page.getByRole('link', { name: 'Open AAPL analysis' })).toHaveCount(0);
   await expect(page.getByText('Sign in to keep your saved stocks here.')).toBeVisible();
   expect((await request.get('/api/watchlist')).status()).toBe(401);
+  expect((await request.get('/api/watchlist', { headers: { Cookie: `stocksight_session=${priorCookie.value}` } })).status()).toBe(401);
+});
+
+test('expired app session hides private data and rejects the attempted mutation', async ({ page, request }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+  await page.getByRole('button', { name: 'Save to watchlist', exact: true }).click();
+  await expect(page.getByRole('link', { name: 'Open AAPL analysis' })).toBeVisible();
+  await request.post('/api/test/expire?user=alice');
+  await page.getByRole('button', { name: 'Remove AAPL' }).click();
+  await expect(page.getByRole('link', { name: 'Open AAPL analysis' })).toHaveCount(0);
+  await expect(page.getByRole('alert')).toContainText('session expired');
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+  await expect(page.getByRole('link', { name: 'Open AAPL analysis' })).toBeVisible();
+});
+
+test('an existing tab detects an account switch without exposing the old list', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+  await page.getByRole('button', { name: 'Save to watchlist', exact: true }).click();
+  await expect(page.getByRole('link', { name: 'Open AAPL analysis' })).toBeVisible();
+  const other = await page.context().newPage();
+  await other.goto('/');
+  await other.getByRole('button', { name: 'Sign out', exact: true }).click();
+  await other.evaluate(() => sessionStorage.setItem('stocksight:e2e-next-user', 'bob'));
+  await other.getByRole('button', { name: 'Sign in', exact: true }).click();
+  await expect(other.getByText('Bob Example')).toBeVisible();
+  await page.bringToFront();
+  await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+  await expect(page.getByRole('link', { name: 'Open AAPL analysis' })).toHaveCount(0);
+  await expect(page.getByText('No saved stocks yet.')).toBeVisible();
+  await other.close();
 });
 
 test('storage failure has a real retry path', async ({ page }) => {
@@ -66,14 +106,14 @@ test('storage failure has a real retry path', async ({ page }) => {
   await expect(page.getByText('No saved stocks yet.')).toBeVisible();
 });
 
-test('expired signed access token is rejected through the actual API', async ({ page, request }) => {
+test('expired Auth0 proof cannot establish an app session', async ({ page, request }) => {
   const expired = await token(request, 'alice', true);
   await page.route('**/api/test/identity?user=alice', route => route.fulfill({ json: { access_token: expired } }));
   await page.goto('/');
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();
-  await expect(page.getByRole('alert')).toContainText('Sign in again or retry');
+  await expect(page.getByRole('alert')).toContainText('Could not restore your session. Sign in again.');
   await page.unroute('**/api/test/identity?user=alice');
-  await page.getByRole('button', { name: 'Retry watchlist' }).click();
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click();
   await expect(page.getByText('No saved stocks yet.')).toBeVisible();
 });
 

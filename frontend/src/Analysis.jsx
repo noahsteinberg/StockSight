@@ -104,7 +104,7 @@ export default function Analysis({ symbol, onSelectSymbol, watchlist }) {
       <div aria-live="polite" aria-busy={Boolean(loadingPrices)}>
         {loadingPrices && <p className="analysis-message">Loading prices.</p>}
         {result.error && result.symbol === symbol && <div className="analysis-message" role="alert"><p>{result.error}</p><button onClick={() => { reload(); setRetry(value => value + 1); }}>Retry</button></div>}
-        {result.data?.symbol === symbol && !loadingPrices && bars.length === 0 && <p className="analysis-message">No observations in this range.</p>}
+        {result.data && result.symbol === symbol && !loadingPrices && bars.length === 0 && <p className="analysis-message">No observations in this range.</p>}
       </div>
       {current && <>
         <div className="quote"><div><h2>{result.data.symbol} <span>{result.data.name}</span></h2><strong>{money.format(current.close)}</strong></div><p>{current.date}<br /><span>Volume {current.volume.toLocaleString('en-US')}</span></p></div>
