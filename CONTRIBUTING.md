@@ -2,6 +2,17 @@
 
 Team: Noah Steinberg, Gavin Javier Pino, Parth Sachdev, and Vladislav Lagutin.
 
+## Continuing the current foundation
+
+Read [AGENTS.md](AGENTS.md) and [CURRENT_HANDOFF.md](docs/CURRENT_HANDOFF.md) first.
+Inspect the actual branch and working tree before switching or pulling. The
+current foundation may include unpublished changes after `6131c5e`; main and the
+older frontend-redesign snapshot need not contain them. Preserve local work and
+coordinate transfer through normal review. Documentation work alone does not
+authorize publication. Keep indicator UI and the deferred redesign separate.
+Run the environment access check before Docker, servers or live integration tests;
+use only disposable `_test` databases for test commands that reset schemas.
+
 ## Workflow
 
 1. Pull the latest `main`: `git switch main`, then `git pull --ff-only origin main`.
@@ -16,7 +27,7 @@ Team: Noah Steinberg, Gavin Javier Pino, Parth Sachdev, and Vladislav Lagutin.
 
 Other branch examples: `feature/stock-analysis`, `feature/prediction-model`, `fix/ticker-validation`, `docs/database-design`.
 
-For the first commit only, there is no remote `main` to pull until the repository owner publishes it. Review the scaffold locally before creating that commit or pushing it.
+For a new feature, begin from the agreed reviewed integration head; do not discard existing work to follow the example branch names. Check actual hosted CI results before merge.
 
 ## Working agreements
 

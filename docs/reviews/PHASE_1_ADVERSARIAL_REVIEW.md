@@ -1,5 +1,10 @@
 # Phase 1 adversarial review
 
+Historical review evidence for the scope/date below, not a current startup or
+completion checklist. See [current handoff](../CURRENT_HANDOFF.md) for resolved
+runtime/import/session limitations, implemented indicators and remaining gates.
+A later implementation does not retroactively change this review's original result.
+
 Reviewed November 15, 2026. Review status: complete for source/API/tooling checks; rendered UI verification remains incomplete.
 
 ## Scope and provenance

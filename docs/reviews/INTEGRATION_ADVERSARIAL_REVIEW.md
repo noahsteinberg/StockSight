@@ -1,5 +1,10 @@
 # Integration adversarial review — November 16, 2026
 
+Historical review evidence for the scope/date below, not a current startup or
+completion checklist. See [current handoff](../CURRENT_HANDOFF.md) for resolved
+runtime/import/session limitations, implemented indicators and remaining gates.
+A later implementation does not retroactively change this review's original result.
+
 Scope: local startup, environment selection, readiness, storage failure handling,
 fixture/database boundaries, search/chart integration and verification claims.
 

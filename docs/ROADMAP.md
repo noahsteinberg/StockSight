@@ -1,5 +1,14 @@
 # Proposed StockSight team roadmap
 
+Current implementation update (November 16, 2026): historical PostgreSQL charts,
+validated snapshot import, Auth0/private watchlists and persistent app sessions
+are implemented locally. SMA20/RSI14 backend is verified; indicator frontend
+integration remains incomplete, so M3 has not passed. ML/forecasts/outcomes and
+evaluation remain unimplemented. The frontend redesign is explicitly deferred;
+continue in separate phases. See [CURRENT_HANDOFF.md](CURRENT_HANDOFF.md) for current
+contracts, dated checks and checkout/publication limits. The ownership table and
+full MVP gates below remain unchanged; earlier baseline prose is historical.
+
 Prepared October 29, 2026; revised November 15, 2026 against the submitted team proposal. Status: proposal for team agreement, not an approved schedule. Owners below follow the team proposal and may be reassigned by agreement. No GitHub issues are created by this document.
 
 ## 1. Outcome and current starting point

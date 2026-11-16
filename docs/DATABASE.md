@@ -1,60 +1,84 @@
-# Phase 2 persistence foundation
+# Database implementation and operations
 
-This increment implements PostgreSQL storage, Alembic migrations, and an explicit idempotent import of the existing AAPL historical fixture. It does not choose a live provider or implement scheduled ingestion, accounts, indicators, or ML.
+Current continuation context: [CURRENT_HANDOFF.md](CURRENT_HANDOFF.md).
+PostgreSQL/SQLAlchemy/Alembic persistence, snapshot ingestion, private watchlists
+and app sessions are implemented. Live provider refresh and ML are not.
 
-## Storage contract
+## Schema and migrations
 
-- `stocks`: symbol, company name, exchange, currency.
-- `price_series`: one canonical series per symbol with source URL, historical mode, adjustment convention, fixture SHA256, and import timestamp.
-- `daily_bars`: composite primary key `(series_id, session_date)`, fixed-precision Numeric(18,6) OHLC, integer volume, foreign keys, and bounds/volume constraints. The primary key supports series/date queries; no redundant date index is required for this access pattern.
+| Table | Contract |
+| --- | --- |
+| `stocks` | Symbol key, display name, exchange and currency |
+| `price_series` | One canonical series per symbol, source, adjustment label, mode, source hash and import time |
+| `daily_bars` | `(series_id, session_date)` key, Numeric(18,6) OHLC, integer volume, OHLC/volume constraints and nullable source_values JSON |
+| `user_identities` | Local UUID mapped uniquely to verified Auth0 issuer/subject; no passwords/profile copy |
+| `watchlist_entries` | Owner/symbol key, added_at; private, bounded to 100 per owner |
+| `auth_sessions` | Hashed opaque session identifier, owner, audience, CSRF state and absolute expiry; no raw Auth0 tokens |
 
-Daily session dates remain dates, not invented midnight UTC timestamps. The current canonical series is unadjusted USD AAPL historical data; it remains labeled historical after storage. Only one series per symbol is supported for this increment. Supporting multiple providers/adjustment policies requires an explicit canonical-series selection contract before ingestion work.
+Migrations: `0001` market foundation, `0002` source values, `0003` accounts and
+watchlists, `0004_app_sessions` app sessions. Use a checkout containing the current
+head with a database already upgraded to it. Alembic owns all schema changes;
+normal API startup never creates tables, seeds or imports. Review new migrations
+before applying. Downgrades remove data and belong only in disposable tests or
+an explicitly authorized recovery operation.
 
-`GET /api/stocks` and `/api/stocks/{symbol}/prices` retain the Phase 1 JSON contract. Search escapes SQL wildcard characters and is capped at 50 results. Price queries select the newest bounded rows, then return them chronologically. `all` is bounded to the latest 2,000 sessions; the existing 506-row fixture fits entirely. No file import or schema creation happens during API startup.
+## Existing imported development database
 
-If `STOCKSIGHT_DATABASE_URL` is set, API reads come from that database. A missing/empty URL selects the fixture adapter explicitly. Database failures return sanitized 503 responses and never switch to fixture data. `/api/health` remains a process-health check; `/api/ready` checks configured storage/schema. Readiness now checks all three market tables and usable joined history. Missing tables return SCHEMA_MISSING; empty storage returns DATA_NOT_IMPORTED. See LOCAL_START.md for recovery.
+Gavin's local snapshot contains 2,947,701 bars in 494 canonical series. It was
+verified after a container restart; later account/session migrations preserved
+market counts and hashes. The latest indicator HTTP check preserved market and
+watchlist counts. These are dated local findings, not a guarantee of another
+checkout's database. See DATASET_HANDOFF.md and INDICATORS.md for evidence.
 
-## Local setup on Windows
+**Do not run `app.seed` over the snapshot, delete Docker volumes, or reimport as
+routine troubleshooting.** The Plotly seed conflicts with the imported canonical
+AAPL series. An existing database normally needs only Docker startup, reviewed
+migration and readiness checks. Import replacement requires the explicit policy
+in [PRICES_IMPORT.md](PRICES_IMPORT.md).
 
-Requires Docker Desktop running, Node, and a Python environment installed as described in README. From the repository root:
+## Local setup
 
-1. Copy root `.env.example` to root `.env` and replace its local database password. This file configures Docker Compose, not FastAPI.
-2. Copy `backend/.env.example` to `backend/.env`. Set `STOCKSIGHT_DATABASE_URL` to the example PostgreSQL URL with the same password. URL-encode special password characters. Both `.env` files are ignored by Git.
-3. Run `docker compose up -d --wait`.
-4. From backend, install `requirements-dev.txt`, run `python -m alembic upgrade head`, then `python -m app.seed`.
-5. Start `python -m uvicorn app.main:app --host 127.0.0.1 --port 8000`. Start the frontend normally and open http://127.0.0.1:5173.
+Use [LOCAL_START.md](LOCAL_START.md) for executable commands. Before Docker,
+server startup or live tests, run the venv environment check from backend.
+A denial is an execution-access problem; do not change credentials or import data
+to fix it. Use the supported approval path if available.
 
-Use the virtual environment interpreter directly in PowerShell if activation is unavailable, for example `.\.venv\Scripts\python.exe -m app.seed`.
+For a new setup, copy root `.env.example` to root `.env` for Compose and
+`backend/.env.example` to `backend/.env` for FastAPI; set matching local credentials
+without committing them. URL-encode password characters in database URLs.
+Compose binds PostgreSQL to `127.0.0.1:5433` and retains a named volume. Changing
+a Compose password does not change a role in an existing volume.
 
-Compose binds only 127.0.0.1:5433 and uses a named volume. `docker compose stop` stops services without deleting data; `docker compose up -d --wait` starts them again. Do not use `docker compose down -v` against data you want to keep. Changing the Compose password after volume creation does not change the existing PostgreSQL role password; keep the existing configuration or deliberately migrate credentials. The developer role is a local setup role; production least-privilege provisioning remains deployment work.
+Run `alembic upgrade head` explicitly, then choose one initial dataset on a blank
+database: the small Plotly fixture via `app.seed`, or the separately supplied
+Parquet snapshot via the documented importer. Do not run both blindly. No source
+Parquet or local database volume travels with Git. Explicit fixture API mode via
+`app.demo:create_demo_app --factory` needs no database and ignores saved DB config.
 
-## Migration and import behavior
+## Read contract and readiness
 
-`alembic upgrade head` is explicit. `alembic check` detects model/schema drift. New revisions can be generated with `alembic revision --autogenerate -m "..."`; review the generated migration before applying it. Downgrades remove tables and belong only in disposable tests or an approved recovery operation, not routine startup.
+Missing/empty STOCKSIGHT_DATABASE_URL explicitly selects fixture mode; a nonempty
+URL selects database mode and errors never fall back. Search escapes wildcard
+characters and caps results at 50. Price display reads newest bounded rows then
+returns chronological bars; `all` is Max 2,000 sessions. Indicators use their own
+fixed 10,000-session calculation window before trimming; see INDICATORS.md.
+Daily dates remain dates, not invented UTC instants. Imported adjustment semantics
+are unverified; do not label the team snapshot unadjusted merely because the
+Plotly fixture is unadjusted.
 
-`python -m app.seed` atomically upserts the stock, series metadata, and all fixture bars. Running it twice preserves 506 bar keys; corrected values update existing dates. A constraint error rolls back the entire import. Import does not delete existing dates that are absent from a later fixture; future provider ingestion needs its own correction/removal policy. Import timestamp and fixture hash identify the import, not provider market freshness. Retain the fixture's source/license documentation.
+`/api/health` proves liveness only. `/api/ready` validates all mapped market and
+account/session schema plus usable joined history; it does not require any user
+or saved stocks. `app.doctor` gives safe local diagnostic codes without modifying
+schema or printing credentials. No readiness response certifies provider freshness
+or ML suitability.
 
-## Tests and CI
+## Isolated tests and CI
 
-The default backend suite migrates temporary SQLite files, imports twice, checks corrections and rollback, compares fixture/database API output, creates a new app/engine to test persistence, tests schema downgrade/re-upgrade, and checks safe failure. SQLite is a fast test adapter, not the target deployment database.
-
-To also run PostgreSQL cases, create a separate disposable database named `stocksight_test` and set `STOCKSIGHT_TEST_DATABASE_URL` to its URL before `python -m pytest`. Tests refuse to reset a PostgreSQL database whose name does not end in `_test`. These tests downgrade their tables during cleanup; never point them at the normal development database.
-
-For browser tests, set `STOCKSIGHT_E2E_DATABASE_URL` to a migrated/seeded database URL and run `npm run test:e2e` from frontend. The API test server explicitly overrides local `.env`: without that E2E variable it runs fixture mode; with it, it runs database mode. CI now provisions disposable PostgreSQL services, runs backend integration tests, migrates/seeds the browser database, and runs the same browser suite. Hosted CI is not claimed to have run locally.
-
-## Next decisions
-
-Parth and Vladislav should review provider access, permitted caching/redistribution, adjusted-price conventions, supported symbols, and ingestion refresh/failure semantics. Gavin and Noah jointly own keeping the browser/API contract stable. Adding more fixture rows is not equivalent to implementing provider ingestion. The milestone is persistence foundation only, not all of roadmap M2.
-
-## Verification November 15, 2026
-
-- Docker Desktop was started; PostgreSQL 17 ran in the project-local Compose service.
-- `alembic upgrade head` succeeded against the new development database; `alembic check` reported no schema drift.
-- Two seed runs each processed 506 bars; the database contained 506 unique rows.
-- The PostgreSQL container was restarted and all 506 rows remained in its named volume.
-- Thirteen backend tests passed across temporary SQLite and a separate disposable PostgreSQL test database, including migration cycles, contract parity, correction imports, rollback, orphan rejection, app restart persistence, and sanitized disconnected/unmigrated storage errors.
-- All seven headless browser tests passed against the PostgreSQL-backed API, including actual range/normalization requests and controlled UI failure cases.
-- Backend Ruff lint/format and frontend lint/build passed.
-- The running local API reported `/api/ready` status ok with storage database.
-
-Local credentials were generated in ignored root/backend `.env` files and were not committed. CI configuration was updated, but hosted CI and second-machine verification have not run. Provider selection/ingestion is still outstanding. Changes are committed locally; pushing remains deferred at the user's request.
+The default suite uses disposable SQLite adapters. To include PostgreSQL, create
+a separate database ending in `_test` and set STOCKSIGHT_TEST_DATABASE_URL;
+fixtures migrate and downgrade their tables. Never use the normal development URL.
+Use a unique backend/.pytest_cache basetemp. Commands and distinct chart/account
+browser database variables are in CURRENT_HANDOFF.md. Chart PostgreSQL tests need
+an explicitly migrated/fixture-seeded disposable DB; account tests reset their own
+disposable schema. CI defines PostgreSQL-backed backend and browser jobs, including
+fixture setup. Hosted success still requires an actual run on the published head.

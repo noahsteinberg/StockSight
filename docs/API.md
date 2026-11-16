@@ -1,5 +1,13 @@
 # Current API
 
+Continuation context: [CURRENT_HANDOFF.md](CURRENT_HANDOFF.md). Public stock
+contracts below are implemented; prediction/evaluation routes do not exist.
+
+The moving-average/RSI backend contract is in [INDICATORS.md](INDICATORS.md):
+`GET /api/stocks/{symbol}/indicators?range=3mo`. It returns dated SMA20 and Wilder
+RSI14 values, null warm-up values and explicit calculation-window metadata.
+The existing frontend has not been changed for this phase.
+
 Local base URL: `http://127.0.0.1:8000`.
 
 Private endpoints accept an Auth0 bearer token or the first-party app session.

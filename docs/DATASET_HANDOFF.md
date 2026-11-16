@@ -1,75 +1,40 @@
 # StockSight dataset integration handoff
 
-Prepared November 16, 2026. Starting application commit: `821288c` on `feature/frontend-redesign`.
+Updated November 16, 2026. Current application context is in
+[CURRENT_HANDOFF.md](CURRENT_HANDOFF.md); import commands and replacement policy
+are in [PRICES_IMPORT.md](PRICES_IMPORT.md). This file records data evidence, not
+instructions to reimport an already completed snapshot.
 
-## PostgreSQL completion (November 16, 2026)
+## Current imported state
 
-Gavin authorized completing the PostgreSQL import in this continuation. The
-ordinary sandbox diagnostic was permission-denied; the approved execution path
-reported accessible Docker and PostgreSQL. Screen capture remained off.
-Gavin subsequently confirmed an earlier import had already finished; its local
-completion report is dated 20261116T182245866445Z. The continuation reran the
-unchanged snapshot under the documented per-symbol replacement policy.
+The PostgreSQL snapshot import completed through the approved execution path:
+2,947,701 accepted bars across 494 symbols, 252 quarantined without repairs.
+Stored counts/source hashes matched validation; restart persistence and real HTTP
+search/history were verified. The source was unchanged when the continuation
+reran the already completed import under explicit per-symbol replacement policy.
+No further reimport is needed for account/session or indicator work.
 
-`app.complete_backend --replace-existing-series` completed successfully:
+Migrations now include `0004_app_sessions`; market data survived account/session
+upgrades unchanged. The latest indicator phase confirmed the same market counts
+and two watchlist entries. AAPL/MSFT each used 6,757 calculation observations and
+returned date-aligned, range-stable indicators through the normal HTTP API.
+See INDICATORS.md for that evidence; earlier test counts are historical.
 
-- Validated the unchanged source SHA256 listed below; accepted 2,947,701 rows
-  across 494 symbols and quarantined 252 without repairs.
-- Applied migrations, imported and checked AAPL/MSFT/NVDA, then imported the
-  full snapshot. Stored counts and source hashes matched for every symbol;
-  Alembic reported no schema drift. AAPL/MSFT/NVDA counts remained stable when
-  imported again during the full pass: 6,757 / 6,757 / 6,728.
-- Restarted the PostgreSQL container and verified all 2,947,701 rows, 494 series,
-  and 2,947,701 populated source_values records persisted.
-- Started the regular API on 127.0.0.1:8000. Real HTTP readiness reported
-  database; search and 1mo/3mo/1y/all histories for AAPL/MSFT/NVDA matched the
-  repository results exactly. Max returned 2,000 bars, has_earlier=true and
-  as_of=2026-11-12 for each.
-- All 50 backend tests passed, including cases on a separately created and
-  subsequently removed disposable PostgreSQL database. Ruff lint and formatting
-  passed. No browser verification was performed in this continuation.
+The frontend supports imported symbol search/history with actual provenance,
+`historical_snapshot` mode, Max=2,000 and has_earlier. Explicit offline fixture
+mode remains AAPL-only with 506 bars. SMA20/RSI14 backend is implemented; frontend
+indicator integration is pending and redesign is deferred.
 
-Ignored local evidence: `.local-data/backend-completion-20261116T184037934756Z.json`
-and `.local-data/backend-live-verification-20261116T184056Z.json`. Data, credentials,
-logs and local verification scripts/reports remain outside Git. No push or merge
-is part of this continuation. Adjustment semantics remain unverified; this is
-historical chart integration, not ML suitability approval.
+The team identifies Yahoo Finance as source and S&P 500 stocks as intended scope.
+That does not verify historical constituent membership, cleaning, permitted use,
+adjustment semantics or ML suitability. USD is assumed; missing company/exchange
+metadata is not fabricated. Auxiliary source values are preserved in JSON, while
+chart/indicator input remains stored close. Live refresh is not implemented.
 
-This completion supersedes earlier statements below that live PostgreSQL import
-and backend verification are pending. Earlier browser results still predate the
-new dataset.
-
-## Current integration update (November 16, 2026)
-
-Noah's supplied team messages identify Yahoo Finance as the intended source and
-S&P 500 stocks as scope; Vlad identifies prices_clean.parquet as the shared file.
-A validated importer, source-values migration, and historical_snapshot API mode
-are now implemented. Adjustment semantics are still unverified and labeled as
-such; this is historical chart integration, not ML suitability approval.
-
-Full-file validation: 2,947,701 accepted rows across 494 symbols; 252 quarantined.
-Twenty targeted backend tests and Ruff lint/format pass. Actual AAPL/MSFT/NVDA
-rows were imported twice into a disposable SQLite database with stable counts,
-API-function parity, correct dated source labels, and no schema drift. No live
-PostgreSQL import or browser success is claimed. Docker is not accessible/running
-from this agent session. See [import commands and policy](PRICES_IMPORT.md).
-
-The remaining sections retain the original inspection evidence. Statements
-about unconfirmed provider identity or the importer being only proposed are
-superseded by this update; other adjustment/metadata/ML limitations remain.
-
-## Current project state
-
-- React/Vite renders historical AAPL prices/volume through FastAPI.
-- PostgreSQL storage, SQLAlchemy models, Alembic migrations, and an explicit fixture importer are implemented.
-- The existing fixture contains 506 AAPL bars from 2015-02-17 through 2017-02-16. Repeated imports update existing keys without duplicates.
-- Explicit fixture mode remains available; database mode returns sanitized errors instead of silently falling back.
-- Prior verification: 13 backend tests, seven browser tests against PostgreSQL, lint/format/build, and persistence after a container restart passed. These results predate integration of this new dataset.
-- Provider ingestion, refresh scheduling, indicators, accounts/watchlists, and ML are still future work.
-- Changes are committed locally. Pushing remains deferred at Gavin's request; do not push or merge without a new instruction.
-- Operationally, Gavin is implementing frontend/backend integration. At his request, the existing ownership assignments in the project documentation remain unchanged. Do not wait for Noah to continue local implementation.
-
-Related docs: [roadmap](ROADMAP.md), [database setup](DATABASE.md), [Phase 1](PHASE_1.md), and [review evidence](reviews/PHASE_1_ADVERSARIAL_REVIEW.md).
+Do not seed the Plotly fixture over imported AAPL, delete volumes, or change
+canonical histories as a troubleshooting step. Data/credentials/local evidence
+stay ignored. The source file and database are local resources, not part of a
+Git checkout or guarantee about another conversation's runtime access.
 
 ## Input file
 
@@ -153,9 +118,9 @@ Concrete OHLC anomaly: HUBB, 2021-05-05. Open `195.97999572753906`, low `196.210
 
 The filename and bad_bar flag are insufficient import validation: 37 missing-volume records and this OHLC anomaly are not covered by that flag. Do not invent replacement volume, forward-fill OHLC, or silently alter the anomalous price.
 
-## Questions for Vlad before approving import
+## Remaining provenance and ML questions
 
-1. What is the upstream provider, download date, and applicable permitted-use/caching/redistribution policy?
+1. Yahoo Finance is team-reported provenance; what download date, reproducible source and permitted-use/caching/redistribution policy apply?
 2. Can he provide the download/cleaning script and original input or reproducible source reference?
 3. What exactly makes bad_bar true, and were invalid values deliberately nulled instead of removed?
 4. Are OHLC and volume raw, split-adjusted, or otherwise transformed? How is adj_close calculated?
@@ -166,63 +131,26 @@ The filename and bad_bar flag are insufficient import validation: 37 missing-vol
 
 No answers are established merely by this file's column names or writer metadata.
 
-## Proposed implementation sequence
 
-1. Add a read-only validation command that checks the input hash/schema, dates, ticker normalization, nulls, OHLC bounds, volume, and duplicate keys. Produce a summary and quarantine reasons without touching PostgreSQL.
-2. Resolve provenance and adjustment conventions. Choose a canonical series policy before writing data. The existing price_series table permits one series per symbol, so importing AAPL over the existing Plotly series is not an automatic safe operation.
-3. Preserve source precision until the conversion policy is defined. The dataset uses doubles with more than six decimal places; the current database stores Numeric(18,6). Validate OHLC again after rounding because conversion can change bounds.
-4. Design storage for adjusted close and corporate actions, or explicitly defer those columns while preserving the original file. Add a reviewed Alembic migration if the agreed import needs new fields; do not silently discard metadata required for later research.
-5. Implement a dry-run importer first, then bounded/chunked writes into a disposable database. Avoid a single multi-million-row SQL statement. Define atomicity and checkpoint behavior per symbol; a failed import must not be marked complete.
-6. Quarantine or reject flagged, incomplete, and inconsistent records with counts/reasons. Keep the input unchanged. Any repair requires an explicit rule and provenance.
-7. Test a small subset such as AAPL/MSFT/NVDA first. Verify no duplicates on repeat import, corrections on existing dates, rollback/resume behavior, source metadata, and parity between API responses and accepted rows.
-8. Expand to the full accepted dataset after the small import passes. Reuse the browser/API response contract and retain visible source/date information.
-9. Treat ongoing refresh as a separate ingestion task. This historical snapshot does not select or implement a live provider.
+## Implemented boundaries and evidence
 
-## Existing code boundaries to inspect
+- `backend/app/import_prices.py`: deterministic validation and bounded per-symbol
+  import with explicit canonical replacement, quarantine and correction policy.
+- `backend/app/db.py`: Numeric(18,6) OHLC, source_values, keys and constraints.
+- `backend/app/repository.py`: bounded canonical history reads, including indicator
+  calculation input; no whole-universe browser request.
+- `backend/app/api/stocks.py`: explicit fixture/database selection and safe errors.
+- `backend/app/indicators.py`: tested close-based SMA20/RSI14; no adjustment approval.
+- `frontend/src/Analysis.jsx`: prices/volume, search, source/dates and bounded ranges.
 
-- `backend/app/db.py`: stocks, price_series, daily_bars, constraints, numeric precision.
-- `backend/app/seed.py`: current atomic 506-row fixture upsert; a reference, not a scalable Parquet importer.
-- `backend/app/market.py`: current fixture loader and historical response schemas.
-- `backend/app/repository.py`: bounded newest-row queries, canonical series selection, symbol lookup.
-- `backend/app/api/stocks.py`: fixture/database adapter selection and safe errors.
-- `backend/migrations/`: explicit schema evolution.
-- `backend/tests/test_database.py`: migration, repeat-import, correction, rollback, restart, and failure tests.
-- `frontend/src/Analysis.jsx`: price/volume display, source/date labels, and range selection.
+Original full import evidence is ignored under
+`.local-data/backend-completion-20261116T184037934756Z.json` and
+`.local-data/backend-live-verification-20261116T184056Z.json`. The import phase
+recorded 50 backend passes; the newer indicator suite records 95 passes with one
+expected SQLite-only skip. Those are distinct dated runs, not additive counts.
+Local reports need not exist elsewhere; use committed tests for reproduction.
 
-Important integration limits: API search is capped at 50 matches; all-history is capped at the most recent 2,000 sessions. Several supplied symbols have more than 6,000 observations. Decide whether to introduce pagination/date windows or label bounded history explicitly; never imply the entire dataset is displayed when it is not. History.mode currently only permits historical_fixture; a new dataset needs an agreed provenance/mode representation rather than reusing the Plotly label.
-
-## Completion criteria for the next increment
-
-- Provenance and adjustment policy recorded, or explicitly blocked pending answers.
-- Deterministic validation summary tied to the input hash.
-- Rejected/quarantined records counted by reason; no silent fabricated repairs.
-- Import dry-run and disposable-database tests pass before modifying the demo's canonical data.
-- Repeating import leaves row counts stable; corrections follow the declared policy.
-- The API serves accepted rows with accurate source, dates, units, and bounded-coverage semantics.
-- Browser search/chart tests pass for the supported imported subset.
-- Large data and credentials remain outside Git; code/docs are committed locally and pushing stays deferred.
-
-## Inspection environment and changes
-
-Inspection used PyArrow 26.0.1 installed in a temporary directory, not added to project requirements. No application code, schema, or database data was changed for inspection. If Parquet ingestion is implemented, add and pin the reader dependency deliberately with tests. This handoff records observed file contents and proposed work only; it does not claim a successful import or validated predictive dataset.
-
-
-## Follow-up integration work (November 16, 2026)
-
-The stock-search/chart integration now consumes the existing stock-search route,
-uses returned provenance labels, and displays bounded history explicitly.
-History includes session_limit and has_earlier; the browser calls the `all`
-range Max. See [Noah's review guide](FRONTEND_BACKEND_REVIEW.md) for the completed
-integration scope, startup commands, and current verification evidence.
-
-The Parquet inspection findings and import blockers above remain unchanged.
-This increment does not import prices_clean.parquet, replace AAPL's canonical
-series, or approve the unknown provider/adjustment policy.
-
-
-## Publication authorization (November 16, 2026)
-
-Gavin subsequently authorized verifying, committing, and publishing the integration
-for Noah's review. The earlier push deferral is superseded for this review snapshot.
-No merge or dataset import was authorized. See FRONTEND_BACKEND_REVIEW.md for the
-local commit, publication blockers, and verification limits.
+The inspection metadata above describes the supplied source file, including
+rejected rows, rather than claiming every source record was imported. PyArrow
+is now deliberately pinned through requirements-import.txt. Browser/account
+checks after the initial import are recorded separately in SESSION_HANDOFF.md.

@@ -1,5 +1,9 @@
 # Adversarial review of roadmap against submitted proposal
 
+Historical requirements review, retained with its original scope and verdict.
+Current implementation and phased continuation are in
+[CURRENT_HANDOFF.md](CURRENT_HANDOFF.md); full MVP gates remain in ROADMAP.md.
+
 Reviewed November 15, 2026.
 
 ## Verdict

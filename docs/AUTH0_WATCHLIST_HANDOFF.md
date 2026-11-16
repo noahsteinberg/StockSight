@@ -6,7 +6,8 @@ and real two-account verification. It supersedes earlier refresh limitations bel
 
 This increment implements the account UI, Auth0 SDK integration, validated private
 API routes and PostgreSQL watchlists. Noah can continue from the existing React
-components and the OpenAPI contract. Indicators and ML remain separate work.
+components and the OpenAPI contract. SMA20/RSI14 backend is now implemented (INDICATORS.md); indicator UI and ML
+remain separate work. CURRENT_HANDOFF.md is the current continuation entry point.
 
 Real Auth0 authorization/sign-in and private-watchlist persistence were verified
 after tenant setup on November 16. The user completed hosted authentication;
@@ -14,7 +15,12 @@ no password was collected by the agent. Automated tests separately use signed
 test identities in an isolated harness. No test identity endpoint is mounted by
 app.main. Additional hosted account-lifecycle checks remain below.
 
-## Auth0 setup Gavin needs to complete
+## Auth0 setup for another environment
+
+The development tenant is already configured. These are reproduction steps, not
+an instruction to replace the tenant/connection or recreate existing users.
+User-Delegated Access and username signup with optional recovery email are enabled;
+see SESSION_HANDOFF.md for the preserved existing-account behavior.
 
 1. Create an Auth0 tenant, then create an application named StockSight with type
    **Single Page Application**. Use Universal Login with a database connection
@@ -99,17 +105,19 @@ database readiness fail until migrations are applied.
 
 ## API contract
 
-Signup/login/logout are Auth0 Universal Login operations through the official
-React SDK, not local password endpoints. The browser requests an access token
-for the custom API audience and sends `Authorization: Bearer ACCESS_TOKEN`.
-An ID token is not an API credential. OpenAPI at /docs includes the bearer scheme.
+Signup/login/logout use Auth0 Universal Login through the official React SDK;
+there are no local password endpoints. A valid API access token bootstraps the
+first-party session. Normal frontend private calls use the HttpOnly cookie plus
+CSRF/expected-user headers through authorizedFetch. Bearer callers remain
+supported. An ID token is not an API credential. OpenAPI advertises both schemes;
+SESSION_HANDOFF.md owns session creation/restoration/logout details.
 
 | Method and path | Request | Success |
 | --- | --- | --- |
-| GET /api/me | Bearer token | 200 `{ "id": "local-user-uuid" }` |
-| GET /api/watchlist | Bearer token | 200 `{ "items": [{ "symbol": "AAPL", "name": "Apple Inc.", "added_at": "ISO-UTC" }], "limit": 100 }` |
-| POST /api/watchlist | Bearer token; JSON `{ "symbol": "AAPL" }` | 201 saved item; 200 same item on repeat |
-| DELETE /api/watchlist/{symbol} | Bearer token | 204; repeated removal also 204 |
+| GET /api/me | App session or bearer token | 200 `{ "id": "local-user-uuid" }` |
+| GET /api/watchlist | App session or bearer token | 200 `{ "items": [{ "symbol": "AAPL", "name": "Apple Inc.", "added_at": "ISO-UTC" }], "limit": 100 }` |
+| POST /api/watchlist | App session or bearer token; JSON `{ "symbol": "AAPL" }` | 201 saved item; 200 same item on repeat |
+| DELETE /api/watchlist/{symbol} | App session or bearer token | 204; repeated removal also 204 |
 
 Symbols are trimmed/uppercased and validated. A saved symbol must have a
 canonical series in storage. Lists are bounded to 100 entries per account,
@@ -230,7 +238,11 @@ Ignored evidence: .local-data/auth-foundation-verification.json,
 .local-data/account-development-migration.json and corresponding command logs.
 The remaining hosted lifecycle checks above are not replaced by these results.
 
-## Live Auth0 continuation (November 16, 2026)
+## Earlier live Auth0 continuation (November 16, 2026)
+
+Historical pre-session-fix evidence: the refresh limitation described in this
+section is resolved by the later app-session implementation in SESSION_HANDOFF.md.
+Do not reintroduce persistent Auth0 token caching to address it.
 
 - Loaded Gavin's supplied public domain/client ID/audience into ignored local
   environment files. The database URL was preserved. Tenant OpenID discovery and

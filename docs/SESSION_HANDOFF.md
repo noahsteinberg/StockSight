@@ -138,8 +138,11 @@ test-only and absent from the normal application.
 
 ## Boundaries for Noah
 
-The account/watchlist core is locally verified; this does not complete indicators,
-ML, prediction history, evaluation, hosted CI or second-machine acceptance.
+The account/watchlist core is locally verified. The full MVP, ML, prediction
+history, evaluation, hosted CI and second-machine acceptance remain unfinished.
+For the current continuation and phase boundary, read CURRENT_HANDOFF.md.
+The subsequent [indicator backend phase](INDICATORS.md) implements SMA20 and
+RSI14 with numerical/API tests; frontend visualization and redesign remain deferred.
 Before public deployment, confirm HTTPS/origins, production Auth0 settings, mail
 delivery and credential-reset acceptance, and the policy for revoking app sessions
 when an Auth0 account is disabled or a password changes elsewhere. App sessions

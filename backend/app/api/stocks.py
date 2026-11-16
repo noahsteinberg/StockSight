@@ -1,11 +1,21 @@
 """Stock routes preserve the historical contract across explicit storage modes."""
 
-from typing import Annotated, Literal
+from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, Query, Request
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.market import ADJUSTMENT, SOURCE, SOURCE_URL, History, Stock, load_bars
+from app.indicators import CALCULATION_LIMIT, IndicatorHistory, calculate_indicators
+from app.market import (
+    ADJUSTMENT,
+    SESSION_LIMITS,
+    SOURCE,
+    SOURCE_URL,
+    History,
+    HistoryRange,
+    Stock,
+    load_bars,
+)
 from app.repository import database_history, search_database
 
 router = APIRouter(tags=["stocks"])
@@ -39,20 +49,38 @@ def search_stocks(
 
 
 @router.get("/stocks/{symbol}/prices", response_model=History)
-def prices(
-    request: Request, symbol: str, range: Literal["1mo", "3mo", "1y", "all"] = "3mo"
+def prices(request: Request, symbol: str, range: HistoryRange = "3mo") -> History:
+    return read_history(request, symbol, range)
+
+
+@router.get("/stocks/{symbol}/indicators", response_model=IndicatorHistory)
+def indicators(
+    request: Request, symbol: str, range: HistoryRange = "3mo"
+) -> IndicatorHistory:
+    history = read_history(request, symbol, "all", session_limit=CALCULATION_LIMIT)
+    return calculate_indicators(history, range)
+
+
+def read_history(
+    request: Request,
+    symbol: str,
+    range: HistoryRange,
+    *,
+    session_limit: int | None = None,
 ) -> History:
     symbol = symbol.strip().upper()
     if request.app.state.engine is not None:
         try:
-            result = database_history(request.app.state.engine, symbol, range)
+            result = database_history(
+                request.app.state.engine, symbol, range, session_limit=session_limit
+            )
         except SQLAlchemyError:
             raise unavailable() from None
         if result is not None:
             return result
     elif symbol == "AAPL":
         bars = load_bars()
-        count = {"1mo": 21, "3mo": 63, "1y": 252, "all": 2000}[range]
+        count = session_limit if session_limit is not None else SESSION_LIMITS[range]
         return History(
             symbol=symbol,
             name="Apple Inc.",

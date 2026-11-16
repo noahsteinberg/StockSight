@@ -5,7 +5,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
 
 from app.db import DailyBar, PriceSeries, StockRecord
-from app.market import Bar, History, Stock
+from app.market import SESSION_LIMITS, Bar, History, Stock
 
 
 def search_database(engine: Engine, query: str) -> list[Stock]:
@@ -30,8 +30,11 @@ def search_database(engine: Engine, query: str) -> list[Stock]:
         ]
 
 
-def database_history(engine: Engine, symbol: str, range_value: str) -> History | None:
-    limit = {"1mo": 21, "3mo": 63, "1y": 252, "all": 2000}[range_value]
+def database_history(
+    engine: Engine, symbol: str, range_value: str, *, session_limit: int | None = None
+) -> History | None:
+    # The optional internal limit supplies a fixed calculation window for indicators.
+    limit = session_limit if session_limit is not None else SESSION_LIMITS[range_value]
     with Session(engine) as session:
         series = session.scalar(select(PriceSeries).where(PriceSeries.symbol == symbol))
         if series is None:

@@ -1,6 +1,15 @@
 # Machine learning foundation
 
-Documentation only. No data downloads, features, training, fake predictions, or model artifacts are included.
+No ML features/training/inference, predictions or model artifacts are implemented.
+The application already imports historical data and exposes tested close-based
+SMA20/RSI14. Read [INDICATORS.md](../docs/INDICATORS.md) before reusing those
+calculations: it defines a fixed history anchor/cap, null warm-up and flat-price
+behavior. A shared/versioned feature implementation is still required; do not
+silently use different training and inference conventions.
+
+[CURRENT_HANDOFF.md](../docs/CURRENT_HANDOFF.md) records current scope. The snapshot's
+adjustment/calendar/universe limitations remain unresolved, so chart acceptance
+is not ML suitability approval. Frontend redesign is a separately deferred task.
 
 Planned pipeline:
 

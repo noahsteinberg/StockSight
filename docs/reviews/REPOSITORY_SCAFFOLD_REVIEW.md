@@ -1,5 +1,10 @@
 # StockSight adversarial repository review
 
+Historical review evidence for the scope/date below, not a current startup or
+completion checklist. See [current handoff](../CURRENT_HANDOFF.md) for resolved
+runtime/import/session limitations, implemented indicators and remaining gates.
+A later implementation does not retroactively change this review's original result.
+
 Reviewed October 27, 2026. Head: 89fa1c8fa57aacef60cfd30e506ca0147226ea83.
 
 ## Scope and recommendation

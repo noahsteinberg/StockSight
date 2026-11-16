@@ -1,5 +1,10 @@
 # Import the team historical dataset
 
+The local team snapshot has already been imported successfully. This guide is
+for deliberate initial imports or authorized replacements, not routine startup.
+Use [CURRENT_HANDOFF.md](CURRENT_HANDOFF.md) and LOCAL_START.md to resume existing
+work without reimporting or seeding over the canonical series.
+
 Noah's November 16 team messages identify Yahoo Finance as the intended source
 and S&P 500 stocks as the project scope. Vlad identifies prices_clean.parquet as
 the supplied dataset. This is team-reported provenance, not an independently

@@ -1,5 +1,10 @@
 # Diagnose agent execution access
 
+Continuation context: [CURRENT_HANDOFF.md](CURRENT_HANDOFF.md). Later approved
+runs also verified API 8000, frontend 5173 and PostgreSQL access for session and
+indicator work. Port availability below is dated diagnostic evidence, not current
+process inventory. Always rerun the venv check in the actual next conversation.
+
 ## Current findings (November 16, 2026)
 
 The ordinary sandboxed agent command process reports Windows Low Mandatory Level. Its Docker

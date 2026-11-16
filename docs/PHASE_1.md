@@ -1,5 +1,11 @@
 # Phase 1 historical stock analysis
 
+Historical Phase 1 record. Its AAPL-only, no-database/account/indicator scope and
+verification counts apply to that increment. For current contracts, startup and
+remaining phases use [CURRENT_HANDOFF.md](CURRENT_HANDOFF.md),
+[API.md](API.md) and [LOCAL_START.md](LOCAL_START.md). In particular `all` now
+means Max 2,000, and use the explicit demo factory for database-free startup.
+
 Implemented scope: ticker search, daily closing-price/volume chart, 21/63/252-session and full-history views, keyboard date inspection, accessible observation table, loading/empty/error/retry states, and a real FastAPI request. Only AAPL is supported initially. No accounts, database, indicators, or predictions are claimed.
 
 ## Data

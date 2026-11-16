@@ -1,5 +1,8 @@
 # Architecture
 
+Current implementation and phase boundaries are summarized in
+[CURRENT_HANDOFF.md](CURRENT_HANDOFF.md). The frontend redesign is deferred.
+
 ## Implemented
 
 - `frontend/src/App.jsx`: React page with an Analysis workspace and anchor navigation. Analysis.jsx fetches historical bars through the Vite API proxy and renders SVG prices/volume with an accessible table.
@@ -20,12 +23,20 @@
   session independently of Auth0's silent iframe flow. See SESSION_HANDOFF.md for
   the cookie/bearer API contract and real-account verification.
 
+- `app/indicators.py` calculates close-based SMA20 and Wilder RSI14 over a fixed
+  bounded history, before trimming display ranges. The public indicator route
+  shares storage/error behavior with prices. The frontend does not consume it yet;
+  numerical/window conventions are versioned in INDICATORS.md.
+- `app/import_prices.py` validates and imports the team snapshot per symbol;
+  `daily_bars.source_values` retains auxiliary source fields. This is not a
+  live-provider adapter or scheduled refresh service.
+
 ## Planned boundary
 
 Browser → FastAPI → PostgreSQL / selected market-data provider.
 
 Offline ML pipeline → validated, versioned artifact → backend inference.
 
-The browser-to-FastAPI historical-fixture path is implemented; PostgreSQL reads and migrations are implemented; provider ingestion and ML connections do not exist yet. Training should not run inside an HTTP request. Begin with one frontend and one backend; add modules only when real features require them. Backend schemas should define stable contracts before frontend integration. Use separate tests for deterministic calculations, provider adapters, persistence, and HTTP behavior as each is introduced.
+Browser-to-FastAPI fixture and imported PostgreSQL paths are implemented, including snapshot import, accounts/sessions and the indicator API. Live incremental provider ingestion and ML connections do not exist yet. Training should not run inside an HTTP request. Begin with one frontend and one backend; add modules only when real features require them. Backend schemas should define stable contracts before frontend integration. Use separate tests for deterministic calculations, provider adapters, persistence, and HTTP behavior as each is introduced.
 
 Python supports the future pandas/NumPy/scikit-learn workflow for analysis, training, and inference. SQLAlchemy/Alembic and psycopg are implemented persistence dependencies. Tailwind and React Router are unnecessary for the current single page.

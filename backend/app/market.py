@@ -12,6 +12,8 @@ FIXTURE_PATH = Path(__file__).resolve().parent / "fixtures" / "apple-source.csv"
 SOURCE = "Plotly historical Apple dataset"
 SOURCE_URL = "https://github.com/plotly/datasets/blob/master/finance-charts-apple.csv"
 ADJUSTMENT = "Unadjusted OHLC; historical values are not current quotes"
+SESSION_LIMITS = {"1mo": 21, "3mo": 63, "1y": 252, "all": 2000}
+HistoryRange = Literal["1mo", "3mo", "1y", "all"]
 
 
 class Stock(BaseModel):
