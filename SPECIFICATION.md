@@ -6,7 +6,14 @@ Build an educational full-stack stock analysis and prediction platform for stude
 
 ## Current deliverable
 
-Phase 0 provides an honest informational React landing page, a database-free FastAPI health endpoint, development tooling, CI configuration, and team documentation. It does not provide investment functionality.
+The current implementation provides PostgreSQL-backed historical search/charts,
+repeatable snapshot import, and an Auth0/private-watchlist integration foundation.
+Real hosted sign-in, persistent sessions, username signup with optional recovery
+email and two-user private watchlists are locally verified. SMA20/Wilder RSI14
+are implemented in the backend; indicator frontend integration is next when
+assigned. The redesign is explicitly deferred. Inference, prediction history and
+evaluation remain unimplemented. Read [the current handoff](docs/CURRENT_HANDOFF.md)
+and [indicator contract](docs/INDICATORS.md) for the working boundary and evidence.
 
 ## Planned MVP
 
@@ -31,13 +38,13 @@ Phase 0 provides an honest informational React landing page, a database-free Fas
 
 ## Non-goals
 
-Phase 0 excludes authentication, stock provider requests, database connections, indicators, watchlists, model training/inference, and a dashboard. The MVP excludes brokerage execution, paper trading, news/sentiment, high-frequency trading, and guaranteed-return recommendations. Redis, Celery, Kubernetes, GraphQL, and microservices have no current justification.
+The original Phase 0 was a scaffold; its exclusions are not the current implementation status. The MVP excludes brokerage execution, paper trading, news/sentiment, high-frequency trading, and guaranteed-return recommendations. Redis, Celery, Kubernetes, GraphQL, and microservices have no current justification.
 
 ## Unresolved decisions
 
-- Market-data provider, license, rate limits, coverage, and caching policy
-- Authentication mechanism and account recovery approach
-- Schema, migration plan, and hosting choice
+- Provider usage rights, reproducible cleaning, adjustments/calendar and incremental refresh
+- Production password-reset acceptance and provider-driven session revocation (Auth0 and app sessions are implemented)
+- Hosting choice and operational recovery (SQLAlchemy/Alembic schema is implemented through 0004)
 - Exact prediction definition: close-to-close or another horizon, cutoff time, timezone, neutral/unchanged prices, and adjusted-price policy
 - Baseline, model comparison metrics, probability calibration, and retraining cadence
 - Prediction-history visibility and data retention

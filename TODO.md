@@ -1,51 +1,66 @@
-# Roadmap
+# Incremental work and MVP status
 
-Only Phase 0 is complete. Later phases describe work to scope and review, not functionality currently available.
+Updated November 16, 2026. Read [AGENTS.md](AGENTS.md) and
+[the current handoff](docs/CURRENT_HANDOFF.md) first. This checklist describes current
+implementation, not hosted release approval. The team milestone numbering and
+unchanged ownership are in [ROADMAP.md](docs/ROADMAP.md).
 
-## Phase 0: Repository foundation
+## Working foundation
 
-- [x] Initialize repository and configure origin
-- [x] Build responsive informational React landing page
-- [x] Add FastAPI health endpoint and contract test
-- [x] Configure frontend lint/build, pytest, Ruff, and CI
-- [x] Document scope, architecture, collaboration, security, database, and ML
-- [x] Verify local install, lint, build, server startup, and health response
+- [x] React/FastAPI repository, pinned dependencies, lint/build/test and CI definitions
+- [x] Search, bounded historical price/volume chart, keyboard inspection and table
+- [x] PostgreSQL schema/migrations, canonical series and controlled storage errors
+- [x] Validated repeatable team Parquet import; imported snapshot locally verified
+- [x] Auth0 signup/login/logout and private persistent watchlists
+- [x] HttpOnly app sessions, refresh restoration, CSRF and account-switch isolation
+- [x] Username signup with optional recovery email; real two-account isolation
+- [x] SMA20 and Wilder RSI14 backend API, numerical/date/range/database tests
+- [x] Current contracts and agent handoff
 
-Initial human review, commit, and first push remain owner actions; no commit or push is part of this scaffold task.
+## Frontend redesign and indicator integration
 
-## Phase 1: Full-stack/database foundation
+- [x] Render API SMA20 overlay and RSI14 with functional toggles
+- [x] Preserve null warm-up, units, provenance, dates and bounded-history meaning
+- [x] Handle independent indicator loading/error/retry and stale request cancellation
+- [x] Add real-API browser acceptance for toggles, ranges and date alignment
+- [x] Recheck chart/watchlist/session flows, mobile layout and keyboard access
+- [x] UConn-inspired responsive workspace and concise shared UI states
 
-- [ ] Agree on API conventions and add a real frontend/API integration
-- [ ] Design PostgreSQL schema and choose SQLAlchemy/Alembic setup
-- [ ] Add migrations, isolated database tests, and local configuration
+Gavin authorized this phase after the backend handoff. See
+[FRONTEND_REDESIGN.md](docs/FRONTEND_REDESIGN.md) for reference research and evidence.
 
-## Phase 2: Accounts and watchlists
+## Data and account follow-up
 
-- [ ] Choose and implement secure authentication and account lifecycle
-- [ ] Implement authorized persistent watchlist CRUD and UI
-- [ ] Test ownership boundaries and error states
+App-view increment implemented; see [APP_VIEWS.md](docs/APP_VIEWS.md):
 
-## Phase 3: Stock data and analysis
+- [x] Dashboard with real private watchlist filtering, saved dates, open/remove
+- [x] Shareable page navigation with refresh, history and keyboard focus
+- [x] Selected-stock Predictions view and Model performance view, honestly unavailable
+- [x] Data/methodology page and dashboard/session browser acceptance
 
-- [ ] Select provider and document licensing, limits, and provenance
-- [ ] Define symbol validation, timestamps, adjustments, and caching
-- [ ] Add stock search, historical charts, and tested RSI/MACD/Bollinger calculations
+These views do not mark the ML/prediction items below complete.
 
-## Phase 4: ML prediction pipeline
+- [ ] Confirm upstream download/cleaning, usage rights, price adjustments and calendar
+- [ ] Enrich missing company/exchange metadata from a verified source
+- [ ] Implement reliable incremental refresh with correction/failure policy
+- [ ] Complete password-reset acceptance and provider-driven app-session revocation policy before public release
 
-- [ ] Define horizon, target, market calendar, and information cutoff
-- [ ] Create reproducible data/feature pipeline with chronological splits
-- [ ] Compare a naive baseline, Logistic Regression, and Random Forest
-- [ ] Record evaluation and model provenance; add versioned inference only after validation
+## Remaining full MVP
 
-## Phase 5: Prediction history/evaluation
+- [ ] Finalize target, information cutoff, calendar, unchanged-price and adjustment rules
+- [ ] Version features with chronological train/validation/test splits and no leakage
+- [ ] Evaluate majority baseline and Logistic Regression; Random Forest optional
+- [ ] Record held-out results, model/data versions and trusted artifact checksum
+- [ ] Add bounded inference with an honest artifact-unavailable response
+- [ ] Persist stable forecasts with cutoff, target session, version and retry semantics
+- [ ] Resolve outcomes idempotently; distinguish replay from newly generated forecasts
+- [ ] Show prediction history and evaluation against the same-sample baseline
+- [ ] Verify hosted CI on published head and setup on a second machine
+- [ ] Decide hosting requirements, HTTPS/secrets/origins, migrations and backups
+- [ ] Rehearse the complete professor demo and graceful failure path
 
-- [ ] Persist predictions and match outcomes after the horizon expires
-- [ ] Show history, baseline comparisons, and out-of-sample metrics
-- [ ] Test timestamp alignment and model-version traceability
-
-## Phase 6: Testing, deployment, and demo
-
-- [ ] Add end-to-end coverage and accessibility checks for implemented features
-- [ ] Prepare deployment, secrets, HTTPS, backup, and migration procedures
-- [ ] Run security/data-quality review and rehearse a reproducible team demo
+The prior backend run passed 95 tests with one expected SQLite-only skip;
+PostgreSQL counterpart passed. The redesign passed frontend lint/build, 19 chart/
+indicator browser tests and nine account/session browser tests, plus normal-app
+PostgreSQL browser checks. No publication is implied. ML remains for Vlad per
+Gavin's current direction; roadmap ownership tables are preserved.

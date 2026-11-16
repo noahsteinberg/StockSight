@@ -35,3 +35,10 @@ artifacts/
 Thumbs.db
 .idea/
 .vscode/
+
+!backend/app/fixtures/apple-source.csv
+
+frontend/test-results/
+frontend/playwright-report/
+
+.local-data/

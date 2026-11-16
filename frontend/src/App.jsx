@@ -1,164 +1,68 @@
-const features = [
-  {
-    number: "01",
-    title: "Stock Analysis",
-    description:
-      "Explore price history and understand technical indicators, including RSI, MACD, and Bollinger Bands.",
-    detail: "Understand the movement",
-  },
-  {
-    number: "02",
-    title: "Watchlists",
-    description:
-      "Keep the companies you follow in one place, with an account and a watchlist that stays with you.",
-    detail: "Follow what interests you",
-  },
-  {
-    number: "03",
-    title: "ML Predictions",
-    description:
-      "Investigate next-trading-day price direction using historical data and measurable model outputs.",
-    detail: "Explore a hypothesis",
-  },
-  {
-    number: "04",
-    title: "Prediction Evaluation",
-    description:
-      "Compare predictions with observed outcomes and learn where models succeed, struggle, and change.",
-    detail: "Measure the evidence",
-  },
+import { useEffect, useRef, useState } from 'react';
+import Analysis from './Analysis.jsx';
+import AccountControls from './AccountControls.jsx';
+import Watchlist from './Watchlist.jsx';
+import { Dashboard, Methodology, ModelPerformance, Predictions } from './Pages.jsx';
+import { useAccount } from './auth-context.js';
+import useWatchlist from './use-watchlist.js';
+import usePageRoute from './use-page-route.js';
+
+const pages = [
+  ['dashboard', 'Dashboard'], ['analysis', 'Analysis'], ['predictions', 'Predictions'],
+  ['performance', 'Model performance'], ['methodology', 'Methodology'],
 ];
 
 export default function App() {
-  return (
-    <>
-      <a className="skip-link" href="#main">
-        Skip to content
-      </a>
-      <header className="header shell">
-        <a className="brand" href="#" aria-label="StockSight home">
-          <span className="brand-mark" aria-hidden="true">
-            S<span>↗</span>
-          </span>
-          StockSight<span className="brand-dot">.</span>
+  const route = usePageRoute();
+  const main = useRef(null);
+  const [selectedSymbol, setSelectedSymbol] = useState(() => {
+    const saved = new URLSearchParams(window.location.hash.split('?')[1]).get('symbol')?.trim().toUpperCase() || sessionStorage.getItem('stocksight:selected-symbol');
+    return saved && /^[A-Z][A-Z0-9.^=-]{0,15}$/.test(saved) ? saved : 'AAPL';
+  });
+  const symbol = route.symbol || selectedSymbol;
+  const account = useAccount();
+  const watchlist = useWatchlist();
+  useEffect(() => {
+    document.title = `${pages.find(([page]) => page === route.page)?.[1] || 'Page not found'} | StockSight`;
+    main.current?.focus({ preventScroll: true });
+    window.scrollTo(0, 0);
+  }, [route.hash, route.page]);
+  function rememberStock(value) {
+    setSelectedSymbol(value);
+    sessionStorage.setItem('stocksight:selected-symbol', value);
+  }
+  function selectStock(value) {
+    rememberStock(value);
+    window.location.hash = `/analysis?symbol=${encodeURIComponent(value)}`;
+  }
+  return <>
+    <a className="skip-link" href="#main" onClick={event => { event.preventDefault(); main.current?.focus(); }}>Skip to content</a>
+    <header className="masthead">
+      <div className="masthead-inner wrap">
+        <a className="brand" href="#/dashboard" onClick={() => rememberStock(symbol)} aria-label="StockSight home">
+          <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5 23V9M5 23h22M10 19l6-7 5 3 7-9" /></svg>
+          StockSight<span className="brand-divider" aria-hidden="true" /><span className="brand-school">UCONN</span>
         </a>
-        <nav aria-label="Main navigation">
-          <a href="#explore">Our direction</a>
-          <a href="#project">
-            The project <span aria-hidden="true">↗</span>
-          </a>
-        </nav>
-      </header>
-
-      <main id="main">
-        <section className="hero shell" aria-labelledby="hero-title">
-          <div className="hero-copy">
-            <p className="eyebrow">
-              <span className="status-dot" /> A new perspective, in progress
-            </p>
-            <h1 id="hero-title">
-              Less noise.
-              <br />
-              More <em>insight.</em>
-            </h1>
-            <p className="intro">
-              A clearer view of the market starts with better questions. We’re
-              building a space to explore stocks, test ideas, and learn from the
-              evidence.
-            </p>
-            <a className="button" href="#explore">
-              Explore what’s ahead <span aria-hidden="true">↘</span>
-            </a>
-            <p className="hero-note">Early scaffold · Features coming soon</p>
-          </div>
-          <aside className="perspective" aria-labelledby="perspective-title">
-            <div className="panel-top">
-              <span>THE STOCKSIGHT APPROACH</span>
-              <span aria-hidden="true">↗</span>
-            </div>
-            <div className="orbit" aria-hidden="true">
-              <div className="orbit-inner">
-                <span>S.</span>
-              </div>
-              <span className="orbit-point" />
-            </div>
-            <h2 id="perspective-title">
-              Curiosity.
-              <br />
-              Backed by evidence.
-            </h2>
-            <p>
-              Observe the data. Test a hypothesis.
-              <br />
-              Measure what actually happened.
-            </p>
-            <div className="panel-bottom">
-              <span>Research, then reason.</span>
-              <span>01 / 04</span>
-            </div>
-          </aside>
-        </section>
-
-        <section
-          className="explore shell"
-          id="explore"
-          aria-labelledby="explore-title"
-        >
-          <div className="section-heading">
-            <div>
-              <p className="eyebrow">WHAT WE’RE BUILDING</p>
-              <h2 id="explore-title">Four ways to look closer.</h2>
-            </div>
-            <p>
-              One connected learning experience.
-              <br />
-              All four areas are planned.
-            </p>
-          </div>
-          <div className="feature-grid">
-            {features.map((feature) => (
-              <article className="feature" key={feature.number}>
-                <div className="feature-top">
-                  <span>{feature.number}</span>
-                  <span className="badge">Coming soon</span>
-                </div>
-                <h3>{feature.title}</h3>
-                <p>{feature.description}</p>
-                <div className="feature-detail">
-                  {feature.detail}
-                  <span aria-hidden="true">↗</span>
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section
-          className="project shell"
-          id="project"
-          aria-labelledby="project-title"
-        >
-          <p className="eyebrow">BUILT TO LEARN</p>
-          <div>
-            <h2 id="project-title">An experiment in understanding.</h2>
-            <p>
-              StockSight is a CSE 4095 Agentic Programming team project at the
-              University of Connecticut. We’re starting with a clean foundation
-              and building thoughtfully, one question at a time.
-            </p>
-          </div>
-        </section>
-      </main>
-
-      <footer className="footer shell">
-        <span className="footer-brand">StockSight.</span>
-        <p>
-          For education and research only. Not financial advice.
-          <br />
-          Future predictions will be uncertain and will not guarantee returns.
-        </p>
-        <span className="footer-note">Made with curiosity.</span>
-      </footer>
-    </>
-  );
+        <AccountControls />
+      </div>
+    </header>
+    <div className="navigation-bar">
+      <nav className="wrap" aria-label="Main navigation">
+        {pages.map(([page, label]) => <a key={page} onClick={() => rememberStock(symbol)} href={`#/${page}${page === 'analysis' || page === 'predictions' ? `?symbol=${encodeURIComponent(symbol)}` : ''}`} aria-current={route.page === page ? 'page' : undefined}>{label}</a>)}
+      </nav>
+    </div>
+    <main ref={main} id="main" className="wrap" tabIndex="-1">
+      {account.error && <div role="alert" className="account-error">{account.error}</div>}
+      {route.page === 'analysis' && <div className="workspace">
+        <Analysis symbol={symbol} onSelectSymbol={selectStock} watchlist={watchlist} />
+        <aside className="workspace-sidebar"><Watchlist watchlist={watchlist} onOpen={selectStock} selectedSymbol={symbol} /></aside>
+      </div>}
+      {route.page === 'dashboard' && <Dashboard watchlist={watchlist} onOpen={selectStock} symbol={symbol} />}
+      {route.page === 'predictions' && <Predictions symbol={symbol} />}
+      {route.page === 'performance' && <ModelPerformance />}
+      {route.page === 'methodology' && <Methodology />}
+      {route.page === 'not-found' && <section className="app-page"><h1>Page not found</h1><div className="page-panel unavailable-state"><p>This page is unavailable.</p><a className="button-link" href="#/analysis">Go to stock analysis</a></div></section>}
+    </main>
+    <footer className="footer wrap"><span>StockSight <span className="footer-dot">/</span> UConn</span><p>For education and research. Not financial advice.</p><a href="#/methodology" onClick={() => rememberStock(symbol)}>Data & methodology</a></footer>
+  </>;
 }

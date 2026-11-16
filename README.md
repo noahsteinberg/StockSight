@@ -1,106 +1,109 @@
 # StockSight
 
-A University of Connecticut CSE 4095 Agentic Programming team project exploring stock analysis and measurable machine-learning predictions.
+A University of Connecticut CSE 4095 team project for historical stock analysis
+and measurable machine-learning predictions. Educational use, not financial advice.
 
-**Status: early scaffold (Phase 0).** The responsive informational landing page and `GET /api/health` work. No accounts, market data, watchlists, predictions, or database connection exist yet.
+**Current foundation (November 16, 2026):** PostgreSQL-backed search/charts,
+Auth0 signup/login, persistent app sessions, private watchlists and a tested
+SMA20/RSI14 backend API. The frontend does not display indicators yet. ML,
+forecasts/outcomes, evaluation and incremental provider refresh are unfinished.
+The frontend redesign is deferred so work can proceed in separate phases.
 
-## Planned MVP
+**Start here:** [AGENTS.md](AGENTS.md), [current continuation handoff](docs/CURRENT_HANDOFF.md),
+[local startup](docs/LOCAL_START.md), [API](docs/API.md) and
+[architecture](docs/ARCHITECTURE.md). The handoff records the branch/working-tree
+boundary, exact contracts, verification limits and proposed next increment.
+No publication, hosted CI success or complete MVP is implied by local checks.
 
-- Accounts and persistent watchlists
-- Stock search, historical charts, and technical indicators
-- Next-trading-day direction predictions with a precisely defined target
-- Prediction history and evaluation against observed outcomes
+## Stack and source map
 
-See [SPECIFICATION.md](SPECIFICATION.md) for scope and open decisions, and [TODO.md](TODO.md) for the phased roadmap.
+React/Vite JavaScript, plain CSS and native SVG communicate with FastAPI through
+same-origin `/api`. PostgreSQL uses SQLAlchemy/Alembic. Auth0 owns credentials;
+opaque HttpOnly server sessions restore login after refresh. Training will run
+offline, separately from inference. No chart library, router or ML stack is installed.
 
-## Architecture and structure
+| Directory | Contents |
+| --- | --- |
+| `frontend/src` | Analysis/chart, account context, private watchlist and existing styles |
+| `frontend/e2e` | Chart and account/session browser tests |
+| `backend/app` | API, authentication/sessions, repositories, indicators and imports |
+| `backend/migrations` | Schema through `0004_app_sessions` |
+| `backend/tests` | Numerical, HTTP-contract, migration, persistence and security tests |
+| `docs` | Current handoffs, contracts, setup and dated reviews |
+| `ml` | Planned feature/training/evaluation pipeline; no model implemented |
 
-React + Vite (JavaScript, plain CSS) will communicate with a Python FastAPI API. PostgreSQL and SQLAlchemy/Alembic are planned. ML research will remain separate from API request handling. No router, chart library, database driver, or ML dependencies are installed yet.
+## Install and start
 
-```text
-StockSight/
-├── .github/                  # CI and pull-request template
-├── frontend/                 # React landing page, Vite, ESLint
-│   └── src/                  # App.jsx, main.jsx, styles.css
-├── backend/
-│   ├── app/                  # main.py, config.py, api/health.py
-│   └── tests/                # Health endpoint contract test
-├── database/README.md        # Future persistence foundation
-├── ml/README.md              # Future ML pipeline and evaluation
-├── docs/                     # Architecture, API, security, deployment
-├── .env.example
-├── CONTRIBUTING.md
-├── SPECIFICATION.md
-└── TODO.md
-```
-
-## Local setup
-
-Use Node.js 24 LTS (or a version accepted by `frontend/package.json`), npm, Python 3.12+, and Git. CI uses Node 24 and Python 3.13. Run each service in its own terminal. No API keys or database are needed.
-
-### Frontend
-
-```sh
-cd frontend
-npm install
-npm run dev
-```
-
-Open <http://127.0.0.1:5173>. Navigation scrolls to informational sections; all four feature areas are explicitly marked coming soon. The page does not call the backend.
-
-```sh
-npm run lint
-npm run build
-npm run preview
-```
-
-`npm run preview` serves the built page locally, usually at <http://localhost:4173>. Use `npm ci` for reproducible installs from the committed lockfile.
-
-### Backend (PowerShell)
+Use Node 24 LTS (package.json specifies supported versions), Python 3.12+, npm
+and Git. CI uses Node 24/Python 3.13. PostgreSQL setup also requires Docker Desktop.
+From a fresh checkout in PowerShell:
 
 ```powershell
 cd backend
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
-.\.venv\Scripts\python.exe -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+.\.venv\Scripts\python.exe -m app.environment_check
 ```
 
-Using the interpreter directly avoids PowerShell activation-policy issues. On macOS/Linux, replace `.\.venv\Scripts\python.exe` with `.venv/bin/python` (create the environment with `python3 -m venv .venv` if necessary).
+Use the venv interpreter directly; activation is optional. On macOS/Linux use
+`.venv/bin/python`. Before Docker or PostgreSQL verification add `--require-docker`
+to the check. An access denial requires the runner's supported approval path,
+not repeated restarts or reimports; see [execution access](docs/ENVIRONMENT_ACCESS.md).
 
-Health: <http://127.0.0.1:8000/api/health>. Interactive API documentation: <http://127.0.0.1:8000/docs>.
-
-```json
-{"status": "ok", "service": "stocksight-api"}
-```
-
-From `backend/`:
+For a deliberate database-free historical demo, from backend:
 
 ```powershell
-.\.venv\Scripts\python.exe -m ruff check .
-.\.venv\Scripts\python.exe -m ruff format --check .
-.\.venv\Scripts\python.exe -m pytest
+.\.venv\Scripts\python.exe -m uvicorn app.demo:create_demo_app --factory --host 127.0.0.1 --port 8000
 ```
 
-Runtime-only environments can install `requirements.txt`; contributors and CI install `requirements-dev.txt`.
+In a second terminal from the repository root:
 
-### Environment
+```powershell
+cd frontend
+npm ci
+npm run dev
+```
 
-Defaults work without an environment file. Optionally copy root `.env.example` to `backend/.env`; `app/config.py` loads that exact location. `STOCKSIGHT_APP_NAME` overrides the API name and health response service field. A root `.env` is not loaded automatically. Tests explicitly set the expected service name.
+Open [StockSight locally](http://127.0.0.1:5173). The explicit demo ignores saved
+database settings and serves 506 historical AAPL observations. Its public price
+and indicator APIs work; it does not verify accounts or PostgreSQL.
+For the imported database and Auth0 setup, follow [LOCAL_START.md](docs/LOCAL_START.md).
+Do not run `app.seed` over the existing team snapshot. API startup never imports,
+migrates or silently falls back. No recurring live data feed is implemented.
 
-Never commit `.env` files or credentials. Vite exposes `VITE_*` values to browsers, so they must never contain secrets. Database and provider settings will be introduced when those integrations are implemented.
+## Configuration and verification
 
-## Collaboration
+Root `.env` configures Compose; `backend/.env` configures FastAPI;
+`frontend/.env.local` supplies public Auth0 SPA settings. Copy examples only for
+a new setup and keep real values ignored. Vite `VITE_*` values are public and
+must contain no secrets. Auth0 setup needs no client secret.
 
-Team: Noah Steinberg, Gavin Javier Pino, Parth Sachdev, and Vladislav Lagutin.
+Use [the current handoff](docs/CURRENT_HANDOFF.md#verification-to-preserve) for exact
+backend/browser commands, disposable database variables, test ports and evidence.
+Latest backend phase: 95 passed, one expected skip, Ruff passed; live imported-data
+HTTP indicator checks passed. Prior session phase: 11 chart and 9 account browser
+tests plus frontend lint/build passed. These are dated local results. CI definitions
+provision PostgreSQL and run backend and browser checks; hosted CI still needs a
+verified run on the published head.
 
-Use a focused feature branch, run the relevant checks, and open a pull request for teammate review before merging to `main`. [CONTRIBUTING.md](CONTRIBUTING.md) gives the workflow. GitHub Actions runs frontend lint/build and backend Ruff/pytest without external services. An actual hosted CI run still requires pushing the repository.
+## Collaboration and scope
 
-AI coding agents should read this file, [SPECIFICATION.md](SPECIFICATION.md), [TODO.md](TODO.md), and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) before changing scope. Do not add placeholder predictions or claim planned functionality works.
+Team: Noah Steinberg, Gavin Javier Pino, Parth Sachdev, Vladislav Lagutin.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for review workflow, [TODO.md](TODO.md)
+for incremental status, [SPECIFICATION.md](SPECIFICATION.md) for scope, and
+[ROADMAP.md](docs/ROADMAP.md) for unchanged ownership and complete MVP gates.
+Noah extends the working foundation; indicator UI is the proposed next phase,
+with redesign separate and deferred. Never show fabricated predictions or call
+the full MVP finished while ML, persistence/outcomes and evaluation remain absent.
 
-## Documentation
+## Documentation map
 
-- [Architecture](docs/ARCHITECTURE.md) and [current API](docs/API.md)
-- [Database plan](docs/DATABASE.md) and [ML foundation](ml/README.md)
-- [Security](docs/SECURITY.md) and [deployment plan](docs/DEPLOYMENT.md)
+- [Current handoff](docs/CURRENT_HANDOFF.md) and [startup](docs/LOCAL_START.md)
+- [API](docs/API.md), [indicator conventions](docs/INDICATORS.md), [architecture](docs/ARCHITECTURE.md)
+- [Auth0/watchlists](docs/AUTH0_WATCHLIST_HANDOFF.md) and [sessions](docs/SESSION_HANDOFF.md)
+- [Database](docs/DATABASE.md), [dataset evidence](docs/DATASET_HANDOFF.md), [import policy](docs/PRICES_IMPORT.md)
+- [Security](docs/SECURITY.md), [deployment](docs/DEPLOYMENT.md), [ML plan](ml/README.md)
+- [Frontend/backend acceptance guide](docs/FRONTEND_BACKEND_REVIEW.md)
 
-StockSight is for education and research only, not financial advice. Predictions will be uncertain and must never be presented as guaranteed returns.
+Dated review reports and Phase 1 notes describe their historical scope. Current
+contracts and startup instructions supersede old limitations and commands.

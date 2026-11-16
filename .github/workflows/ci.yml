@@ -26,6 +26,20 @@ jobs:
 
   backend:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: stocksight_test
+          POSTGRES_USER: stocksight
+          POSTGRES_PASSWORD: ci-only-disposable
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U stocksight -d stocksight_test"
+          --health-interval 3s --health-timeout 3s --health-retries 20
+    env:
+      STOCKSIGHT_TEST_DATABASE_URL: postgresql+psycopg://stocksight:ci-only-disposable@127.0.0.1:5432/stocksight_test
     defaults:
       run:
         working-directory: backend
@@ -40,3 +54,53 @@ jobs:
       - run: python -m ruff check .
       - run: python -m ruff format --check .
       - run: python -m pytest
+
+  browser:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: stocksight_test
+          POSTGRES_USER: stocksight
+          POSTGRES_PASSWORD: ci-only-disposable
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U stocksight -d stocksight_test"
+          --health-interval 3s --health-timeout 3s --health-retries 20
+    env:
+      STOCKSIGHT_DATABASE_URL: postgresql+psycopg://stocksight:ci-only-disposable@127.0.0.1:5432/stocksight_test
+      STOCKSIGHT_E2E_DATABASE_URL: postgresql+psycopg://stocksight:ci-only-disposable@127.0.0.1:5432/stocksight_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m venv backend/.venv
+      - run: backend/.venv/bin/python -m pip install -r backend/requirements-dev.txt
+      - run: .venv/bin/python -m alembic upgrade head
+        working-directory: backend
+      - run: .venv/bin/python -m app.seed
+        working-directory: backend
+      - run: npm ci
+        working-directory: frontend
+      - run: npx playwright install --with-deps chromium
+        working-directory: frontend
+      - run: npm run test:e2e
+        working-directory: frontend
+      - run: npm run test:e2e:accounts
+        working-directory: frontend
+        env:
+          STOCKSIGHT_E2E_ACCOUNTS_DATABASE_URL: postgresql+psycopg://stocksight:ci-only-disposable@127.0.0.1:5432/stocksight_test
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-test-results
+          path: frontend/test-results/
+          retention-days: 7
