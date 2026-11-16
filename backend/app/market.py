@@ -38,6 +38,8 @@ class History(BaseModel):
     as_of: date
     range: str
     bars: list[Bar]
+    session_limit: int
+    has_earlier: bool
 
 
 @lru_cache(maxsize=1)

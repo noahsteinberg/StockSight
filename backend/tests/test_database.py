@@ -153,3 +153,76 @@ def test_disconnected_database_never_falls_back_or_leaks_credentials():
         assert response.status_code == 503
         assert "do-not-expose" not in response.text
         assert "127.0.0.1" not in response.text
+
+
+def test_history_cap_and_source_metadata(database):
+    from datetime import date, timedelta
+
+    from sqlalchemy import insert
+
+    from app.db import PriceSeries
+    from app.repository import database_history
+
+    url, engine = database
+    seed_fixture(engine)
+    # Synthetic sessions belong only to this disposable test database.
+    with engine.begin() as connection:
+        connection.execute(DailyBar.__table__.delete())
+        connection.execute(
+            update(PriceSeries)
+            .where(PriceSeries.id == SERIES_ID)
+            .values(source="Integration test source", adjustment="Test convention")
+        )
+        connection.execute(
+            insert(DailyBar),
+            [
+                dict(
+                    series_id=SERIES_ID,
+                    session_date=date(2000, 1, 1) + timedelta(days=index),
+                    open=10,
+                    high=11,
+                    low=9,
+                    close=10,
+                    volume=index,
+                )
+                for index in range(2001)
+            ],
+        )
+    result = database_history(engine, "AAPL", "all").model_dump(mode="json")
+    assert len(result["bars"]) == 2000
+    assert result["session_limit"] == 2000
+    assert result["has_earlier"] is True
+    assert result["bars"][0]["volume"] == 1
+    assert result["bars"][-1]["volume"] == 2000
+    assert result["source"] == "Integration test source"
+    assert result["adjustment"] == "Test convention"
+    with engine.begin() as connection:
+        connection.execute(DailyBar.__table__.delete().where(DailyBar.volume == 0))
+    exact = database_history(engine, "AAPL", "all").model_dump(mode="json")
+    assert len(exact["bars"]) == 2000
+    assert exact["has_earlier"] is False
+
+
+def test_search_history_adapter_contract_parity(database):
+    from types import SimpleNamespace
+
+    from fastapi import HTTPException
+
+    from app.api.stocks import prices, search_stocks
+
+    _, engine = database
+    assert seed_fixture(engine) == seed_fixture(engine) == 506
+    persisted = SimpleNamespace(
+        app=SimpleNamespace(state=SimpleNamespace(engine=engine))
+    )
+    fixture = SimpleNamespace(app=SimpleNamespace(state=SimpleNamespace(engine=None)))
+    for query in ("apple", " aapl ", "unknown", "%", "_"):
+        assert search_stocks(persisted, query) == search_stocks(fixture, query)
+    for range_value in ("1mo", "3mo", "1y", "all"):
+        stored = prices(persisted, " aapl ", range_value)
+        assert stored == prices(fixture, "AAPL", range_value)
+        assert len(stored.bars) <= stored.session_limit
+    with pytest.raises(HTTPException) as unsupported:
+        prices(persisted, "MSFT", "all")
+    assert unsupported.value.status_code == 404
+    assert unsupported.value.detail["code"] == "UNSUPPORTED_SYMBOL"

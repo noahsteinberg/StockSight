@@ -153,3 +153,24 @@ Important integration limits: API search is capped at 50 matches; all-history is
 ## Inspection environment and changes
 
 Inspection used PyArrow 26.0.1 installed in a temporary directory, not added to project requirements. No application code, schema, or database data was changed for inspection. If Parquet ingestion is implemented, add and pin the reader dependency deliberately with tests. This handoff records observed file contents and proposed work only; it does not claim a successful import or validated predictive dataset.
+
+
+## Follow-up integration work (November 16, 2026)
+
+The stock-search/chart integration now consumes the existing stock-search route,
+uses returned provenance labels, and displays bounded history explicitly.
+History includes session_limit and has_earlier; the browser calls the `all`
+range Max. See [Noah's review guide](FRONTEND_BACKEND_REVIEW.md) for the completed
+integration scope, startup commands, and current verification evidence.
+
+The Parquet inspection findings and import blockers above remain unchanged.
+This increment does not import prices_clean.parquet, replace AAPL's canonical
+series, or approve the unknown provider/adjustment policy.
+
+
+## Publication authorization (November 16, 2026)
+
+Gavin subsequently authorized verifying, committing, and publishing the integration
+for Noah's review. The earlier push deferral is superseded for this review snapshot.
+No merge or dataset import was authorized. See FRONTEND_BACKEND_REVIEW.md for the
+publication branch and verification limits.

@@ -33,3 +33,17 @@ def test_supported_symbol_search():
     assert client.get("/api/stocks?query=apple").json()[0]["symbol"] == "AAPL"
     assert client.get("/api/stocks?query=unknown").json() == []
     assert client.get("/api/stocks", params={"query": "x" * 41}).status_code == 422
+
+
+def test_history_reports_display_bounds():
+    from types import SimpleNamespace
+
+    from app.api.stocks import prices
+
+    request = SimpleNamespace(app=SimpleNamespace(state=SimpleNamespace(engine=None)))
+    full = prices(request, "AAPL", "all").model_dump(mode="json")
+    short = prices(request, "aapl", "1mo").model_dump(mode="json")
+    assert full["session_limit"] == 2000
+    assert full["has_earlier"] is False
+    assert short["session_limit"] == 21
+    assert short["has_earlier"] is True

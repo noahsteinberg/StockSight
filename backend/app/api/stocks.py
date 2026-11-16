@@ -62,7 +62,13 @@ def prices(
             as_of=bars[-1].date,
             range=range,
             bars=list(bars[-count:]),
+            session_limit=count,
+            has_earlier=len(bars) > count,
         )
     raise HTTPException(
-        404, detail={"code": "UNSUPPORTED_SYMBOL", "message": "Try AAPL."}
+        404,
+        detail={
+            "code": "UNSUPPORTED_SYMBOL",
+            "message": "No stored history for this symbol. Search supported stocks.",
+        },
     )

@@ -37,9 +37,11 @@ def database_history(engine: Engine, symbol: str, range_value: str) -> History |
                 select(DailyBar)
                 .where(DailyBar.series_id == series.id)
                 .order_by(DailyBar.session_date.desc())
-                .limit(limit)
+                .limit(limit + 1)
             )
         )
+        has_earlier = len(rows) > limit
+        rows = rows[:limit]
         bars = [
             Bar(
                 date=row.session_date,
@@ -63,4 +65,6 @@ def database_history(engine: Engine, symbol: str, range_value: str) -> History |
             as_of=bars[-1].date,
             range=range_value,
             bars=bars,
+            session_limit=limit,
+            has_earlier=has_earlier,
         )

@@ -46,7 +46,7 @@ npm install
 npm run dev
 ```
 
-Open <http://127.0.0.1:5173>. Start the backend too, then search AAPL and choose a range. Vite proxies /api to FastAPI on port 8000. The demo uses historical observations, not live prices.
+Open <http://127.0.0.1:5173>. Start the backend too, then search AAPL or Apple, select a result, and choose a range. Vite proxies /api to FastAPI on port 8000. The demo uses historical observations, not live prices.
 
 ```sh
 npm run lint
@@ -99,6 +99,7 @@ AI coding agents should read this file, [SPECIFICATION.md](SPECIFICATION.md), [T
 
 ## Documentation
 
+- [Frontend/backend review guide](docs/FRONTEND_BACKEND_REVIEW.md)
 - [Architecture](docs/ARCHITECTURE.md) and [current API](docs/API.md)
 - [Database plan](docs/DATABASE.md) and [ML foundation](ml/README.md)
 - [Security](docs/SECURITY.md) and [deployment plan](docs/DEPLOYMENT.md)
