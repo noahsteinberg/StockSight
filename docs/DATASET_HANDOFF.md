@@ -2,6 +2,43 @@
 
 Prepared November 16, 2026. Starting application commit: `821288c` on `feature/frontend-redesign`.
 
+## PostgreSQL completion (November 16, 2026)
+
+Gavin authorized completing the PostgreSQL import in this continuation. The
+ordinary sandbox diagnostic was permission-denied; the approved execution path
+reported accessible Docker and PostgreSQL. Screen capture remained off.
+Gavin subsequently confirmed an earlier import had already finished; its local
+completion report is dated 20261116T182245866445Z. The continuation reran the
+unchanged snapshot under the documented per-symbol replacement policy.
+
+`app.complete_backend --replace-existing-series` completed successfully:
+
+- Validated the unchanged source SHA256 listed below; accepted 2,947,701 rows
+  across 494 symbols and quarantined 252 without repairs.
+- Applied migrations, imported and checked AAPL/MSFT/NVDA, then imported the
+  full snapshot. Stored counts and source hashes matched for every symbol;
+  Alembic reported no schema drift. AAPL/MSFT/NVDA counts remained stable when
+  imported again during the full pass: 6,757 / 6,757 / 6,728.
+- Restarted the PostgreSQL container and verified all 2,947,701 rows, 494 series,
+  and 2,947,701 populated source_values records persisted.
+- Started the regular API on 127.0.0.1:8000. Real HTTP readiness reported
+  database; search and 1mo/3mo/1y/all histories for AAPL/MSFT/NVDA matched the
+  repository results exactly. Max returned 2,000 bars, has_earlier=true and
+  as_of=2026-11-12 for each.
+- All 50 backend tests passed, including cases on a separately created and
+  subsequently removed disposable PostgreSQL database. Ruff lint and formatting
+  passed. No browser verification was performed in this continuation.
+
+Ignored local evidence: `.local-data/backend-completion-20261116T184037934756Z.json`
+and `.local-data/backend-live-verification-20261116T184056Z.json`. Data, credentials,
+logs and local verification scripts/reports remain outside Git. No push or merge
+is part of this continuation. Adjustment semantics remain unverified; this is
+historical chart integration, not ML suitability approval.
+
+This completion supersedes earlier statements below that live PostgreSQL import
+and backend verification are pending. Earlier browser results still predate the
+new dataset.
+
 ## Current integration update (November 16, 2026)
 
 Noah's supplied team messages identify Yahoo Finance as the intended source and

@@ -2,10 +2,18 @@
 
 ## Current findings (November 16, 2026)
 
-The agent command process reports Windows Low Mandatory Level. Its Docker
+The ordinary sandboxed agent command process reports Windows Low Mandatory Level. Its Docker
 named-pipe connection is permission-denied and localhost TCP requests fail with
 an explicit socket-access prohibition. The account already belongs to docker-users.
 Docker context desktop-linux selects the expected Docker Desktop Linux-engine pipe.
+
+In the continuation session, the supported command approval mechanism allowed
+the same virtual-environment diagnostic outside the sandbox. That process
+reported Medium Mandatory Level, accessible Docker and accessible PostgreSQL
+on port 5433. Ports 8000 and 5173 were unavailable (not denied). Run Docker and
+live database/HTTP verification through that approved execution path; ordinary
+sandbox commands still cannot establish service reachability. No configuration
+or system-protection change was needed. Screen capture remained off.
 
 The readable user config selects windows.sandbox = elevated. This is a sandbox
 implementation choice, not proof that agent commands have administrator access
@@ -67,8 +75,10 @@ Windows named-pipe access. Do not use the documented Unix docker.sock example as
 though it configured the Windows npipe endpoint.
 
 The active managed session cannot be reconfigured from inside this repository.
-Any permitted access change must be applied through the app/device configuration
-outside this session and verified in a new session with the same diagnostic.
+Use its supported command approval mechanism when available, as verified above.
+If that mechanism is unavailable or rejects access, any further permitted access
+change must be applied through app/device configuration outside the session and
+verified with the same diagnostic.
 Do not disable system protections or expose an unauthenticated Docker TCP API.
 
 Official references:

@@ -59,10 +59,11 @@ and the unchanged input can be rerun. BACKEND VERIFIED is printed only after the
 checks complete; it does not claim browser verification or that Uvicorn is running.
 Restart the regular app.main:app API afterward and refresh the frontend.
 
-The agent's sandbox cannot access Docker's named pipe or the database, even when
-Docker Desktop is open. Running this command in a normal developer terminal is
-required in that environment. Its safeguards have local automated coverage;
-live PostgreSQL completion is pending until an actual success report exists.
+The ordinary agent sandbox cannot access Docker's named pipe or the database,
+even when Docker Desktop is open. Use a normal developer terminal or the supported
+approved execution path after the environment check succeeds. On November 16,
+the approved path completed this command against PostgreSQL; see the completion
+evidence in DATASET_HANDOFF.md.
 
 ### Individual steps
 
@@ -126,5 +127,11 @@ Full source validation and synthetic rollback/correction/conflict tests passed.
 Real AAPL/MSFT/NVDA subset import evidence is in the ignored local verification
 report. Disposable SQLite checks exercise the SQLAlchemy/import/API-function
 contracts; they do not establish live PostgreSQL or HTTP/browser success.
-The agent cannot start/access Docker in this session, so the normal PostgreSQL
-import and browser acceptance steps remain outstanding.
+The November 16 continuation completed the PostgreSQL import, verified every
+symbol's stored count/hash, confirmed no schema drift and checked persistence
+after a container restart. Real localhost HTTP responses for AAPL/MSFT/NVDA
+matched repository histories across all four supported ranges. All 50 backend
+tests passed with disposable PostgreSQL coverage, and Ruff lint/format passed.
+The evidence filenames and execution-access details are in DATASET_HANDOFF.md
+and ENVIRONMENT_ACCESS.md. Browser acceptance against the new dataset remains
+outstanding; no screen capture was used.
