@@ -16,6 +16,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app.config import Settings
 from app.db import DailyBar, PriceSeries, database_engine
+from app.environment_check import docker_status
 from app.import_prices import import_snapshot, scan
 
 BACKEND = Path(__file__).resolve().parents[1]
@@ -123,6 +124,12 @@ def main():
         if not args.path.is_file():
             raise ValueError("Dataset file is missing; provide its path as an argument")
         url = local_database_url(Settings())
+        access = docker_status()
+        if access["status"] != "accessible":
+            status = access["status"].upper()
+            print(f"DOCKER_{status}: {access.get('message', 'Unavailable')}")
+            print("Compare with python -m app.environment_check in your terminal.")
+            return 1
         if importlib.util.find_spec("pyarrow") is None:
             print("Installing the pinned Parquet reader...", flush=True)
             subprocess.run(

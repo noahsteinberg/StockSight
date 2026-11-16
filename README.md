@@ -101,6 +101,7 @@ AI coding agents should read this file, [SPECIFICATION.md](SPECIFICATION.md), [T
 
 ## Documentation
 
+- [Execution-access diagnostics](docs/ENVIRONMENT_ACCESS.md)
 - [Team dataset import](docs/PRICES_IMPORT.md)
 - [Frontend/backend review guide](docs/FRONTEND_BACKEND_REVIEW.md)
 - [Architecture](docs/ARCHITECTURE.md) and [current API](docs/API.md)

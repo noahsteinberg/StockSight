@@ -90,6 +90,7 @@ def test_failed_docker_step_does_not_continue_or_claim_completion(
         database_url="postgresql+psycopg://u:p@127.0.0.1:5433/stocksight",
     )
     monkeypatch.setattr(setup, "Settings", lambda: settings)
+    monkeypatch.setattr(setup, "docker_status", lambda: {"status": "accessible"})
     monkeypatch.setattr(setup.importlib.util, "find_spec", lambda _: object())
     monkeypatch.setattr(
         setup,

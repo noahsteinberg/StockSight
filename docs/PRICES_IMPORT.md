@@ -41,6 +41,8 @@ From backend in your normal PowerShell terminal:
 .\.venv\Scripts\python.exe -m app.complete_backend --replace-existing-series
 ```
 
+Docker access is checked first. A denied or unavailable engine stops setup before the expensive data scan; see ENVIRONMENT_ACCESS.md.
+
 This defaults to prices_clean.parquet in your Downloads folder. An optional first
 argument supplies another path. It checks the configured URL is this project's
 local Compose database, installs the pinned reader if missing, validates the
