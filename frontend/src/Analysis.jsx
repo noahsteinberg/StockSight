@@ -6,6 +6,7 @@ const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD
 
 function responseError(status, searching = false) {
   if (status === 404) return 'Symbol unavailable. Search for a supported stock.';
+  if (status === 503) return searching ? 'Could not search stocks: price storage is unavailable.' : 'Could not load prices: price storage is unavailable.';
   if (status === 422) return 'Invalid request. Check your search or range.';
   return searching ? 'Could not search stocks. Check that the API is running.' : 'Could not load prices. Check that the API is running.';
 }

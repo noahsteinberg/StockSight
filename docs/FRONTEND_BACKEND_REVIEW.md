@@ -78,9 +78,7 @@ database-backed walkthrough. `/api/health` alone does not verify storage.
 Migration and fixture import are explicit; startup does not change the schema
 or silently seed/fall back when database configuration is broken.
 
-For a deliberate database-free walkthrough, set `STOCKSIGHT_DATABASE_URL` to an
-empty string in the backend terminal before starting Uvicorn. Readiness then
-reports fixture storage. Do not confuse this with PostgreSQL verification.
+For a deliberate database-free walkthrough, use the explicit app.demo:create_demo_app --factory entry point in [local startup](LOCAL_START.md). It ignores saved database settings. This does not verify PostgreSQL.
 
 ## Review walkthrough
 

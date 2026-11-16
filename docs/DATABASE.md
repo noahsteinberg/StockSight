@@ -12,7 +12,7 @@ Daily session dates remain dates, not invented midnight UTC timestamps. The curr
 
 `GET /api/stocks` and `/api/stocks/{symbol}/prices` retain the Phase 1 JSON contract. Search escapes SQL wildcard characters and is capped at 50 results. Price queries select the newest bounded rows, then return them chronologically. `all` is bounded to the latest 2,000 sessions; the existing 506-row fixture fits entirely. No file import or schema creation happens during API startup.
 
-If `STOCKSIGHT_DATABASE_URL` is set, API reads come from that database. A missing/empty URL selects the fixture adapter explicitly. Database failures return sanitized 503 responses and never switch to fixture data. `/api/health` remains a process-health check; `/api/ready` checks configured storage/schema. Readiness does not assert a particular dataset has been seeded; empty supported history is reported as unavailable via 404 in this initial contract.
+If `STOCKSIGHT_DATABASE_URL` is set, API reads come from that database. A missing/empty URL selects the fixture adapter explicitly. Database failures return sanitized 503 responses and never switch to fixture data. `/api/health` remains a process-health check; `/api/ready` checks configured storage/schema. Readiness now checks all three market tables and usable joined history. Missing tables return SCHEMA_MISSING; empty storage returns DATA_NOT_IMPORTED. See LOCAL_START.md for recovery.
 
 ## Local setup on Windows
 

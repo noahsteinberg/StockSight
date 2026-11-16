@@ -4,6 +4,7 @@ from datetime import date, datetime
 from decimal import Decimal
 
 from sqlalchemy import (
+    JSON,
     BigInteger,
     CheckConstraint,
     DateTime,
@@ -58,6 +59,7 @@ class DailyBar(Base):
     low: Mapped[Decimal] = mapped_column(Numeric(18, 6))
     close: Mapped[Decimal] = mapped_column(Numeric(18, 6))
     volume: Mapped[int] = mapped_column(BigInteger)
+    source_values: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
 
 def database_engine(url: str) -> Engine:

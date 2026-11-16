@@ -33,7 +33,7 @@ class History(BaseModel):
     name: str
     source: str
     source_url: str
-    mode: Literal["historical_fixture"] = "historical_fixture"
+    mode: Literal["historical_fixture", "historical_snapshot"] = "historical_fixture"
     adjustment: str = "Unadjusted OHLC; historical values are not current quotes"
     as_of: date
     range: str

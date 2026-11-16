@@ -2,9 +2,24 @@
 
 Prepared November 16, 2026. Starting application commit: `821288c` on `feature/frontend-redesign`.
 
-## Immediate objective
+## Current integration update (November 16, 2026)
 
-Evaluate Vlad's historical dataset and prepare a separate, validated importer into the existing PostgreSQL foundation. Inspection is complete; the Parquet dataset has not been imported. Do not interpret this handoff as approval of its source, price-adjustment policy, or ML suitability.
+Noah's supplied team messages identify Yahoo Finance as the intended source and
+S&P 500 stocks as scope; Vlad identifies prices_clean.parquet as the shared file.
+A validated importer, source-values migration, and historical_snapshot API mode
+are now implemented. Adjustment semantics are still unverified and labeled as
+such; this is historical chart integration, not ML suitability approval.
+
+Full-file validation: 2,947,701 accepted rows across 494 symbols; 252 quarantined.
+Twenty targeted backend tests and Ruff lint/format pass. Actual AAPL/MSFT/NVDA
+rows were imported twice into a disposable SQLite database with stable counts,
+API-function parity, correct dated source labels, and no schema drift. No live
+PostgreSQL import or browser success is claimed. Docker is not accessible/running
+from this agent session. See [import commands and policy](PRICES_IMPORT.md).
+
+The remaining sections retain the original inspection evidence. Statements
+about unconfirmed provider identity or the importer being only proposed are
+superseded by this update; other adjustment/metadata/ML limitations remain.
 
 ## Current project state
 

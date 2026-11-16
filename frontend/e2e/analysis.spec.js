@@ -39,7 +39,7 @@ test('blank ticker gives feedback; unsupported ticker and normalized recovery', 
 test('API failure recovers through Retry', async ({ page }) => {
   await page.route(barsURL, route => route.fulfill({ status: 503, body: 'Unavailable' }));
   await page.goto('/');
-  await expect(page.getByRole('alert')).toContainText('Could not load prices');
+  await expect(page.getByRole('alert')).toContainText('price storage is unavailable');
   await page.unroute(barsURL);
   await page.getByRole('button', { name: 'Retry', exact: true }).click();
   await expect(latest(page)).toContainText('63 sessions');

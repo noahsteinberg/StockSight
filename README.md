@@ -36,6 +36,8 @@ StockSight/
 
 ## Local setup
 
+For current commands and 503 recovery, see [local startup](docs/LOCAL_START.md) and the [integration adversarial review](docs/reviews/INTEGRATION_ADVERSARIAL_REVIEW.md). Use the explicit demo factory to view charts without PostgreSQL.
+
 Use Node.js 24 LTS (or a version accepted by `frontend/package.json`), npm, Python 3.12+, and Git. CI uses Node 24 and Python 3.13. Run each service in its own terminal. No API keys are needed; fixture mode works without a database. Database mode requires the local PostgreSQL setup.
 
 ### Frontend
@@ -87,7 +89,7 @@ Runtime-only environments can install `requirements.txt`; contributors and CI in
 
 Defaults use the historical fixture without an environment file. Copy `backend/.env.example` to `backend/.env` for API settings; `app/config.py` loads that exact location. Root `.env.example` is for Docker Compose; see [database setup](docs/DATABASE.md). `STOCKSIGHT_APP_NAME` overrides the API name and health response service field. A root `.env` is not loaded automatically. Tests explicitly set the expected service name.
 
-Never commit `.env` files or credentials. Vite exposes `VITE_*` values to browsers, so they must never contain secrets. Database and provider settings will be introduced when those integrations are implemented.
+Never commit `.env` files or credentials. Vite exposes `VITE_*` values to browsers, so they must never contain secrets. STOCKSIGHT_DATABASE_URL already selects storage; a saved nonempty URL requires running, migrated, seeded PostgreSQL.
 
 ## Collaboration
 
@@ -99,6 +101,7 @@ AI coding agents should read this file, [SPECIFICATION.md](SPECIFICATION.md), [T
 
 ## Documentation
 
+- [Team dataset import](docs/PRICES_IMPORT.md)
 - [Frontend/backend review guide](docs/FRONTEND_BACKEND_REVIEW.md)
 - [Architecture](docs/ARCHITECTURE.md) and [current API](docs/API.md)
 - [Database plan](docs/DATABASE.md) and [ML foundation](ml/README.md)
