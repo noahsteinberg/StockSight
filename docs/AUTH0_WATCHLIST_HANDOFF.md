@@ -21,9 +21,13 @@ Auth0 account being created. No test identity endpoint is mounted by app.main.
 3. Under Applications → APIs, create **StockSight API**, identifier
    `https://stocksight-api`, signing algorithm **RS256**. The identifier is a
    logical audience; it does not need to be a hosted URL.
-4. Set the API's access-token expiration and browser-flow expiration to 300
+4. Open that API's **Application Access** tab. Edit the StockSight SPA and enable
+   **User-Delegated Access**, then save. When using per-app authorization, the SPA
+   needs this explicit grant before Auth0 will issue a token for this audience.
+   Client/Machine-to-Machine access is not needed for this user-login flow.
+5. Set the API's access-token expiration and browser-flow expiration to 300
    seconds for this demo. No Management API access or client secret is needed.
-5. Supply these three public values: tenant **Domain**, application **Client ID**,
+6. Supply these three public values: tenant **Domain**, application **Client ID**,
    and API **Identifier**. Do not send a password, client secret or bearer token.
 
 Use exactly the same hostname when opening the app and configuring callbacks.
@@ -35,6 +39,12 @@ Official references: [Auth0 React SDK](https://github.com/auth0/auth0-react),
 [SPA SDK configuration](https://github.com/auth0/auth0-spa-js),
 [token best practices](https://auth0.com/docs/secure/tokens/token-best-practices),
 and [PyJWT validation](https://pyjwt.readthedocs.io/en/stable/usage.html).
+API grant configuration follows Auth0's
+[application access policy guide](https://auth0.com/blog/developers-guide-api-access-policies-auth0/).
+
+If Auth0 returns `Client ... is not authorized to access resource server ...`,
+check step 4 and the API's user-access policy. Keep per-app authorization and grant
+the StockSight SPA user access rather than broadening access for every application.
 
 ## Local configuration and startup
 
