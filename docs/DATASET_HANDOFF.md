@@ -173,4 +173,4 @@ series, or approve the unknown provider/adjustment policy.
 Gavin subsequently authorized verifying, committing, and publishing the integration
 for Noah's review. The earlier push deferral is superseded for this review snapshot.
 No merge or dataset import was authorized. See FRONTEND_BACKEND_REVIEW.md for the
-publication branch and verification limits.
+local commit, publication blockers, and verification limits.

@@ -1,10 +1,23 @@
 # Frontend/backend integration review
 
 Prepared November 16, 2026 for Noah. Branch: `feature/frontend-redesign`.
-Review publication target: `review/stock-search-integration-20261116`.
-The original local feature branch and its earlier commits are preserved. The
-review branch publishes their combined file snapshot because command-line Git
-network access is unavailable in the agent session. No merge is authorized.
+Publication status: committed locally on `feature/frontend-redesign`; not pushed.
+The initial integration commit is `bb4eeab`. A later documentation commit records
+the publication blocker. No remote review branch or PR was created, and no merge
+was performed. The original local branch and earlier commits are preserved.
+
+Publishing was attempted after Gavin authorized it. Command-line Git failed with
+`getaddrinfo() thread failed to start`; the GitHub connector rejected tree creation
+with HTTP 403 `Resource not accessible by integration`. Its available permission
+controls do not grant the repository write access needed for this operation.
+From a normal terminal in this repository, publish the existing commits with:
+
+```powershell
+git push origin feature/frontend-redesign
+```
+
+Then run/check CI for that exact branch head. Publication and hosted CI must not
+be reported as successful until their actual results are available.
 
 ## Completed integration scope
 
@@ -103,7 +116,7 @@ reports fixture storage. Do not confuse this with PostgreSQL verification.
   terminated on startup in the initial attempt. On the follow-up, Docker was
   open but command-line access to its named pipe was denied. Interrupted blocked
   test runs are not passes. GitHub CI is the intended independent verification
-  path for this publication; check the actual workflow result before signoff.
+  path once publication is possible; no hosted workflow was triggered in this session.
 - PostgreSQL and the browser suite were verified in the prior increment (see
   DATABASE.md), but that evidence predates these changes. Re-run them for this
   exact diff on a normally running local environment before merge/demo signoff.
