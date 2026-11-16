@@ -4,9 +4,11 @@ This increment implements the account UI, Auth0 SDK integration, validated priva
 API routes and PostgreSQL watchlists. Noah can continue from the existing React
 components and the OpenAPI contract. Indicators and ML remain separate work.
 
-Real Auth0 signup/login acceptance is pending tenant setup. Automated tests use
-signed test identities in an isolated harness; they are not evidence of a real
-Auth0 account being created. No test identity endpoint is mounted by app.main.
+Real Auth0 authorization/sign-in and private-watchlist persistence were verified
+after tenant setup on November 16. The user completed hosted authentication;
+no password was collected by the agent. Automated tests separately use signed
+test identities in an isolated harness. No test identity endpoint is mounted by
+app.main. Additional hosted account-lifecycle checks remain below.
 
 ## Auth0 setup Gavin needs to complete
 
@@ -196,10 +198,11 @@ Neither app.main nor app.demo exposes /api/test/identity. Screenshots, video and
 tracing are off in the account suite unless a one-off visual check is explicitly
 requested with STOCKSIGHT_VISUAL_QA=1.
 
-After tenant setup, complete the real acceptance flow: new account signup,
-logout/login, save/open/remove, refresh persistence, second-user isolation, invalid
-or duplicate signup, expired session handling and sign-out. Record the result
-without credentials or screenshots of account secrets. This gate is still pending.
+Remaining real-tenant acceptance: explicitly verify invalid/duplicate database
+signup, recovery, sign-out, expired sessions, removal and a second real user's
+isolation. Save/open, refresh persistence after reauthentication and hosted sign-in
+were verified as described below. Automated signed-token tests cover additional
+API/UI scenarios, but do not substitute for the remaining hosted lifecycle checks.
 
 ## Local verification November 16, 2026
 
@@ -223,4 +226,28 @@ without credentials or screenshots of account secrets. This gate is still pendin
 
 Ignored evidence: .local-data/auth-foundation-verification.json,
 .local-data/account-development-migration.json and corresponding command logs.
-The remaining real-tenant acceptance gate above is not replaced by these results.
+The remaining hosted lifecycle checks above are not replaced by these results.
+
+## Live Auth0 continuation (November 16, 2026)
+
+- Loaded Gavin's supplied public domain/client ID/audience into ignored local
+  environment files. The database URL was preserved. Tenant OpenID discovery and
+  RSA JWKS retrieval succeeded over verified HTTPS.
+- The initial live request was rejected because the SPA lacked a user-delegated
+  API grant. Gavin enabled it in the Auth0 dashboard; the real hosted signup page
+  then opened successfully. The setup steps above now include that grant.
+- The user completed hosted authentication manually and returned to StockSight.
+  The real access-token-protected watchlist loaded, and saving AAPL succeeded.
+- A browser refresh did not silently restore the local Auth0 session. Interactive
+  sign-in required the hosted consent page again. After reauthentication, the
+  same saved AAPL entry was retrieved. Persistence is verified; seamless silent
+  session restoration is not verified in this local browser setup. Tokens remain
+  in SDK memory under the existing design; no persistent token cache was added.
+- Changed the analysis view to MSFT, then opened saved AAPL from the dashboard.
+  The ticker and chart returned to AAPL correctly. The AAPL entry was left saved.
+- The regular API and frontend are running on ports 8000/5173 from this worktree.
+  No source-data import or replacement was performed during this continuation.
+
+No passwords, bearer tokens, callback codes, emails or Auth0 session state are
+included in Git or the local acceptance report. This is evidence of one real
+Auth0 user flow, not a claim that every hosted lifecycle scenario has passed.

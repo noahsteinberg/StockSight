@@ -25,7 +25,8 @@ Team review, second-machine verification, and pending pushes remain explicit han
 - [x] Implement Auth0 SDK/token-validation foundation and private identity storage
 - [x] Implement authorized persistent watchlist CRUD and UI
 - [x] Test ownership boundaries, concurrency, persistence and error states
-- [ ] Configure the Auth0 tenant and verify real signup/login/logout and recovery behavior
+- [x] Configure Auth0 and verify real hosted sign-in and watchlist save/retrieval
+- [ ] Finish real hosted logout/recovery, invalid/duplicate signup and second-user acceptance
 
 ## Phase 3: Stock data and analysis
 

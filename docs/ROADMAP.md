@@ -281,6 +281,7 @@ Phase 2 persistence foundation update (November 15, 2026): PostgreSQL schema/mig
 Account/watchlist foundation update (November 16, 2026): Auth0 React integration,
 validated access-token protection, private watchlist APIs/storage and the personal
 dashboard UI are implemented. PostgreSQL-backed automated integration checks pass.
-Real tenant signup/login/logout acceptance awaits Auth0 configuration; M4 is not
-marked complete until that gate passes. See [the handoff](AUTH0_WATCHLIST_HANDOFF.md).
+Real Auth0 sign-in and saved-watchlist retrieval now pass. Additional hosted
+lifecycle checks and silent session restoration in the local browser remain
+unverified; M4 is not marked complete. See [the handoff](AUTH0_WATCHLIST_HANDOFF.md).
 Existing ownership assignments remain unchanged. M3 and M5 remain outstanding.
