@@ -7,8 +7,8 @@ findings and are not current startup instructions.
 ## Checkout and delivery state
 
 Gavin's implementation checkout is on `feature/auth0-watchlists`, following
-`6131c5e` (persistent app sessions). The indicator backend and current documentation
-are delivered together in the local commit containing this handoff. Check
+`6e1c7e1` (indicator backend and prior handoff). The frontend redesign and
+SMA20/RSI14 UI are delivered in the local commit containing this update. Check
 `git status --short`, `git branch --show-current` and `git log -3 --oneline` in
 the actual checkout. They have not been pushed or merged by this task.
 Gavin requests a local commit for every completed change going forward; run the
@@ -30,18 +30,19 @@ the configuration described below.
 
 | Area | Current implementation | Remaining boundary |
 | --- | --- | --- |
-| Search and charts | React → FastAPI → canonical PostgreSQL history; price/volume SVG, ranges, keyboard inspection, table, source/date and errors | Metadata enrichment and later visual redesign |
+| Search and charts | UConn-inspired responsive research workspace; React → FastAPI → PostgreSQL history, SVG chart, ranges, inspection, table and feedback | Metadata enrichment |
 | Data | Repeatable validated Parquet importer; 494 canonical series and 2,947,701 bars on Gavin's local database | Reproducible provider download, rights/adjustment/calendar review and incremental refresh |
 | Accounts | Auth0 signup/login/logout; username with optional recovery email; HttpOnly server sessions restore on refresh | Production reset/account-disable revocation policy and complete password-reset acceptance |
-| Watchlists | Private persistence, save/remove/open, capacity 100, account-switch and two-user isolation | Future UI refinement |
-| Indicators | Public SMA20/Wilder RSI14 API; numerical tests and range/date alignment | Frontend rendering, toggles and short-history presentation |
+| Watchlists | Private persistence, save/remove/open, capacity 100, account isolation; desktop sidebar/mobile stack and selected-stock state | Later product refinements |
+| Indicators | SMA20 overlay and RSI14 panel/toggles; independent retries, snapshot alignment, null handling and date inspection | Future indicators only if separately scoped |
 | ML / forecasts | Documentation and proposed target only | Features, chronological evaluation, trusted artifact, inference, persisted forecasts/outcomes and evaluation UI |
 | Delivery | Local checks; CI definitions include disposable PostgreSQL and browser tests | Hosted CI on published head, second-machine setup and deployment/demo acceptance |
 
-**Phase boundary:** Gavin asked to keep changes digestible and explicitly deferred
-the frontend redesign. The next proposed task is to integrate the indicator API
-into the existing frontend when assigned. Do not bundle redesign, ML or provider
-refresh into that increment. The complete MVP is not finished.
+**Phase boundary:** Gavin subsequently authorized a UConn-inspired frontend
+redesign and existing indicator integration. That phase is implemented and locally
+verified; see [FRONTEND_REDESIGN.md](FRONTEND_REDESIGN.md) for research, changes,
+evidence and limitations. ML remains for Vlad per Gavin's current direction.
+No ML/provider refresh work was bundled. The complete MVP is not finished.
 
 ## Local setup
 
@@ -137,14 +138,22 @@ close or label historical observations live. No recurring ingestion exists.
 
 These are dated local results, not a new run in the next conversation:
 
+- Latest redesign: frontend lint/build passed; 19 chart/indicator browser tests
+  passed against the real fixture API; nine account/session cases passed against
+  the isolated SQLite harness, including SDK boundary checks. Desktop/mobile
+  screenshots inspected and 1440/390/320px overflow checks passed. Normal-app
+  PostgreSQL browser checks confirmed AAPL/MSFT indicators and stable MSFT latest
+  values across 3M/1Y. No new hosted Auth0 acceptance, PG automated suite, hosted CI
+  or deployment is claimed. Details and ignored screenshot paths are in
+  FRONTEND_REDESIGN.md.
 - Latest backend indicator phase: 95 passed, one expected SQLite invocation of a
   PostgreSQL-only concurrency test skipped; its PostgreSQL invocation passed.
   Ruff lint/format passed. Fixture and PostgreSQL indicator contracts were tested.
 - Real HTTP against imported PostgreSQL: AAPL/MSFT, all four ranges aligned to
   prices and stable overlapping indicators; market/watchlist counts unchanged.
 - Previous session phase: 11 chart and 9 account/session browser tests passed
-  against disposable PostgreSQL, plus frontend lint/build. These browser results
-  predate the indicator-only backend change; no indicator UI browser test exists.
+  against disposable PostgreSQL, plus frontend lint/build. Those results predate
+  the redesign; the latest indicator UI browser checks are listed above.
 - Real Auth0: original/second-account signup/login, refresh, distinct watchlists,
   removal and logout verified; user confirmed recovery email receipt. No full
   password change was performed or independently verified.
@@ -188,17 +197,15 @@ from production. The account suite disables capture; chart traces are retained
 on failure. No continuous screen capture is needed; use visual capture only when
 necessary and keep sensitive artifacts ignored.
 
-## Acceptance for the next frontend increment
+## Frontend increment — implemented
 
-When assigned, add SMA20 overlay and RSI14 visualization/toggles to the existing
-analysis view, with units, period labels, null warm-up handling and current
-source/date context. Keep search, ranges, date inspection, watchlist navigation,
-session restoration and mobile/keyboard access working. Cancel superseded
-indicator requests and prevent stale symbol/range results from being combined.
-Handle indicator failure/retry independently and compare/join response dates.
-Test the real API path and range changes; short-history and failure fixtures may
-be explicit controlled tests. Do not imply that historical indicators predict a
-guaranteed outcome. Complete and review that increment before a separate redesign.
+The authorized redesign includes SMA20/RSI14 toggles, plots, units, null warm-up
+handling and current source/date context. Browser tests cover real fixture API
+ranges and controlled short-history/failure/mismatch cases. Private requests still
+use the unchanged session wrapper. Preserve independent retry, cancellation,
+snapshot/date checks and bounded-history meaning in subsequent work. The new
+use-indicators.js hook owns public indicator requests; PricePlot.jsx owns SVG
+presentation. No client-side indicator computation was introduced.
 
 Full MVP gates and unchanged team ownership remain in [ROADMAP.md](ROADMAP.md).
 
@@ -206,9 +213,9 @@ Full MVP gates and unchanged team ownership remain in [ROADMAP.md](ROADMAP.md).
 
 > Continue StockSight in the current worktree. Read AGENTS.md and
 > docs/CURRENT_HANDOFF.md, then inspect git status before changing files.
-> The SMA20/RSI14 backend phase is implemented and locally verified; indicator UI
-> is the proposed next phase. Keep the existing frontend design: redesign is
-> deferred. Work in one digestible phase at a time. Before live operations run
+> The UConn-inspired redesign and SMA20/RSI14 frontend integration are implemented
+> and locally verified; read docs/FRONTEND_REDESIGN.md. ML remains for Vlad.
+> Work in one digestible phase at a time. Before live operations run
 > the backend virtual-environment environment check. Preserve imported market
 > data, existing accounts/watchlists and uncommitted changes. Do not push or
 > merge without instruction. Report current state before starting the next phase.

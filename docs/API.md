@@ -6,7 +6,8 @@ contracts below are implemented; prediction/evaluation routes do not exist.
 The moving-average/RSI backend contract is in [INDICATORS.md](INDICATORS.md):
 `GET /api/stocks/{symbol}/indicators?range=3mo`. It returns dated SMA20 and Wilder
 RSI14 values, null warm-up values and explicit calculation-window metadata.
-The existing frontend has not been changed for this phase.
+The frontend consumes it through independent SMA20/RSI14 toggles and checks
+price/indicator snapshot alignment; see FRONTEND_REDESIGN.md.
 
 Local base URL: `http://127.0.0.1:8000`.
 

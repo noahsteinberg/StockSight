@@ -1,7 +1,8 @@
 # Architecture
 
 Current implementation and phase boundaries are summarized in
-[CURRENT_HANDOFF.md](CURRENT_HANDOFF.md). The frontend redesign is deferred.
+[CURRENT_HANDOFF.md](CURRENT_HANDOFF.md). The UConn-inspired frontend redesign
+and indicator integration are documented in [FRONTEND_REDESIGN.md](FRONTEND_REDESIGN.md).
 
 ## Implemented
 
@@ -25,7 +26,8 @@ Current implementation and phase boundaries are summarized in
 
 - `app/indicators.py` calculates close-based SMA20 and Wilder RSI14 over a fixed
   bounded history, before trimming display ranges. The public indicator route
-  shares storage/error behavior with prices. The frontend does not consume it yet;
+  shares storage/error behavior with prices. Frontend use-indicators.js consumes it,
+  validates snapshot/date alignment, and supplies SMA/RSI plots and date inspection;
   numerical/window conventions are versioned in INDICATORS.md.
 - `app/import_prices.py` validates and imports the team snapshot per symbol;
   `daily_bars.source_values` retains auxiliary source fields. This is not a

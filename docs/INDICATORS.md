@@ -3,7 +3,8 @@
 `GET /api/stocks/{symbol}/indicators?range=3mo` is public and reads the same
 canonical stored daily series as `/prices`. It performs no provider downloads,
 imports, training or database writes. Fixture mode remains explicit. No schema
-migration is needed. The frontend is unchanged in this phase.
+migration is needed. The later frontend redesign now consumes this endpoint;
+see [FRONTEND_REDESIGN.md](FRONTEND_REDESIGN.md).
 
 ## Contract
 
@@ -83,9 +84,10 @@ date alignment, all display ranges, the calculation cap, restarts, explicit
 fixture/database equivalence, empty history and sanitized failures. Database tests
 run on SQLite and opt-in disposable PostgreSQL using the existing test fixture.
 
-This completes the indicator backend slice, not milestone M3: frontend SMA/RSI
-rendering, toggles, units and insufficient-history states remain the next phase.
-The redesign is separately deferred. ML, persisted forecasts/outcomes and model
+The later frontend phase implements SMA/RSI rendering, toggles, units,
+insufficient-history states and browser acceptance, including real fixture API
+and imported PostgreSQL browser checks. See FRONTEND_REDESIGN.md for scope.
+ML, persisted forecasts/outcomes and model
 evaluation remain outstanding MVP work. Team ownership in ROADMAP.md is unchanged.
 
 Local verification on November 16, 2026: the full backend suite passed with 95

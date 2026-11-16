@@ -35,17 +35,17 @@ requires instruction.
 - Auth0 Universal Login/PKCE, verified API JWTs, private watchlists and opaque
   HttpOnly app sessions. Refresh restores the app session without relying on an
   Auth0 silent iframe. Username signup with optional recovery email is configured.
-- SMA20/Wilder RSI14 backend API is implemented and locally verified. **Its
-  frontend integration has not been implemented.** See INDICATORS.md for null
+- SMA20/Wilder RSI14 backend API and frontend toggles/plots are implemented and
+  locally verified. See INDICATORS.md for null
   warm-up values, fixed calculation history and versioned numerical conventions.
 - ML training/inference, stored forecasts/outcomes, evaluation, incremental
   provider refresh and production deployment remain unfinished. Do not add fake
   scores, prices, forecasts or claims that the full MVP is complete.
 
-Gavin requested digestible phases and explicitly stopped the frontend redesign.
-Do not redesign as part of backend or documentation work. The proposed next
-increment is indicator rendering/toggles in the existing UI, when assigned;
-the redesign is a separate later task. Gavin will continue this work in a new conversation. Resume from this foundation.
+Gavin subsequently authorized a UConn-inspired frontend redesign and existing
+indicator integration. That phase is implemented; see docs/FRONTEND_REDESIGN.md
+for reference research, changes and dated verification. Keep subsequent phases
+digestible and follow the current request. ML remains for Vlad per Gavin's direction.
 Preserve the team ownership table in ROADMAP.md; it is coordination, not a ban
 on implementing across layers. Follow the current user's task scope.
 

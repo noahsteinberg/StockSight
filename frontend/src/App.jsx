@@ -1,15 +1,10 @@
-import Analysis from './Analysis.jsx';
 import { useState } from 'react';
+import Analysis from './Analysis.jsx';
 import AccountControls from './AccountControls.jsx';
 import Watchlist from './Watchlist.jsx';
 import { useAccount } from './auth-context.js';
 import useWatchlist from './use-watchlist.js';
-const sections = [
-  { number: '01', title: 'Stock analysis', status: 'Historical demo' },
-  { number: '02', title: 'Watchlists', status: 'Accounts' },
-  { number: '03', title: 'Predictions', status: 'Planned' },
-  { number: '04', title: 'Evaluation', status: 'Planned' },
-];
+
 const repo = 'https://github.com/noahsteinberg/StockSight';
 
 export default function App() {
@@ -23,42 +18,34 @@ export default function App() {
     setSymbol(value);
     sessionStorage.setItem('stocksight:selected-symbol', value);
   }
-  return (
-    <>
-      <a className="skip-link" href="#main">Skip to content</a>
-      <header className="masthead wrap">
-        <a className="brand" href="#" aria-label="StockSight home">StockSight<span aria-hidden="true"> /</span></a>
-        <nav aria-label="Main navigation">
-          <a href="#analysis">Analysis</a>
-          <a href="#watchlist">Watchlist</a>
-          <a href="#project">Project</a>
-          <a href={repo}>GitHub <span aria-hidden="true">↗</span></a>
-        </nav>
+  return <>
+    <a className="skip-link" href="#main">Skip to content</a>
+    <header className="masthead">
+      <div className="masthead-inner wrap">
+        <a className="brand" href="#analysis" aria-label="StockSight home">
+          <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5 23V9M5 23h22M10 19l6-7 5 3 7-9" /></svg>
+          StockSight<span className="brand-divider" aria-hidden="true" /><span className="brand-school">UCONN</span>
+        </a>
         <AccountControls />
-      </header>
-      <main id="main" className="wrap" tabIndex="-1">
-        {account.error && <div role="alert" className="account-error">{account.error}</div>}
+      </div>
+    </header>
+    <div className="navigation-bar">
+      <nav className="wrap" aria-label="Main navigation">
+        <a href="#analysis">Analysis</a><a href="#watchlist">Watchlist</a><a href="#project">About</a>
+        <span className="navigation-context">Historical research</span>
+      </nav>
+    </div>
+    <main id="main" className="wrap" tabIndex="-1">
+      {account.error && <div role="alert" className="account-error">{account.error}</div>}
+      <div className="workspace">
         <Analysis symbol={symbol} onSelectSymbol={selectStock} watchlist={watchlist} />
-        <Watchlist watchlist={watchlist} onOpen={selectStock} />
-        <section id="scope" className="scope" aria-labelledby="scope-title">
-          <div className="section-heading"><h2 id="scope-title">Project scope</h2><span>Planned capabilities</span></div>
-          <ol className="scope-list">
-            {sections.map(section => (
-              <li key={section.number}>
-                <span className="row-number" aria-hidden="true">{section.number}</span>
-                <h3>{section.title}</h3>
-
-                <span className={section.status === 'Next up' ? 'row-status next' : 'row-status'}>{section.status}</span>
-              </li>
-            ))}
-          </ol>
-        </section>
-        <section id="project" className="project" aria-labelledby="project-title">
-          <div><span className="note-label">THE PROJECT</span><h2 id="project-title">Built at UConn.</h2></div>
-          <div className="project-copy"><p>A CSE 4095 Agentic Programming team project by Noah Steinberg, Gavin Javier Pino, Parth Sachdev, and Vladislav Lagutin.</p><a className="text-link" href={`${repo}/blob/main/SPECIFICATION.md`}>Read the specification <span aria-hidden="true">↗</span></a></div>
-        </section>
-      </main>
-      <footer className="footer wrap"><span>StockSight</span><p>For education and research. Not financial advice.</p><a href="#">Back to top ↑</a></footer>
-    </>
-  );
+        <aside className="workspace-sidebar"><Watchlist watchlist={watchlist} onOpen={selectStock} selectedSymbol={symbol} /></aside>
+      </div>
+      <details id="project" className="project">
+        <summary>About StockSight <span>UConn · CSE 4095</span></summary>
+        <div className="project-copy"><p>An educational stock research project by Noah Steinberg, Gavin Javier Pino, Parth Sachdev, and Vladislav Lagutin.</p><p>Search historical prices, inspect technical indicators, and keep a private watchlist. Predictions and model evaluation are in development.</p><a href={repo}>GitHub ↗</a><a href={`${repo}/blob/main/SPECIFICATION.md`}>Project specification ↗</a></div>
+      </details>
+    </main>
+    <footer className="footer wrap"><span>StockSight <span className="footer-dot">/</span> UConn</span><p>For education and research. Not financial advice.</p><a href="#analysis">Back to top ↑</a></footer>
+  </>;
 }

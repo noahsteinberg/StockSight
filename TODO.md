@@ -17,16 +17,17 @@ unchanged ownership are in [ROADMAP.md](docs/ROADMAP.md).
 - [x] SMA20 and Wilder RSI14 backend API, numerical/date/range/database tests
 - [x] Current contracts and agent handoff
 
-## Next proposed increment — indicator UI, when assigned
+## Frontend redesign and indicator integration
 
-- [ ] Render API SMA20 overlay and RSI14 with functional toggles in existing UI
-- [ ] Preserve null warm-up, units, provenance, dates and bounded-history meaning
-- [ ] Handle independent indicator loading/error/retry and stale request cancellation
-- [ ] Add real-API browser acceptance for toggles, ranges and date alignment
-- [ ] Recheck chart/watchlist/session flows, mobile layout and keyboard access
+- [x] Render API SMA20 overlay and RSI14 with functional toggles
+- [x] Preserve null warm-up, units, provenance, dates and bounded-history meaning
+- [x] Handle independent indicator loading/error/retry and stale request cancellation
+- [x] Add real-API browser acceptance for toggles, ranges and date alignment
+- [x] Recheck chart/watchlist/session flows, mobile layout and keyboard access
+- [x] UConn-inspired responsive workspace and concise shared UI states
 
-Frontend redesign is explicitly deferred to a separate later phase. Do not bundle
-it into the indicator increment. M3 is incomplete until indicator UI acceptance passes.
+Gavin authorized this phase after the backend handoff. See
+[FRONTEND_REDESIGN.md](docs/FRONTEND_REDESIGN.md) for reference research and evidence.
 
 ## Data and account follow-up
 
@@ -49,6 +50,8 @@ it into the indicator increment. M3 is incomplete until indicator UI acceptance 
 - [ ] Decide hosting requirements, HTTPS/secrets/origins, migrations and backups
 - [ ] Rehearse the complete professor demo and graceful failure path
 
-The latest backend run passed 95 tests with one expected SQLite-only skip;
-PostgreSQL counterpart passed. Earlier browser/session evidence is dated in the
-handoff. No new test run or publication is implied by this documentation update.
+The prior backend run passed 95 tests with one expected SQLite-only skip;
+PostgreSQL counterpart passed. The redesign passed frontend lint/build, 19 chart/
+indicator browser tests and nine account/session browser tests, plus normal-app
+PostgreSQL browser checks. No publication is implied. ML remains for Vlad per
+Gavin's current direction; roadmap ownership tables are preserved.
