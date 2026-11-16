@@ -1,0 +1,216 @@
+# Auth0 accounts and watchlist foundation
+
+This increment implements the account UI, Auth0 SDK integration, validated private
+API routes and PostgreSQL watchlists. Noah can continue from the existing React
+components and the OpenAPI contract. Indicators and ML remain separate work.
+
+Real Auth0 signup/login acceptance is pending tenant setup. Automated tests use
+signed test identities in an isolated harness; they are not evidence of a real
+Auth0 account being created. No test identity endpoint is mounted by app.main.
+
+## Auth0 setup Gavin needs to complete
+
+1. Create an Auth0 tenant, then create an application named StockSight with type
+   **Single Page Application**. Use Universal Login with a database connection
+   enabled for that application and self-service signup allowed.
+2. In the application's Settings, set all three fields below to
+   `http://127.0.0.1:5173`:
+   - Allowed Callback URLs
+   - Allowed Logout URLs
+   - Allowed Web Origins
+3. Under Applications → APIs, create **StockSight API**, identifier
+   `https://stocksight-api`, signing algorithm **RS256**. The identifier is a
+   logical audience; it does not need to be a hosted URL.
+4. Set the API's access-token expiration and browser-flow expiration to 300
+   seconds for this demo. No Management API access or client secret is needed.
+5. Supply these three public values: tenant **Domain**, application **Client ID**,
+   and API **Identifier**. Do not send a password, client secret or bearer token.
+
+Use exactly the same hostname when opening the app and configuring callbacks.
+If using localhost instead, explicitly register its URLs as well. Add exact HTTPS
+production origins when deploying; do not use wildcard callbacks. Auth0 permits
+local development exceptions, but deployment requires HTTPS.
+
+Official references: [Auth0 React SDK](https://github.com/auth0/auth0-react),
+[SPA SDK configuration](https://github.com/auth0/auth0-spa-js),
+[token best practices](https://auth0.com/docs/secure/tokens/token-best-practices),
+and [PyJWT validation](https://pyjwt.readthedocs.io/en/stable/usage.html).
+
+## Local configuration and startup
+
+Implementation branch: `feature/auth0-watchlists` in the current worktree. Use a
+checkout containing migration 0003 for startup and Alembic commands: the shared
+local development database has already been upgraded to that revision.
+
+Copy frontend/.env.example to ignored frontend/.env.local and set:
+
+```dotenv
+VITE_AUTH0_DOMAIN=YOUR_TENANT.auth0.com
+VITE_AUTH0_CLIENT_ID=YOUR_SPA_CLIENT_ID
+VITE_AUTH0_AUDIENCE=https://stocksight-api
+```
+
+Add to ignored backend/.env, preserving the existing database URL:
+
+```dotenv
+STOCKSIGHT_AUTH0_DOMAIN=YOUR_TENANT.auth0.com
+STOCKSIGHT_AUTH0_AUDIENCE=https://stocksight-api
+```
+
+Use the actual lowercase tenant hostname without https://, a path or a port.
+VITE_* settings are public browser configuration; never put a secret there.
+FastAPI reads backend/.env; Vite reads frontend/.env.local. Both processes need
+restarting after configuration changes.
+
+From backend, using its virtual environment:
+
+```powershell
+.\.venv\Scripts\python.exe -m app.environment_check --require-docker
+.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+.\.venv\Scripts\python.exe -m alembic upgrade head
+.\.venv\Scripts\python.exe -m app.doctor
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+```
+
+From frontend, use `npm ci` then `npm run dev`. See LOCAL_START.md for Docker
+startup and execution access. Migration 0003 adds only identity/watchlist tables;
+it does not reimport or replace the market snapshot. Do not run app.seed over
+that snapshot. No seeding occurs during normal application startup.
+
+With Auth0 unset, public stock analysis still works; the UI reports that sign-in
+is being set up. Protected endpoints fail closed. Missing account tables make
+database readiness fail until migrations are applied.
+
+## API contract
+
+Signup/login/logout are Auth0 Universal Login operations through the official
+React SDK, not local password endpoints. The browser requests an access token
+for the custom API audience and sends `Authorization: Bearer ACCESS_TOKEN`.
+An ID token is not an API credential. OpenAPI at /docs includes the bearer scheme.
+
+| Method and path | Request | Success |
+| --- | --- | --- |
+| GET /api/me | Bearer token | 200 `{ "id": "local-user-uuid" }` |
+| GET /api/watchlist | Bearer token | 200 `{ "items": [{ "symbol": "AAPL", "name": "Apple Inc.", "added_at": "ISO-UTC" }], "limit": 100 }` |
+| POST /api/watchlist | Bearer token; JSON `{ "symbol": "AAPL" }` | 201 saved item; 200 same item on repeat |
+| DELETE /api/watchlist/{symbol} | Bearer token | 204; repeated removal also 204 |
+
+Symbols are trimmed/uppercased and validated. A saved symbol must have a
+canonical series in storage. Lists are bounded to 100 entries per account,
+ordered by newest save then symbol. Duplicate saves preserve added_at, including
+at capacity. PostgreSQL serializes saves per account to enforce capacity and
+duplicate semantics under concurrent requests. Private responses use no-store.
+
+The owner always comes from verified issuer + subject, mapped to a local UUID.
+There is no caller-supplied owner field; extra POST fields are rejected. Removing
+a symbol affects only the current user's entry, even if another user has saved
+the same symbol. Display names come from Auth0 in the UI; local identity storage
+does not copy email, profile or passwords.
+
+Errors retain `{ "detail": { "code": "...", "message": "..." } }`, except
+FastAPI's standard 422 validation structure:
+
+- 401 UNAUTHENTICATED: absent, invalid, expired, wrong-issuer/audience or non-user
+  token; includes WWW-Authenticate: Bearer.
+- 404 UNSUPPORTED_SYMBOL: no canonical stored series for an add.
+- 409 WATCHLIST_FULL: 100 entries reached; remove one first.
+- 422: malformed symbol/body or unexpected owner fields.
+- 503 AUTH_NOT_CONFIGURED / AUTH_UNAVAILABLE / ACCOUNT_STORAGE_UNAVAILABLE:
+  configuration, key retrieval or storage unavailable. No fixture fallback and
+  no raw credentials/driver errors.
+
+## Authentication decisions and limitations
+
+- The SDK handles Authorization Code + PKCE, state and redirect processing.
+  Create account uses screen_hint=signup. It handles local-cache cleanup and
+  Auth0 logout; app passwords and custom cryptography are not implemented.
+- The API pins RS256 and validates signature, issuer, audience, exp, iat and sub
+  (plus nbf when supplied), with 10 seconds of clock tolerance. Client-credentials
+  identities are rejected. JWKS comes only from the configured HTTPS issuer,
+  never token-provided URLs; retrieval has a timeout and bounded cache.
+- Access tokens use the SDK's in-memory cache, not localStorage/sessionStorage.
+  Reloading may restore the Auth0 session silently. If browser cookie policy
+  prevents that, sign in again; database watchlists remain intact. Refresh tokens
+  and persistent token caching are not enabled in this increment.
+- Logout clears the local login and Auth0 session, but an already copied access
+  JWT can remain valid until expiration. The proposed 300-second lifetime limits
+  that window. Immediate server-side revocation is not implemented; do not claim
+  that logout invalidates every previously issued bearer token.
+- API authentication uses explicit Authorization headers rather than ambient
+  API cookies, so no API cookie-session CSRF scheme is introduced. Vite proxies
+  /api in development; production must provide same-origin routing. No permissive
+  CORS middleware was added.
+- Auth0 owns password policies, duplicate signup, recovery, email delivery and
+  identity-provider controls. Verify these in the configured tenant before a
+  public release; local signed-token tests cannot prove hosted behavior.
+
+## Frontend handoff
+
+- AuthProvider.jsx wraps the official SDK and exposes a small account context.
+- AccountControls.jsx provides signup/sign-in/sign-out and current-user display.
+- use-watchlist.js owns authorized requests, cancellation, retry and mutations.
+  Returned state is keyed to the current subject so logout/user changes hide
+  another user's list immediately.
+- Watchlist.jsx is the personal dashboard: signed-out/empty/loading/error states,
+  open-stock navigation and removal. App.jsx owns the selected stock; Analysis.jsx
+  supports saving and opening saved stocks without introducing a second chart.
+- The existing paper/ink design, chart contracts, range controls and fixture demo
+  remain. Company names absent from the market snapshot still display tickers.
+
+## Verification commands and remaining live acceptance
+
+Backend: run pytest with a unique backend/.pytest_cache subdirectory as basetemp;
+set STOCKSIGHT_TEST_DATABASE_URL only to a disposable PostgreSQL _test database
+to include PostgreSQL cases. These tests migrate and downgrade their own tables.
+
+Frontend:
+
+```powershell
+npm run lint
+npm run build
+npm run test:e2e
+npm run test:e2e:accounts
+```
+
+The account browser suite uses separate ports 5175/5176/8102. Most UI scenarios
+use a test-only Auth0 SDK boundary and real signed JWTs/API/storage. Separate
+scenarios use the actual SDK to check signup audience/PKCE and invalid callback
+handling. Hosted credentials and successful OAuth code exchange are not tested.
+Set STOCKSIGHT_E2E_ACCOUNTS_DATABASE_URL to a separate disposable PostgreSQL
+_test database for browser/database coverage; absent that, it explicitly creates
+a disposable SQLite file. Never use the normal development database.
+
+The fixture is restricted to `vite serve --mode e2e-accounts`; production builds
+in that mode fail. Its token issuer is in backend/tests/e2e_accounts_app.py only.
+Neither app.main nor app.demo exposes /api/test/identity. Screenshots, video and
+tracing are off in the account suite unless a one-off visual check is explicitly
+requested with STOCKSIGHT_VISUAL_QA=1.
+
+After tenant setup, complete the real acceptance flow: new account signup,
+logout/login, save/open/remove, refresh persistence, second-user isolation, invalid
+or duplicate signup, expired session handling and sign-out. Record the result
+without credentials or screenshots of account secrets. This gate is still pending.
+
+## Local verification November 16, 2026
+
+- 68 backend tests passed with PostgreSQL enabled. One SQLite-only invocation of
+  the PostgreSQL concurrency scenario was skipped; the PostgreSQL invocation
+  passed, including 12 concurrent duplicate adds yielding one new entry.
+- An additional focused check confirmed configured authentication with missing
+  or unmigrated storage returns a controlled 503. Production exposes no test
+  identity issuer endpoint.
+- 11 existing chart browser tests and 7 account browser tests passed against
+  disposable PostgreSQL. The latter include real-SDK PKCE signup initiation and
+  invalid-callback handling, alongside the explicit test identity harness.
+- Backend Ruff lint/format and frontend lint/build passed. One headless mobile
+  layout image was inspected; continuous capture was not enabled.
+- Migration 0003 was applied to the existing local development database. All
+  2,947,701 market rows, 494 series and every source hash were unchanged; there
+  was no schema drift. No accounts or watchlist entries were fabricated there.
+- A temporary normal app.main HTTP server reported database readiness, returned
+  exact ticker T first, rejected unauthenticated private requests and returned
+  404 for /api/test/identity. That verification server was stopped afterward.
+
+Ignored evidence: .local-data/auth-foundation-verification.json,
+.local-data/account-development-migration.json and corresponding command logs.
+The remaining real-tenant acceptance gate above is not replaced by these results.

@@ -1,6 +1,6 @@
 """Bounded reads of a canonical daily series; no provider calls in HTTP requests."""
 
-from sqlalchemy import select
+from sqlalchemy import case, select
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
 
@@ -19,9 +19,14 @@ def search_database(engine: Engine, query: str) -> list[Stock]:
                 StockRecord.symbol.icontains(query, autoescape=True)
                 | StockRecord.name.icontains(query, autoescape=True)
             )
+        ordering = (
+            (case((StockRecord.symbol == query, 0), else_=1), StockRecord.symbol)
+            if query
+            else (StockRecord.symbol,)
+        )
         return [
             Stock(symbol=row.symbol, name=row.name)
-            for row in session.scalars(statement.order_by(StockRecord.symbol).limit(50))
+            for row in session.scalars(statement.order_by(*ordering).limit(50))
         ]
 
 

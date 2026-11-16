@@ -22,9 +22,10 @@ Team review, second-machine verification, and pending pushes remain explicit han
 
 ## Phase 2: Accounts and watchlists
 
-- [ ] Choose and implement secure authentication and account lifecycle
-- [ ] Implement authorized persistent watchlist CRUD and UI
-- [ ] Test ownership boundaries and error states
+- [x] Implement Auth0 SDK/token-validation foundation and private identity storage
+- [x] Implement authorized persistent watchlist CRUD and UI
+- [x] Test ownership boundaries, concurrency, persistence and error states
+- [ ] Configure the Auth0 tenant and verify real signup/login/logout and recovery behavior
 
 ## Phase 3: Stock data and analysis
 

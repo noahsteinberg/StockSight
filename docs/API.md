@@ -14,7 +14,7 @@ No authentication, parameters, database, or provider access. Returns HTTP 200 wi
 
 PowerShell: `Invoke-RestMethod http://127.0.0.1:8000/api/health`.
 
-FastAPI supplies `/docs`, `/redoc`, and `/openapi.json`. There are no user, watchlist, prediction, or evaluation endpoints. Stock endpoints are described below. Define validation, pagination, error envelopes, authorization, and timestamp conventions alongside the first real feature.
+FastAPI supplies `/docs`, `/redoc`, and `/openapi.json`. Auth0-protected current-user and watchlist endpoints are documented in [the account API contract](AUTH0_WATCHLIST_HANDOFF.md). Prediction and evaluation endpoints remain unimplemented. Stock endpoints are described below.
 
 ## Phase 1 historical API
 
@@ -28,8 +28,9 @@ A nonempty STOCKSIGHT_DATABASE_URL selects database reads with the same history 
 ## Search/chart integration update (November 16, 2026)
 
 The analysis form calls `GET /api/stocks?query=...` with a ticker or company
-name. The response remains an alphabetically ordered array of `{symbol, name}`
-objects, capped at 50 matches. Select a result to request its price history;
+name. The response is an array of `{symbol, name}`
+objects, capped at 50 matches, with an exact ticker match ranked first and other
+matches ordered alphabetically. Select a result to request its price history;
 searching alone preserves the currently displayed chart. Empty matches and
 storage errors have separate visible states.
 

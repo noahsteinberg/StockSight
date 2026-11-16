@@ -8,6 +8,13 @@
 - `backend/app/config.py`: typed environment settings; optional `backend/.env` loading. Tests inject settings for a deterministic service name.
 - app/api/stocks.py selects explicit fixture or SQLAlchemy repository reads; database mode requires PostgreSQL. app/seed.py imports the historical fixture independently, and Alembic owns schema changes.
 - Vite proxies /api to localhost:8000 during development. Production hosting must supply equivalent routing.
+- AuthProvider.jsx uses Auth0 Universal Login through the React SDK. app/auth.py
+  validates API access tokens; app/api/accounts.py provisions verified identity
+  references and restricts watchlist operations to the current user. Migration
+  0003 adds identity/watchlist tables. No local password store is introduced.
+- Watchlist.jsx and use-watchlist.js provide the personal dashboard; App.jsx shares
+  selected-stock state with the existing Analysis.jsx chart. Auth0 configuration
+  and pending real-tenant acceptance are documented in AUTH0_WATCHLIST_HANDOFF.md.
 
 ## Planned boundary
 

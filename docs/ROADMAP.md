@@ -277,3 +277,10 @@ Revision log: November 15, 2026 — corrected optional registration, added dashb
 Phase 1 implementation update (November 15, 2026): the local implementation now provides fixture-backed AAPL analysis through FastAPI; see [Phase 1](PHASE_1.md) for scope and verification. This is not approval of the undated schedule or completion of later milestones.
 
 Phase 2 persistence foundation update (November 15, 2026): PostgreSQL schema/migrations, explicit fixture upsert, bounded database reads, readiness/failure behavior, and PostgreSQL integration/browser checks are implemented. See [database setup and evidence](DATABASE.md). This completes the initial persistence slice only; selecting a live provider, scheduled incremental ingestion, freshness policy, and broader symbol coverage remain M2 work. Gavin and Noah jointly own frontend/backend integration; other role assignments require team agreement.
+
+Account/watchlist foundation update (November 16, 2026): Auth0 React integration,
+validated access-token protection, private watchlist APIs/storage and the personal
+dashboard UI are implemented. PostgreSQL-backed automated integration checks pass.
+Real tenant signup/login/logout acceptance awaits Auth0 configuration; M4 is not
+marked complete until that gate passes. See [the handoff](AUTH0_WATCHLIST_HANDOFF.md).
+Existing ownership assignments remain unchanged. M3 and M5 remain outstanding.

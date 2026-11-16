@@ -6,7 +6,11 @@ Build an educational full-stack stock analysis and prediction platform for stude
 
 ## Current deliverable
 
-Phase 0 provides an honest informational React landing page, a database-free FastAPI health endpoint, development tooling, CI configuration, and team documentation. It does not provide investment functionality.
+The current implementation provides PostgreSQL-backed historical search/charts,
+repeatable snapshot import, and an Auth0/private-watchlist integration foundation.
+Hosted signup/login acceptance awaits tenant configuration. Indicators, inference,
+prediction history and evaluation remain planned. See
+[the account handoff](docs/AUTH0_WATCHLIST_HANDOFF.md) for its contract and limits.
 
 ## Planned MVP
 

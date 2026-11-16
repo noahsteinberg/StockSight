@@ -226,3 +226,26 @@ def test_search_history_adapter_contract_parity(database):
         prices(persisted, "MSFT", "all")
     assert unsupported.value.status_code == 404
     assert unsupported.value.detail["code"] == "UNSUPPORTED_SYMBOL"
+
+
+def test_exact_ticker_is_ranked_before_capped_partial_matches(database):
+    from datetime import date
+
+    from app.import_prices import write_symbol
+
+    url, engine = database
+    bar = {
+        "session_date": date(2026, 11, 12),
+        "open": 10,
+        "high": 11,
+        "low": 9,
+        "close": 10,
+        "volume": 42,
+    }
+    for symbol in [f"A{index:02d}T" for index in range(51)] + ["T"]:
+        write_symbol(engine, symbol, [bar], "a" * 64)
+    with TestClient(create_app(db_settings(url))) as client:
+        matches = client.get("/api/stocks?query=t").json()
+        assert len(matches) == 50
+        assert matches[0]["symbol"] == "T"
+        assert client.get("/api/stocks/T/prices").status_code == 200

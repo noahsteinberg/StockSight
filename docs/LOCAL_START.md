@@ -4,6 +4,10 @@ Keep two PowerShell terminals open. Stop an existing service with Ctrl+C in its
 own terminal before restarting it. The website is on port 5173; port 8000 is the
 API. A 404 for the API's `/` or favicon is expected.
 
+For the account/watchlist integration, configure Auth0 as described in
+[the handoff](AUTH0_WATCHLIST_HANDOFF.md). The historical chart remains available
+without Auth0. Normal database startup requires migration 0003 for watchlists.
+
 ## Explicit demo without PostgreSQL
 
 From the repository root, terminal 1:
@@ -33,9 +37,15 @@ Start Docker Desktop, then from the repository root:
 docker compose up -d --wait
 cd backend
 .\.venv\Scripts\python.exe -m alembic upgrade head
-.\.venv\Scripts\python.exe -m app.seed
 .\.venv\Scripts\python.exe -m app.doctor
 ```
+
+For an existing imported database, these commands do not import or replace data.
+For a blank database, deliberately choose one initial dataset: use
+`python -m app.complete_backend --replace-existing-series` for the team snapshot
+(see PRICES_IMPORT.md), or `python -m app.seed` for the small Plotly fixture only.
+Never run the fixture seed over an installed team snapshot. Run app.doctor again
+after the selected initial import.
 
 Stop if any command fails. With `Storage ready: database`, start the regular API:
 

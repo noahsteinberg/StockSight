@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import PricePlot from './PricePlot.jsx';
+import { useAccount } from './auth-context.js';
 
 const ranges = [['1mo', '1M'], ['3mo', '3M'], ['1y', '1Y'], ['all', 'Max']];
 const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
@@ -11,10 +12,12 @@ function responseError(status, searching = false) {
   return searching ? 'Could not search stocks. Check that the API is running.' : 'Could not load prices. Check that the API is running.';
 }
 
-export default function Analysis() {
+export default function Analysis({ symbol, onSelectSymbol, watchlist }) {
+  const account = useAccount();
   const [inputError, setInputError] = useState('');
-  const [input, setInput] = useState('AAPL');
-  const [symbol, setSymbol] = useState('AAPL');
+  const [draft, setDraft] = useState({ symbol, value: symbol });
+  const input = draft.symbol === symbol ? draft.value : symbol;
+  function setInput(value) { setDraft({ symbol, value }); }
   const [range, setRange] = useState('3mo');
   const [result, setResult] = useState({ loading: true });
   const [retry, setRetry] = useState(0);
@@ -50,16 +53,16 @@ export default function Analysis() {
         const response = await fetch(`/api/stocks/${encodeURIComponent(symbol)}/prices?range=${range}`, { signal: controller.signal });
         if (!response.ok) throw new Error(responseError(response.status));
         const data = await response.json();
-        if (active) setResult({ data });
+        if (active) setResult({ data, symbol });
       } catch (error) {
-        if (active) setResult({ error: error.name === 'AbortError' ? 'Request timed out. Try again.' : error.message });
+        if (active) setResult({ error: error.name === 'AbortError' ? 'Request timed out. Try again.' : error.message, symbol });
       } finally { clearTimeout(timeout); }
     }
     load();
     return () => { active = false; clearTimeout(timeout); controller.abort(); };
   }, [symbol, range, retry]);
 
-  function reload() { setSelected(null); setResult({ loading: true }); }
+  function reload() { setSelected(null); setResult({ loading: true, symbol }); }
   function startSearch(event) {
     event.preventDefault();
     const query = input.trim();
@@ -70,14 +73,16 @@ export default function Analysis() {
   }
   function openStock(next) {
     reload();
-    setSymbol(next);
+    onSelectSymbol(next);
     setInput(next);
     setSearch(null);
     setSearchRequest(null);
     setRetry(value => value + 1);
   }
-  const bars = result.data?.bars || [];
-  const current = bars[selected ?? bars.length - 1];
+  const bars = result.data?.symbol === symbol ? result.data.bars : [];
+  const loadingPrices = result.loading || result.symbol !== symbol;
+  const selectedIndex = selected?.symbol === symbol ? selected.index : null;
+  const current = bars[selectedIndex ?? bars.length - 1];
 
   return (
     <section className="analysis" id="analysis" aria-labelledby="analysis-title">
@@ -96,15 +101,20 @@ export default function Analysis() {
         {search.matches?.length === 0 && <p>No matching stocks for &ldquo;{search.query}&rdquo;. Try another ticker or company name.</p>}
         {search.matches?.length > 0 && <><p>Choose a stock to view its history. Up to 50 matches; narrow your search if needed.</p><ul>{search.matches.map(stock => <li key={stock.symbol}><button type="button" onClick={() => openStock(stock.symbol)}>{stock.symbol} <span>{stock.name}</span></button></li>)}</ul></>}
       </div>}
-      <div aria-live="polite" aria-busy={Boolean(result.loading)}>
-        {result.loading && <p className="analysis-message">Loading prices.</p>}
-        {result.error && <div className="analysis-message" role="alert"><p>{result.error}</p><button onClick={() => { reload(); setRetry(value => value + 1); }}>Retry</button></div>}
-        {result.data && bars.length === 0 && <p className="analysis-message">No observations in this range.</p>}
+      <div aria-live="polite" aria-busy={Boolean(loadingPrices)}>
+        {loadingPrices && <p className="analysis-message">Loading prices.</p>}
+        {result.error && result.symbol === symbol && <div className="analysis-message" role="alert"><p>{result.error}</p><button onClick={() => { reload(); setRetry(value => value + 1); }}>Retry</button></div>}
+        {result.data?.symbol === symbol && !loadingPrices && bars.length === 0 && <p className="analysis-message">No observations in this range.</p>}
       </div>
       {current && <>
         <div className="quote"><div><h2>{result.data.symbol} <span>{result.data.name}</span></h2><strong>{money.format(current.close)}</strong></div><p>{current.date}<br /><span>Volume {current.volume.toLocaleString('en-US')}</span></p></div>
+        {account.configured && <div className="save-stock"><button type="button"
+          disabled={account.isLoading || watchlist.mutation.busy || (account.isAuthenticated && (watchlist.loading || Boolean(watchlist.error) || watchlist.items.some(stock => stock.symbol === result.data.symbol)))}
+          onClick={() => account.isAuthenticated ? watchlist.save(result.data.symbol) : account.login()}>
+          {!account.isAuthenticated ? 'Sign in to save' : watchlist.items.some(stock => stock.symbol === result.data.symbol) ? 'Saved to watchlist' : 'Save to watchlist'}
+        </button><a href="#watchlist">Your watchlist ↓</a></div>}
         <PricePlot bars={bars} />
-        <label className="observation-picker">Inspect date<input aria-label="Inspect historical observation" type="range" min="0" max={bars.length-1} value={selected ?? bars.length-1} aria-valuetext={`${current.date}, ${money.format(current.close)}`} onChange={event => setSelected(Number(event.target.value))} /></label>
+        <label className="observation-picker">Inspect date<input aria-label="Inspect historical observation" type="range" min="0" max={bars.length-1} value={selectedIndex ?? bars.length-1} aria-valuetext={`${current.date}, ${money.format(current.close)}`} onChange={event => setSelected({ symbol, index: Number(event.target.value) })} /></label>
         <p className="data-note">As of {result.data.as_of} · {bars.length} sessions · {bars[0].date} to {bars.at(-1).date} · <a href={result.data.source_url}>Source: {result.data.source}</a><br />{result.data.adjustment} · Historical data, not live quotes.</p>
         {result.data.has_earlier && <p className="data-note">Earlier stored sessions are outside this view. Showing the latest {result.data.session_limit} sessions.{range === 'all' ? ' Max is capped at 2,000 sessions.' : ' Choose a longer range to see more.'}</p>}
         <details><summary>Price observations</summary><div className="table-scroll"><table><thead><tr><th scope="col">Date</th><th scope="col">Close (USD)</th><th scope="col">Volume</th></tr></thead><tbody>{bars.map(bar => <tr key={bar.date}><th scope="row">{bar.date}</th><td>{money.format(bar.close)}</td><td>{bar.volume.toLocaleString('en-US')}</td></tr>)}</tbody></table></div></details>

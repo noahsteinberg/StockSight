@@ -94,6 +94,10 @@ jobs:
         working-directory: frontend
       - run: npm run test:e2e
         working-directory: frontend
+      - run: npm run test:e2e:accounts
+        working-directory: frontend
+        env:
+          STOCKSIGHT_E2E_ACCOUNTS_DATABASE_URL: postgresql+psycopg://stocksight:ci-only-disposable@127.0.0.1:5432/stocksight_test
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

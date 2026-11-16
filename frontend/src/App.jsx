@@ -1,13 +1,28 @@
 import Analysis from './Analysis.jsx';
+import { useState } from 'react';
+import AccountControls from './AccountControls.jsx';
+import Watchlist from './Watchlist.jsx';
+import { useAccount } from './auth-context.js';
+import useWatchlist from './use-watchlist.js';
 const sections = [
   { number: '01', title: 'Stock analysis', status: 'Historical demo' },
-  { number: '02', title: 'Watchlists', status: 'Planned' },
+  { number: '02', title: 'Watchlists', status: 'Accounts' },
   { number: '03', title: 'Predictions', status: 'Planned' },
   { number: '04', title: 'Evaluation', status: 'Planned' },
 ];
 const repo = 'https://github.com/noahsteinberg/StockSight';
 
 export default function App() {
+  const [symbol, setSymbol] = useState(() => {
+    const saved = sessionStorage.getItem('stocksight:selected-symbol');
+    return saved && /^[A-Z][A-Z0-9.^=-]{0,15}$/.test(saved) ? saved : 'AAPL';
+  });
+  const account = useAccount();
+  const watchlist = useWatchlist();
+  function selectStock(value) {
+    setSymbol(value);
+    sessionStorage.setItem('stocksight:selected-symbol', value);
+  }
   return (
     <>
       <a className="skip-link" href="#main">Skip to content</a>
@@ -15,12 +30,16 @@ export default function App() {
         <a className="brand" href="#" aria-label="StockSight home">StockSight<span aria-hidden="true"> /</span></a>
         <nav aria-label="Main navigation">
           <a href="#analysis">Analysis</a>
+          <a href="#watchlist">Watchlist</a>
           <a href="#project">Project</a>
           <a href={repo}>GitHub <span aria-hidden="true">↗</span></a>
         </nav>
+        <AccountControls />
       </header>
       <main id="main" className="wrap" tabIndex="-1">
-        <Analysis />
+        {account.error && <div role="alert" className="account-error">{account.error}</div>}
+        <Analysis symbol={symbol} onSelectSymbol={selectStock} watchlist={watchlist} />
+        <Watchlist watchlist={watchlist} onOpen={selectStock} />
         <section id="scope" className="scope" aria-labelledby="scope-title">
           <div className="section-heading"><h2 id="scope-title">Project scope</h2><span>Planned capabilities</span></div>
           <ol className="scope-list">

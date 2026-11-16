@@ -4,7 +4,9 @@ from sqlalchemy import inspect, select
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.db import DailyBar, PriceSeries, StockRecord
+from app.db import DailyBar, PriceSeries, StockRecord, UserIdentity, WatchlistEntry
+
+MODELS = (StockRecord, PriceSeries, DailyBar, UserIdentity, WatchlistEntry)
 
 
 def storage_problem(engine: Engine | None) -> dict[str, str] | None:
@@ -13,16 +15,13 @@ def storage_problem(engine: Engine | None) -> dict[str, str] | None:
     try:
         with engine.connect() as connection:
             inspector = inspect(connection)
-            if any(
-                not inspector.has_table(model.__tablename__)
-                for model in (StockRecord, PriceSeries, DailyBar)
-            ):
+            if any(not inspector.has_table(model.__tablename__) for model in MODELS):
                 return {
                     "code": "SCHEMA_MISSING",
                     "message": "Database tables are missing. Run alembic upgrade head.",
                 }
             # Query all mapped columns, not just one table, to detect schema drift.
-            for model in (StockRecord, PriceSeries, DailyBar):
+            for model in MODELS:
                 connection.execute(select(model).limit(1))
             available = connection.execute(
                 select(DailyBar.session_date)

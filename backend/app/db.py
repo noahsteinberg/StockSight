@@ -11,6 +11,7 @@ from sqlalchemy import (
     ForeignKey,
     Numeric,
     String,
+    UniqueConstraint,
     create_engine,
     event,
 )
@@ -60,6 +61,24 @@ class DailyBar(Base):
     close: Mapped[Decimal] = mapped_column(Numeric(18, 6))
     volume: Mapped[int] = mapped_column(BigInteger)
     source_values: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+
+
+class UserIdentity(Base):
+    __tablename__ = "user_identities"
+    __table_args__ = (UniqueConstraint("issuer", "subject", name="uq_identity"),)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    issuer: Mapped[str] = mapped_column(String(255))
+    subject: Mapped[str] = mapped_column(String(255))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class WatchlistEntry(Base):
+    __tablename__ = "watchlist_entries"
+    user_id: Mapped[str] = mapped_column(
+        ForeignKey("user_identities.id", ondelete="CASCADE"), primary_key=True
+    )
+    symbol: Mapped[str] = mapped_column(ForeignKey("stocks.symbol"), primary_key=True)
+    added_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
 def database_engine(url: str) -> Engine:
