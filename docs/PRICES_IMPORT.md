@@ -33,6 +33,37 @@ metadata import can add accurate company search names and exchange identifiers.
 
 ## Commands
 
+### Complete the local backend in one command
+
+From backend in your normal PowerShell terminal:
+
+```powershell
+.\.venv\Scripts\python.exe -m app.complete_backend --replace-existing-series
+```
+
+This defaults to prices_clean.parquet in your Downloads folder. An optional first
+argument supplies another path. It checks the configured URL is this project's
+local Compose database, installs the pinned reader if missing, validates the
+source, starts Compose, migrates, imports AAPL/MSFT/NVDA, and checks their counts
+and in-process HTTP API responses before importing all accepted symbols.
+It then verifies every selected symbol's stored count and source hash, checks
+API responses again, and checks migration/model consistency. Successful evidence
+is saved under ignored .local-data/backend-completion-TIMESTAMP.json.
+
+The replacement flag authorizes replacing selected canonical histories, including
+the small Plotly AAPL fixture, with the team snapshot. The database volume is
+preserved. Errors stop the sequence; per-symbol import progress remains visible
+and the unchanged input can be rerun. BACKEND VERIFIED is printed only after the
+checks complete; it does not claim browser verification or that Uvicorn is running.
+Restart the regular app.main:app API afterward and refresh the frontend.
+
+The agent's sandbox cannot access Docker's named pipe or the database, even when
+Docker Desktop is open. Running this command in a normal developer terminal is
+required in that environment. Its safeguards have local automated coverage;
+live PostgreSQL completion is pending until an actual success report exists.
+
+### Individual steps
+
 Run from backend in your own terminal. Install the optional reader first:
 
 ```powershell
