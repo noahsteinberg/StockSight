@@ -1,6 +1,6 @@
 import { Auth0Provider, useAuth0 } from '@auth0/auth0-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { completeEmbeddedLogin, embeddedCallback, passwordLogin, signup, resetPassword } from './embedded-auth.js';
+import { AuthFlowError, completeEmbeddedLogin, embeddedCallback, passwordLogin, signup, resetPassword } from './embedded-auth.js';
 import { AccountContext } from './auth-context.js';
 
 const domain = import.meta.env.VITE_AUTH0_DOMAIN?.trim();
@@ -53,8 +53,8 @@ function Session({ children }) {
     }
     restoration.current.then(data => {
       if (active) setSession(data);
-    }).catch(() => {
-      if (active) setSession({ ...guest, status: 'error', error: 'Could not restore your session. Sign in again.' });
+    }).catch(error => {
+      if (active) setSession({ ...guest, status: 'error', error: error instanceof AuthFlowError ? error.message : 'Could not restore your session. Sign in again.' });
     });
     return () => { active = false; };
   }, []);

@@ -24,9 +24,9 @@ The existing backend session, CSRF, ownership and watchlist contracts are unchan
   an account exists. Accounts without recovery email may need administrator help.
 - Google uses the existing official React SDK, Authorization Code + PKCE, and
   `connection=google-oauth2`; the provider consent/sign-in screens remain external.
-- The local form exposes an explicit hosted Auth0 sign-in option after an error
-  for blocked cross-origin cookies, MFA, CAPTCHA or other provider verification.
-  Those challenges are not bypassed or reimplemented by the local form.
+- The local form does not offer a second hosted Auth0 login link. Google remains
+  available. MFA/account verification requirements still apply; removing that
+  link does not disable them or make blocked cross-site cookies usable.
 
 ## Session boundary
 
@@ -76,11 +76,18 @@ In the Auth0 SPA settings:
 3. Enable cross-origin authentication for the existing application where the
    tenant exposes that setting. Preserve username signup and optional-email
    flexible identifiers on the existing database connection.
-4. Enable the existing Google connection for this SPA. Preserve user-delegated
+4. After deploying the verification page, set **Cross-Origin Verification Fallback
+   URL** to `https://stocksight-rose.vercel.app/cross-origin-verification.html`.
+   This is a dedicated Vite HTML entry, not the main React app or a login route.
+   It invokes Auth0.js `crossOriginVerification()` only inside an iframe with the
+   configured Auth0 origin. It accepts messages only from that origin and parent.
+5. Enable the existing Google connection for this SPA. Preserve user-delegated
    API access to the configured audience.
-5. For reliable embedded login in production browsers, place the app and Auth0
+6. For reliable embedded login in production browsers, place the app and Auth0
    custom domain under the same top-level domain. Third-party-cookie restrictions
-   can otherwise block the password flow; the explicit hosted fallback remains.
+   can otherwise block the password flow. The user chose to keep the vercel.app
+   address for now, so Google is the alternative when embedded password login is
+   blocked. Do not promise that the verifier page fixes modern cookie restrictions.
 
 These settings are not applied automatically by the source changes. The old
 Universal Login Liquid template/theme upload is not needed for these local forms.
@@ -88,7 +95,21 @@ Universal Login Liquid template/theme upload is not needed for these local forms
 After configuration, have the user test an existing username, signup with and
 without recovery email, invalid password, recovery-email delivery, Google,
 refresh, logout and two-account watchlist isolation. Use a browser that restricts
-third-party cookies to check the fallback. Do not print credentials or tokens.
+third-party cookies to check and clearly record the password-login limitation. Do not print credentials or tokens.
+
+## November 17 verification-page follow-up
+
+Live Auth0 logs showed `Cross origin login not allowed.` The user approved
+enabling cross-origin authentication for the existing SPA and adding only the
+production origin to Allowed Origins (CORS); the saved settings were verified.
+Later live attempts logged `Unable to configure verification page.`
+The page/handler above addresses the missing SDK verification endpoint. Auth0
+explicitly documents that Chrome/Safari cannot use this fallback to overcome
+blocked third-party cookies without a same-site custom domain.
+
+The UI now distinguishes provider callback failure from app-session creation
+failure instead of presenting every problem as session restoration failure.
+Provider descriptions, credentials and tokens are never echoed into errors.
 
 ## Verification
 
@@ -102,5 +123,6 @@ for production. No new authentication bypass or test endpoint is in the real app
 
 Official references:
 - [Auth0.js and its cross-origin login flow](https://auth0.com/docs/libraries/auth0js)
+- [Verification-page setup and browser support](https://auth0.com/docs/get-started/applications/set-up-cors)
 - [Browser cookie constraints](https://auth0.com/docs/authenticate/login/cross-origin-authentication)
 - [Hosted and embedded login](https://auth0.com/docs/authenticate/login/universal-vs-embedded-login)

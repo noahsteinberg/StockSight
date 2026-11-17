@@ -78,7 +78,7 @@ test('password login uses cross-origin Auth0 and safely displays rejection', asy
   expect(payload.username).toBe('test-username');
   expect(payload).not.toHaveProperty('client_secret');
   await expect(page.getByLabel('Password', { exact: true })).toHaveValue('');
-  await expect(page.getByRole('button', { name: 'Continue with Auth0 sign-in' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Continue with Auth0 sign-in' })).toHaveCount(0);
 });
 
 test('reset email is sent through Auth0 with a non-enumerating confirmation', async ({ page }) => {
@@ -103,9 +103,51 @@ test('unsolicited fragment tokens fail closed and are removed from the URL', asy
   });
   await page.goto('/#access_token=invalid&id_token=invalid&state=untrusted');
   await expect(page.getByRole('heading', { name: 'Log in' })).toBeVisible();
-  await expect(page.getByRole('alert')).toContainText('Could not restore your session');
+  await expect(page.getByRole('alert')).toContainText('Sign-in could not be verified');
   expect(page.url()).toMatch(/#\/login$/);
   expect(created).toBe(false);
+});
+
+test('provider callback errors stay specific and never offer another login page', async ({ page }) => {
+  await page.goto('/#error=server_error&error_description=private-provider-details&state=failed-transaction');
+  await expect(page.getByRole('alert')).toHaveText('Password sign-in is temporarily unavailable. Please try again or use Google sign-in.');
+  await expect(page.getByRole('alert')).not.toContainText('private-provider-details');
+  await expect(page.getByRole('button', { name: 'Continue with Auth0 sign-in' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Continue with Google' })).toBeEnabled();
+  expect(page.url()).toMatch(/#\/login$/);
+});
+
+test('dedicated verification page is separate from the app and ignores untrusted parents', async ({ page }) => {
+  await page.goto('/cross-origin-verification.html');
+  await expect(page.getByRole('status')).toContainText('used automatically');
+  await expect(page.getByLabel('Password', { exact: true })).toHaveCount(0);
+  await page.route('**/verification-harness', route => route.fulfill({ contentType: 'text/html', body: `<p role="status">No verifier messages</p><script>addEventListener('message', () => document.querySelector('p').textContent = 'Unexpected verifier message');</script><iframe src="/cross-origin-verification.html#origin=http%3A%2F%2F127.0.0.1%3A5175"></iframe>` }));
+  await page.goto('/verification-harness');
+  await page.waitForLoadState('networkidle');
+  await expect(page.getByRole('status')).toHaveText('No verifier messages');
+  await expect(page.frameLocator('iframe').getByRole('status')).toContainText('used automatically');
+});
+
+test('configured Auth0 parent can complete the SDK verifier handshake', async ({ page }) => {
+  // Keep both synthetic frames on HTTPS. Loading a localhost HTTP iframe from
+  // an HTTPS provider would test mixed-content protection instead of the SDK.
+  await page.route('https://app.stocksight.test/**', async route => {
+    const url = new URL(route.request().url());
+    const response = await route.fetch({ url: `http://127.0.0.1:5175${url.pathname}${url.search}` });
+    return route.fulfill({ response });
+  });
+  await page.route('https://e2e.auth0.test/verification-harness', route => route.fulfill({ contentType: 'text/html', body: `
+    <p role="status">Waiting</p>
+    <iframe src="https://app.stocksight.test/cross-origin-verification.html#origin=https%3A%2F%2Fe2e.auth0.test"></iframe>
+    <script>
+      addEventListener('message', event => {
+        if (event.origin !== 'https://app.stocksight.test') return;
+        if (event.data.type === 'ready') event.source.postMessage({ type: 'co_verifier_request', request: { id: 'nonexistent-synthetic-id' } }, event.origin);
+        if (event.data.type === 'co_verifier_response' && event.data.response.verifier === '') document.querySelector('p').textContent = 'Verified handshake';
+      });
+    </script>` }));
+  await page.goto('https://e2e.auth0.test/verification-harness');
+  await expect(page.getByRole('status')).toHaveText('Verified handshake');
 });
 
 test('local account routes fit desktop and mobile without animation', async ({ page }) => {

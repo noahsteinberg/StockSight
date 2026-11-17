@@ -77,10 +77,9 @@ export default function AuthPage({ mode }) {
             <p className="subtitle">{reset ? 'Use the recovery email on your account.' : 'Continue to StockSight.'}</p>
             {unavailable && <p className="auth-status" role="status">Sign-in is not configured for this environment.</p>}
             {account.isLoading && <p className="auth-status" role="status">Checking your session…</p>}
-            {(error || account.error) && <>
+            {(error || account.error) &&
               <p className="auth-status auth-error" role="alert">{error || account.error}</p>
-              {!unavailable && <button className="auth-fallback" type="button" disabled={busy} onClick={() => account.loginHosted(signup)}>Continue with Auth0 sign-in</button>}
-            </>}
+            }
             {notice && <p className="auth-status" role="status">{notice} {signup && <a href="#/login">Log in</a>}</p>}
             <form onSubmit={submit} aria-busy={Boolean(busy)}>
               {!reset && <div className="auth-field">
