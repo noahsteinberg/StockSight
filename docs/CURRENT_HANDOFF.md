@@ -1,5 +1,8 @@
 # StockSight — continuation handoff for Gavin and the next agent
 
+For the latest login task and exact pending publication/configuration steps, start
+with [LOGIN_CONTINUATION_HANDOFF.md](LOGIN_CONTINUATION_HANDOFF.md) (November 17).
+
 ## November 17 follow-up: embedded verification and error flow
 
 After PR #12 was merged, live Auth0 logs first showed `Cross origin login not
