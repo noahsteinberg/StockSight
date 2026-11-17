@@ -1,0 +1,17 @@
+.git
+.env
+.env.*
+**/.env
+**/.env.*
+**/.venv
+**/node_modules
+**/dist
+**/__pycache__
+**/.pytest_cache
+**/.ruff_cache
+.local-data
+frontend/e2e
+frontend/test-results
+frontend/playwright-report
+backend/tests
+*.parquet

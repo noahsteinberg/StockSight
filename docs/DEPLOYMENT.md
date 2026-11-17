@@ -1,37 +1,27 @@
-# Deployment plan and remaining gates
+# Deployment
 
-No deployment is claimed. Hosting, budget, domain and final demo requirements
-remain undecided. [CURRENT_HANDOFF.md](CURRENT_HANDOFF.md) records the current locally
-verified foundation. CI definitions test code and disposable PostgreSQL/browser
-flows; they do not publish services, and a hosted run on the published head remains
-an acceptance gate.
+The Vercel project `stocksight` exists in the CSE4095 team. Its reserved production
+origin is `https://stocksight-cse4095.vercel.app`. The repository now contains
+configuration to deploy React/Vite and FastAPI together, with same-origin `/api`
+routing and GitHub Actions CI/post-deployment checks.
 
-Build the frontend with `npm ci` and `npm run build`; publish `frontend/dist`
-through the chosen host without committing generated files. Provide same-origin
-`/api` routing to FastAPI; Vite dev/preview servers are not production hosting.
-Install pinned backend runtime dependencies, run reviewed Alembic migrations
-through `0004_app_sessions`, and supervise Uvicorn behind HTTPS. Keep PostgreSQL
-private, provision least-privilege roles, and define backups/restore and rollback.
-Never import/seed or downgrade production automatically during API startup.
+See [VERCEL.md](VERCEL.md) for exact project settings, production secrets,
+GitHub installation, automatic updates, Auth0 URLs, smoke checks and rollback.
+Infrastructure preparation is not proof of a working deployment: GitHub access,
+the hosted Supabase secret, Auth0 production configuration and live acceptance
+must be verified before calling the app deployed.
 
-Before public release:
+The hosted database must already be migrated through `0005_backend_only_access`.
+Runtime never migrates, imports or seeds. The production entrypoint refuses
+missing database/HTTPS-origin/Auth0 settings instead of silently serving fixture
+data. Credentials stay in Vercel secrets. Preserve a working local demo.
 
-- Configure exact HTTPS frontend Origin and Auth0 callback/logout/web origins;
-  match domain/audience/public client settings and User-Delegated API access.
-- Verify Secure/HttpOnly app cookies, same-origin CSRF checks, absolute expiry,
-  logout revocation and cross-account isolation on the deployed URL.
-- Decide and implement/accept the provider-driven session-revocation policy for
-  account disable/password changes. Current app sessions last until local
-  revocation or expiry; copied bearer tokens retain provider-defined expiry.
-- Verify recovery delivery and a complete reset flow; receipt alone is not proof
-  of a successful password change. Keep credentials entered directly by users.
-- Confirm dataset usage rights, adjustment/calendar conventions and freshness;
-  snapshot import is not a live provider feed.
-- Verify `/api/health` and `/api/ready` plus actual public and authenticated flows;
-  process logs alone do not establish service reachability or storage readiness.
-- Rehearse migration/backup recovery on disposable data, second-machine setup,
-  hosted CI and the professor demo. Keep a working explicitly historical local demo.
+Before declaring the account flow accepted, verify Secure/HttpOnly cookies,
+refresh restoration, watchlist persistence, logout and two-account isolation on
+the actual production origin. Public smoke tests establish public API/data
+integration only. Password reset/account-disable session revocation, data usage
+rights, adjustment/calendar conventions and second-machine acceptance remain
+separate follow-up items documented in CURRENT_HANDOFF.md.
 
-Before adding inference, define trusted artifact storage, version/checksum and
-loading behavior; training stays offline. ML/forecasts/outcomes and evaluation
-remain outstanding MVP work, independently of hosting.
+ML training/inference, forecasts/outcomes, evaluation and automatic market-data
+refresh remain unfinished independently of deployment.
