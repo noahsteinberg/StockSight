@@ -16,7 +16,8 @@ jobs:
     if: >-
       github.event_name == 'workflow_dispatch' ||
       (github.event.deployment_status.state == 'success' &&
-       github.event.deployment.environment == 'Production')
+       (github.event.deployment.production_environment == true ||
+        github.event.deployment.environment == 'Production'))
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -26,5 +27,5 @@ jobs:
           persist-credentials: false
       - name: Verify production frontend, database API and private-route protection
         env:
-          PRODUCTION_URL: https://stocksight-cse4095.vercel.app
+          PRODUCTION_URL: ${{ vars.PRODUCTION_URL || 'https://stocksight-cse4095.vercel.app' }}
         run: python3 scripts/check_deployment.py "$PRODUCTION_URL"

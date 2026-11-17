@@ -13,8 +13,9 @@ after the Supabase merge; no frontend source changed in this deployment incremen
 Vercel project/domain creation and six public production settings succeeded.
 Git linking was rejected because the GitHub integration is not authorized for
 `noahsteinberg/StockSight`. The production Supabase secret is not configured on
-this project. Auth0 production callback/logout/origin configuration remains
-unconfirmed. No successful Vercel build, live HTTP/browser acceptance or automatic
+this project. At the initial check, Auth0 production callback/logout/origin configuration remained
+unconfirmed. Gavin subsequently confirmed all three reserved-origin URLs were saved.
+No successful Vercel build, live HTTP/browser acceptance or automatic
 redeployment is claimed.
 
 GitHub Actions run `44008087297` triggered on the pushed commit, but all three jobs
@@ -22,6 +23,10 @@ were refused before any steps started. GitHub's annotation was: "The job was not
 started because your account is locked due to a billing issue." The repository
 owner must resolve that account restriction before hosted CI/smoke jobs can run.
 This is distinct from a workflow/test failure and from Vercel Git authorization.
+
+## Owner handoff and configurable URL
+
+Read [the deployment agent handoff](DEPLOYMENT_AGENT_HANDOFF.md) for Noah's account/ownership route. The smoke workflow accepts the GitHub repository variable `PRODUCTION_URL`, falling back to Gavin's reserved origin. If Noah deploys in his own account, set that variable and the Vercel/Auth0 origins to his actual address.
 
 ## Project
 
