@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import Analysis from './Analysis.jsx';
+import AuthPage from './AuthPage.jsx';
 import AccountControls from './AccountControls.jsx';
 import Watchlist from './Watchlist.jsx';
 import { Dashboard, Methodology, ModelPerformance, Predictions } from './Pages.jsx';
@@ -23,10 +24,13 @@ export default function App() {
   const account = useAccount();
   const watchlist = useWatchlist();
   useEffect(() => {
-    document.title = `${pages.find(([page]) => page === route.page)?.[1] || 'Page not found'} | StockSight`;
+    document.title = `${({ login: 'Log in', signup: 'Create an account', 'reset-password': 'Reset password' })[route.page] || pages.find(([page]) => page === route.page)?.[1] || 'Page not found'} | StockSight`;
     main.current?.focus({ preventScroll: true });
     window.scrollTo(0, 0);
   }, [route.hash, route.page]);
+  useEffect(() => {
+    if (['login', 'signup', 'reset-password'].includes(route.page) && account.isAuthenticated && !account.pending) window.location.hash = '/dashboard';
+  }, [route.page, account.isAuthenticated, account.pending]);
   function rememberStock(value) {
     setSelectedSymbol(value);
     sessionStorage.setItem('stocksight:selected-symbol', value);
@@ -35,6 +39,7 @@ export default function App() {
     rememberStock(value);
     window.location.hash = `/analysis?symbol=${encodeURIComponent(value)}`;
   }
+  if (['login', 'signup', 'reset-password'].includes(route.page)) return <AuthPage key={route.page} mode={route.page} />;
   return <>
     <a className="skip-link" href="#main" onClick={event => { event.preventDefault(); main.current?.focus(); }}>Skip to content</a>
     <header className="masthead">

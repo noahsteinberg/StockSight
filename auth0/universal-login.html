@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="{{ locale | default: 'en' | escape }}" dir="{{ dir | default: 'auto' | escape }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ prompt.screen.texts.pageTitle | default: 'Account | StockSight' | escape }}</title>
+{%- auth0:head -%}
+<style>
+/* Shell styles only. Auth0 retains control of fields, validation, and routing. */
+.ss-page { margin:0; min-width:320px; background:#060e20; color:#f2f4f8; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; -webkit-font-smoothing:antialiased; }
+.ss-shell,.ss-shell * { box-sizing:border-box; }
+.ss-shell { min-height:100svh; position:relative; isolation:isolate; display:flex; flex-direction:column; }
+.ss-scene { position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none; background:radial-gradient(ellipse at 70% 22%,#152b49 0,transparent 60%),#060e20; }
+.ss-scene::after { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at center,transparent,#060e2066); }
+.ss-chart { position:absolute; width:120%; height:100%; left:-10%; top:0; filter:blur(4px); opacity:.36; }
+.ss-chart-secondary { opacity:.1; filter:blur(7px); }
+.ss-header { display:flex; align-items:center; justify-content:center; gap:9px; padding:0 0 28px; }
+.ss-logo { width:25px; height:25px; fill:none; stroke:#a9c8f4; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+.ss-brand { font-size:19px; font-weight:600; letter-spacing:-.6px; }
+.ss-main { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:56px 20px 40px; }
+.ss-auth { width:min(100%,400px); min-width:0; border:1px solid #ffffff12; border-radius:22px; background:#151e2c; box-shadow:0 16px 56px #00000030,0 2px 8px #0000001a; overflow:hidden; }
+.ss-footer { display:flex; flex-direction:column; align-items:center; gap:16px; text-align:center; color:#aab5c7; font-size:11px; padding:0 24px 24px; line-height:1.6; }
+.ss-footer p { margin:0; }
+@media(max-width:700px) { .ss-main { padding:36px 20px 32px; } .ss-header { padding-bottom:24px; } .ss-footer { padding-bottom:20px; } .ss-chart { width:220%; left:-60%; } }
+</style>
+</head>
+<body class="ss-page">
+<div class="ss-shell">
+
+<!-- Decorative illustration; no live prices or market feed. -->
+<div class="ss-scene" aria-hidden="true">
+<svg class="ss-chart" viewBox="0 0 1440 900" preserveAspectRatio="none" fill="none">
+<defs>
+<linearGradient id="ss-fill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#5f9fdf" stop-opacity=".25"/><stop offset="1" stop-color="#5f9fdf" stop-opacity="0"/></linearGradient>
+<pattern id="ss-grid" width="120" height="100" patternUnits="userSpaceOnUse"><path d="M120 0H0V100" stroke="#88b6ed" stroke-opacity=".12"/></pattern>
+</defs>
+<path fill="url(#ss-grid)" d="M0 0H1440V900H0Z"/>
+<path d="M0 700L60 660L100 680L150 600L200 630L250 540L300 570L350 490L400 530L450 440L500 480L550 410L600 460L650 350L700 380L750 320L800 360L850 290L900 340L950 240L1000 275L1050 210L1100 260L1150 170L1200 210L1250 140L1300 170L1350 100L1440 130V900H0Z" fill="url(#ss-fill)"/>
+<path d="M0 700L60 660L100 680L150 600L200 630L250 540L300 570L350 490L400 530L450 440L500 480L550 410L600 460L650 350L700 380L750 320L800 360L850 290L900 340L950 240L1000 275L1050 210L1100 260L1150 170L1200 210L1250 140L1300 170L1350 100L1440 130" stroke="#7ebcfc" stroke-width="4" stroke-linejoin="round"/>
+</svg>
+<svg class="ss-chart ss-chart-secondary" viewBox="0 0 1440 900" preserveAspectRatio="none" fill="none"><path d="M0 580L90 620L180 530L270 570L360 460L450 510L540 450L630 520L720 390L810 430L900 310L990 350L1080 290L1170 360L1260 250L1350 290L1440 220" stroke="#67d6c6" stroke-width="3"/></svg>
+</div>
+
+<div class="ss-main"><header class="ss-header">
+<svg class="ss-logo" viewBox="0 0 32 32" aria-hidden="true"><path d="M5 23V9M5 23h22M10 19l6-7 5 3 7-9"/></svg>
+<span class="ss-brand">StockSight</span>
+</header><div class="ss-auth">{%- auth0:widget -%}</div></div>
+<footer class="ss-footer">
+<p>For education and research. Not financial advice.</p>
+</footer>
+</div>
+</body>
+</html>

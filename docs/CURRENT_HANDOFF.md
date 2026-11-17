@@ -2,6 +2,33 @@
 
 Updated November 16, 2026. Start with the root [AGENTS.md](../AGENTS.md).
 
+## November 17 embedded account pages
+
+Gavin approved the static navy-chart account design and authorized local forms
+with Auth0 managing all identities/passwords. The current branch was fast-forwarded
+to `f433229` (all previous branch commits were already included) before integrating.
+`AuthPage.jsx` now serves `/#/login`, `/#/signup`, and `/#/reset-password`.
+Auth0.js 10.3.0 handles cross-origin username/password login and validated fragment
+callbacks; Google retains the official React SDK's Authorization Code + PKCE.
+Signup permits the tenant's existing optional-email behavior. The backend's
+HttpOnly session, CSRF, expiry and account-switch contracts are unchanged.
+
+Read [EMBEDDED_LOGIN.md](EMBEDDED_LOGIN.md) before tenant setup or live acceptance.
+The `auth0/` directory retains earlier hosted-template drafts and disabled standalone
+previews; those are not the functional React account pages and need not be uploaded.
+No real tenant setting, user, password, imported data or deployment was changed.
+
+Verification for this increment: frontend lint/build passed; 17 account browser
+cases and 26 public browser cases passed. Accounts used disposable SQLite, signed
+test identities, actual Auth0.js callback validation and intercepted provider HTTP.
+Google PKCE was checked through the real React SDK. Guest desktop/mobile screenshots
+were reviewed, including 1440/390/320px layout checks. npm reported zero vulnerabilities
+after updating Auth0.js from 10.0.0 to the current patched 10.3.0 release.
+This is not live-tenant, hosted browser, PostgreSQL, or deployment acceptance.
+The user still needs the SPA's origin/CORS, Implicit grant and cross-origin settings
+confirmed and a real-browser account test. Production cookie constraints and the
+explicit hosted fallback are documented in EMBEDDED_LOGIN.md.
+
 ## November 17 deployment diagnosis
 
 Noah's Vercel account imported current main (`ae3a80e`) into project

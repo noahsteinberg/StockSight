@@ -1,0 +1,33 @@
+{
+  "borders": {
+    "button_border_radius": 10,
+    "button_border_weight": 1,
+    "buttons_style": "rounded",
+    "input_border_radius": 10,
+    "input_border_weight": 1,
+    "inputs_style": "rounded",
+    "show_widget_shadow": false,
+    "widget_border_weight": 0,
+    "widget_corner_radius": 22
+  },
+  "colors": {
+    "primary_button": "#2865d6",
+    "primary_button_label": "#ffffff",
+    "secondary_button_border": "#303845",
+    "secondary_button_label": "#f2f4f8",
+    "base_focus_color": "#77acff",
+    "base_hover_color": "#3270e4",
+    "header": "#f2f4f8",
+    "body_text": "#aab5c7",
+    "widget_background": "#151e2c",
+    "widget_border": "#151e2c",
+    "input_labels_placeholders": "#aab5c7",
+    "input_filled_text": "#f2f4f8",
+    "input_border": "#303845",
+    "input_background": "#1a2330",
+    "icons": "#aab5c7",
+    "links_focused_components": "#9dc1ff",
+    "error": "#ff9a9a",
+    "success": "#7ed4ab"
+  }
+}

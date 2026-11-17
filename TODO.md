@@ -14,6 +14,7 @@ unchanged ownership are in [ROADMAP.md](docs/ROADMAP.md).
 - [x] Auth0 signup/login/logout and private persistent watchlists
 - [x] HttpOnly app sessions, refresh restoration, CSRF and account-switch isolation
 - [x] Username signup with optional recovery email; real two-account isolation
+- [x] Local React login/signup/recovery forms with Auth0, Google PKCE and unchanged app sessions (EMBEDDED_LOGIN.md)
 - [x] SMA20 and Wilder RSI14 backend API, numerical/date/range/database tests
 - [x] Current contracts and agent handoff
 

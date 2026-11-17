@@ -1,5 +1,6 @@
 import { Auth0Provider, useAuth0 } from '@auth0/auth0-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { completeEmbeddedLogin, embeddedCallback, passwordLogin, signup, resetPassword } from './embedded-auth.js';
 import { AccountContext } from './auth-context.js';
 
 const domain = import.meta.env.VITE_AUTH0_DOMAIN?.trim();
@@ -32,17 +33,30 @@ function Session({ children }) {
   const [action, setAction] = useState(null);
   const [actionError, setActionError] = useState('');
   const exchange = useRef(null);
+  const restoration = useRef(null);
 
   useEffect(() => {
     let active = true;
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000);
-    sessionRequest({ signal: controller.signal }).then(data => {
+    if (!restoration.current) {
+      restoration.current = (async () => {
+        if (embeddedCallback()) {
+          const hash = window.location.hash;
+          // Strip credentials from the address bar before any asynchronous work.
+          window.history.replaceState({}, document.title, '/#/login');
+          window.dispatchEvent(new HashChangeEvent('hashchange'));
+          const next = await completeEmbeddedLogin(hash);
+          window.location.hash = '/dashboard';
+          return next;
+        }
+        return sessionRequest({ signal: AbortSignal.timeout(10000) });
+      })();
+    }
+    restoration.current.then(data => {
       if (active) setSession(data);
     }).catch(() => {
       if (active) setSession({ ...guest, status: 'error', error: 'Could not restore your session. Sign in again.' });
-    }).finally(() => clearTimeout(timeout));
-    return () => { active = false; clearTimeout(timeout); controller.abort(); };
+    });
+    return () => { active = false; };
   }, []);
 
   useEffect(() => {
@@ -98,18 +112,29 @@ function Session({ children }) {
       document.removeEventListener('visibilitychange', recheck);
     };
   }, [session.authenticated, sessionUserId]);
-  const login = useCallback(async (signup = false) => {
+  const loginHosted = useCallback(async (signup = false, google = false) => {
     setAction('login');
     setActionError('');
     setExpired(false);
     exchange.current = null;
     setSession(guest);
     try {
-      await loginWithRedirect({ authorizationParams: signup ? { screen_hint: 'signup' } : {} });
+      await loginWithRedirect({ authorizationParams: google ? { connection: 'google-oauth2' } : signup ? { screen_hint: 'signup' } : {} });
     } catch {
       setActionError('Could not sign in. Try again.');
     } finally { setAction(null); }
   }, [loginWithRedirect]);
+  const login = useCallback((signup = false) => {
+    window.location.hash = signup ? '/signup' : '/login';
+  }, []);
+  const loginWithPassword = useCallback(async (username, password) => {
+    setAction('login');
+    setActionError('');
+    setExpired(false);
+    exchange.current = null;
+    try { await passwordLogin(username, password); }
+    finally { setAction(null); }
+  }, []);
   const signOut = useCallback(async () => {
     setAction('logout');
     setActionError('');
@@ -149,9 +174,9 @@ function Session({ children }) {
   [authenticated, sdkUser, sessionSubject]);
   const value = useMemo(() => ({
     configured: true, isAuthenticated: Boolean(authenticated), isLoading: Boolean(restoring),
-    user: displayUser, login, logout: signOut, authorizedFetch,
+    user: displayUser, login, loginHosted, loginWithPassword, signup, resetPassword, logout: signOut, authorizedFetch,
     pending: Boolean(action), error: actionError || session.error || (!authenticated && sdkError ? 'Sign-in did not finish. Try again.' : ''),
-  }), [authenticated, restoring, displayUser, login, signOut, authorizedFetch, action, actionError, session.error, sdkError]);
+  }), [authenticated, restoring, displayUser, login, loginHosted, loginWithPassword, signOut, authorizedFetch, action, actionError, session.error, sdkError]);
   return <AccountContext.Provider value={value}>{children}</AccountContext.Provider>;
 }
 
