@@ -3,6 +3,26 @@
 Prepared November 16, 2026. This is the deployment runbook; recorded acceptance
 must distinguish configured infrastructure from a verified live application.
 
+## Recorded delivery status — November 16, 2026
+
+Deployment configuration was committed as `1d620e2` and pushed to `main`, including
+the Supabase branch history. Local backend verification passed 92 tests with two
+PostgreSQL-only cases skipped; Ruff lint/format passed. Frontend lint/build passed
+after the Supabase merge; no frontend source changed in this deployment increment.
+
+Vercel project/domain creation and six public production settings succeeded.
+Git linking was rejected because the GitHub integration is not authorized for
+`noahsteinberg/StockSight`. The production Supabase secret is not configured on
+this project. Auth0 production callback/logout/origin configuration remains
+unconfirmed. No successful Vercel build, live HTTP/browser acceptance or automatic
+redeployment is claimed.
+
+GitHub Actions run `44008087297` triggered on the pushed commit, but all three jobs
+were refused before any steps started. GitHub's annotation was: "The job was not
+started because your account is locked due to a billing issue." The repository
+owner must resolve that account restriction before hosted CI/smoke jobs can run.
+This is distinct from a workflow/test failure and from Vercel Git authorization.
+
 ## Project
 
 - Team: CSE4095 (`cse-4095`).
