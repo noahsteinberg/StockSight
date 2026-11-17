@@ -4,6 +4,11 @@ Current continuation context: [CURRENT_HANDOFF.md](CURRENT_HANDOFF.md).
 PostgreSQL/SQLAlchemy/Alembic persistence, snapshot ingestion, private watchlists
 and app sessions are implemented. Live provider refresh and ML are not.
 
+For Supabase hosting, follow [SUPABASE.md](SUPABASE.md). Migration head is now
+`0005_backend_only_access`: PostgreSQL RLS and browser-role privilege revocation
+keep the existing Auth0/FastAPI ownership boundary intact. This migration does
+not replace market data. The previous 0004 head below describes the prior phase.
+
 ## Schema and migrations
 
 | Table | Contract |
