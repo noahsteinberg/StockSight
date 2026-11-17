@@ -101,6 +101,7 @@ AI coding agents should read this file, [SPECIFICATION.md](SPECIFICATION.md), [T
 
 - [Architecture](docs/ARCHITECTURE.md) and [current API](docs/API.md)
 - [ML product integration plan](docs/ML_PRODUCT_INTEGRATION_PLAN.md)
+- [Continuous-target research round and commands](ml/docs/NEXT_SESSION_TARGET_ROUND.md)
 - [Database plan](docs/DATABASE.md) and [ML foundation](ml/README.md)
 - [Security](docs/SECURITY.md) and [deployment plan](docs/DEPLOYMENT.md)
 
