@@ -98,6 +98,12 @@ the full MVP finished while ML, persistence/outcomes and evaluation remain absen
 
 ## Documentation map
 
+- **[November 17 next-AI handoff](docs/NEXT_AGENT_HANDOFF.md)** — current continuation and stop state
+- [Detailed frontend/ML integration specification](docs/FRONTEND_ML_INTEGRATION_SPEC.md)
+- [ML integration architecture](docs/ML_PRODUCT_INTEGRATION_PLAN.md)
+- [Paused ML research handoff](ml/docs/RESEARCH_STATUS_HANDOFF.md)
+- [Six next-step issue drafts](docs/handoff-issues/README.md)
+
 - [Supabase setup](docs/SUPABASE.md) and [Yahoo Finance investigation](docs/YAHOO_FINANCE.md)
 - [Current handoff](docs/CURRENT_HANDOFF.md) and [startup](docs/LOCAL_START.md)
 - [API](docs/API.md), [indicator conventions](docs/INDICATORS.md), [architecture](docs/ARCHITECTURE.md)

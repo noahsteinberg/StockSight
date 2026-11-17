@@ -1,5 +1,11 @@
 # StockSight — continuation handoff for Gavin and the next agent
 
+November 17 continuation: read [NEXT_AGENT_HANDOFF.md](NEXT_AGENT_HANDOFF.md)
+and [the detailed integration specification](FRONTEND_ML_INTEGRATION_SPEC.md).
+Noah reports Auth0 settings are fixed. Full hosted account acceptance is still
+separate from that configuration update. ML is explicitly paused; this handoff
+does not authorize more research or implementation until the next user task.
+
 Updated November 16, 2026. Start with the root [AGENTS.md](../AGENTS.md).
 
 ## November 17 deployment diagnosis
