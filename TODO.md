@@ -31,6 +31,12 @@ Gavin authorized this phase after the backend handoff. See
 
 ## Data and account follow-up
 
+- [x] Prepare Supabase connection support, backend-only table access and setup guide
+- [x] Investigate Yahoo Finance daily-data access and document the API/ingestion plan
+- [x] Create/connect the actual Supabase project and verify migrated hosted schema
+- [x] Load the user-selected historical AAPL demo and verify hosted data integrity
+- [x] Configure the private backend connection and verify public HTTP APIs against Supabase
+
 App-view increment implemented; see [APP_VIEWS.md](docs/APP_VIEWS.md):
 
 - [x] Dashboard with real private watchlist filtering, saved dates, open/remove

@@ -30,8 +30,10 @@ requires instruction.
 
 - React/Vite JavaScript and plain CSS; native SVG price/volume chart, ticker/company
   search, ranges, keyboard date inspection, accessible table and watchlist UI.
-- FastAPI, SQLAlchemy/Alembic and PostgreSQL; migration head `0004_app_sessions`.
+- FastAPI, SQLAlchemy/Alembic and PostgreSQL; migration head `0005_backend_only_access`.
   Explicit fixture mode is available. No provider request runs inside chart APIs.
+  Supabase setup and connection/security behavior are in docs/SUPABASE.md;
+  docs/YAHOO_FINANCE.md records provider research without enabling refresh.
 - Auth0 Universal Login/PKCE, verified API JWTs, private watchlists and opaque
   HttpOnly app sessions. Refresh restores the app session without relying on an
   Auth0 silent iframe. Username signup with optional recovery email is configured.

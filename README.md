@@ -27,7 +27,7 @@ offline, separately from inference. No chart library, router or ML stack is inst
 | `frontend/src` | Analysis/chart, account context, private watchlist and existing styles |
 | `frontend/e2e` | Chart and account/session browser tests |
 | `backend/app` | API, authentication/sessions, repositories, indicators and imports |
-| `backend/migrations` | Schema through `0004_app_sessions` |
+| `backend/migrations` | Schema/access controls through `0005_backend_only_access` |
 | `backend/tests` | Numerical, HTTP-contract, migration, persistence and security tests |
 | `docs` | Current handoffs, contracts, setup and dated reviews |
 | `ml` | Planned feature/training/evaluation pipeline; no model implemented |
@@ -98,6 +98,7 @@ the full MVP finished while ML, persistence/outcomes and evaluation remain absen
 
 ## Documentation map
 
+- [Supabase setup](docs/SUPABASE.md) and [Yahoo Finance investigation](docs/YAHOO_FINANCE.md)
 - [Current handoff](docs/CURRENT_HANDOFF.md) and [startup](docs/LOCAL_START.md)
 - [API](docs/API.md), [indicator conventions](docs/INDICATORS.md), [architecture](docs/ARCHITECTURE.md)
 - [Auth0/watchlists](docs/AUTH0_WATCHLIST_HANDOFF.md) and [sessions](docs/SESSION_HANDOFF.md)
