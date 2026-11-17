@@ -1,5 +1,8 @@
 # Next-session round 2: market context and advanced tree ensembles
 
+**Completed:** no candidate qualified. See
+[`NEXT_SESSION_ROUND2_RESULTS.md`](NEXT_SESSION_ROUND2_RESULTS.md).
+
 This is a bounded training-period follow-up. It preserves the first next-session
 round and its 52.239% HGB reference. It does not modify the app, download data,
 access validation/final test, export a model, or tune a confidence threshold.
