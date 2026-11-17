@@ -173,3 +173,12 @@ Tests: 47 in `tests/test_modeling.py`. All 23 planted bugs were caught, each in 
 - **Next iteration (falsifiable):**
   - Option 1: a feature aimed at the date-level beat-rate (cross-sectional skew of trailing returns). It passes if fold Brier improves by more than 1 bootstrap SE (about 6e-5) without a loss on balanced accuracy.
   - Option 2: decide as a team whether the 0.5-threshold, single-p gate design is the right contract for the app (contract section 6). Changing the gates now would need a new, recorded freeze; it must not be fitted to this result.
+
+
+## Research round 2: bounded follow-up
+
+Four fixed HGB follow-ups and baseline reproduction are reported in [RESEARCH_ROUND2.md](RESEARCH_ROUND2.md). Previous results above are preserved. None of the four new configurations meets the existing training-fold eligibility rules. Stop this round; retain the prior approach as the comparison reference. This does not overturn the earlier finding that no model passed validation. No validation or test access was added.
+
+## Saved-prediction confidence diagnostic: November 14, 2026
+
+The user ran four fixed margin-based answer policies on the reproduced HGB's existing training-fold predictions. See [CONFIDENCE_REVIEW.md](CONFIDENCE_REVIEW.md). Selectivity increased both model and reversal accuracy, without a consistent increase in the model's extra advantage. Achieved coverage drifted substantially; raw probabilities are not verified confidence. Independent scikit-learn checks matched reported metrics, original intervals reproduced, 10 focused tests passed, and fixed 5/10/21/63-session block sensitivity checks were recorded. No operating policy was selected or promoted, no models were trained, and validation/final test were not scored. Stop cutoff exploration pending agreement on the product target and a separately recorded research protocol.

@@ -284,9 +284,10 @@ def fit_base_rate(rows: pd.DataFrame, spec: ModelSpec) -> float:
     return float(rows["label"].to_numpy()[keep].mean())
 
 
-def fit_model(spec: ModelSpec, rows: pd.DataFrame, seed: int = SEED) -> FittedModel:
+def fit_model(spec: ModelSpec, rows: pd.DataFrame, seed: int = SEED, *, columns=None) -> FittedModel:
     """Fit one model per date offset on every spec.stride-th date of `rows` (the fit rows of a fold)."""
-    columns = feature_columns(rows)
+    columns = feature_columns(rows) if columns is None else list(columns)
+    check_feature_columns(columns)
     market = [c for c in MARKET_COLUMNS if c in rows.columns] if spec.market else []
     if spec.market and not market:
         raise ValueError("spec.market is set but the frame has no market columns")

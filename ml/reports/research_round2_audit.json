@@ -1,0 +1,72 @@
+{
+  "at": "2026-11-14T20:55:57+00:00",
+  "train_only": true,
+  "traces": [
+    {
+      "ticker": "AAPL",
+      "as_of_date": "2018-12-20",
+      "calendar_target": "2018-12-28",
+      "status": "labelled",
+      "independently_verified_label": 0,
+      "stock_return": -0.0038258597685159046,
+      "benchmark_return": 0.008143981962348083,
+      "valid_stocks": 474,
+      "manual_ret_21d": -0.15619262778054221
+    },
+    {
+      "ticker": "AAPL",
+      "as_of_date": "2018-12-24",
+      "calendar_target": "2019-01-02",
+      "status": "invalid_window",
+      "independently_verified_label": null,
+      "stock_return": null,
+      "benchmark_return": null,
+      "valid_stocks": 0,
+      "manual_ret_21d": -0.16941940145576873
+    },
+    {
+      "ticker": "MSFT",
+      "as_of_date": "2008-09-15",
+      "calendar_target": "2008-09-22",
+      "status": "labelled",
+      "independently_verified_label": 0,
+      "stock_return": -0.052944888925902545,
+      "benchmark_return": 0.007855389947991743,
+      "valid_stocks": 412,
+      "manual_ret_21d": -0.03522184534275674
+    },
+    {
+      "ticker": "JCI",
+      "as_of_date": "2007-07-02",
+      "calendar_target": "2007-07-10",
+      "status": "invalid_window",
+      "independently_verified_label": null,
+      "stock_return": null,
+      "benchmark_return": -0.004763264343620566,
+      "valid_stocks": 403,
+      "manual_ret_21d": null
+    },
+    {
+      "ticker": "EXPE",
+      "as_of_date": "2011-12-21",
+      "calendar_target": "2011-12-29",
+      "status": "invalid_window",
+      "independently_verified_label": null,
+      "stock_return": null,
+      "benchmark_return": 0.015528004636660568,
+      "valid_stocks": 432,
+      "manual_ret_21d": null
+    }
+  ],
+  "checks": [
+    "Five-session labels independently recalculated from all valid stocks.",
+    "21-session returns checked from each stock's own clean history.",
+    "A late-2018 target outside train is invalid; no later price was read.",
+    "Known JCI/EXPE bad-bar windows remain invalid."
+  ],
+  "limits": [
+    "Current-constituent survivorship bias remains.",
+    "Python 3.12 patch version differs from original 3.12.5; package pins are identical.",
+    "This is a focused audit, not independent certification of all Yahoo prices."
+  ]
+}

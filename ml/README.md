@@ -6,6 +6,10 @@ The prediction target, label rules, split policy, baselines and promotion gates 
 
 **Picking this up?** Start with [HANDOFF.md](HANDOFF.md). It covers status, reproduction, next steps and gotchas.
 
+**Bounded follow-up research:** [Research round 2](docs/RESEARCH_ROUND2.md) reproduces the existing gradient booster and compares exactly four controlled changes. The runner checkpoints each fold and does not score validation or test. Its results and audit are kept separately from the original reports.
+
+**User-run diagnostic:** [Confidence analysis](docs/CONFIDENCE_ANALYSIS.md) explains the root `Run-Confidence-Analysis.cmd` launcher. It analyzes saved predictions without training or downloads and writes small reports for review.
+
 ## S&P 500 daily price dataset
 
 `stocksight_data/` downloads daily bars (2000 onward) for the current S&P 500 constituents from Yahoo Finance via yfinance. It uses its own `requirements.txt`, separate from the backend.
