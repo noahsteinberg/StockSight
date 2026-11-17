@@ -6,7 +6,7 @@ const audience = import.meta.env.VITE_AUTH0_AUDIENCE?.trim();
 const connection = import.meta.env.VITE_AUTH0_DATABASE_CONNECTION?.trim() || 'Username-Password-Authentication';
 let client;
 
-async function webAuth() {
+export async function webAuth() {
   if (!client) client = import('auth0-js').then(({ default: auth0 }) => new auth0.WebAuth({
     domain, clientID, audience, redirectUri: window.location.origin,
     responseType: 'token id_token', scope: 'openid profile email',
@@ -25,12 +25,17 @@ export function authMessage(error, operation = 'login') {
   if (['too_many_attempts', 'too_many_requests'].includes(code)) return 'Too many attempts. Wait a few minutes before trying again.';
   if (['password_strength_error', 'invalid_password', 'password_dictionary_error', 'password_no_user_info_error'].includes(code)) return 'Choose a stronger password with upper and lowercase letters, a number, and a symbol.';
   if (code === 'password_leaked') return 'This password was found in a data breach. Reset your password before signing in.';
-  if (['mfa_required', 'requires_verification', 'unauthorized_client', 'unsupported_credential_type', 'blocked_user', 'login_required'].includes(code)) return 'Additional verification is needed. Continue with Auth0 sign-in below.';
+  if (['mfa_required', 'requires_verification'].includes(code)) return 'This account requires additional verification. Contact support to complete sign-in.';
+  if (code === 'blocked_user') return 'This account is blocked. Use password recovery or contact support.';
+  if (['unauthorized_client', 'unsupported_credential_type', 'server_error'].includes(code)) return 'Password sign-in is temporarily unavailable. Please try again or use Google sign-in.';
+  if (code === 'invalid_token') return 'Sign-in could not be verified. Please enter your details and try again.';
   if (operation === 'signup') return 'Could not create the account. Check your details and password, or try signing in if you already have an account.';
   if (operation === 'reset') return 'Could not send the reset email. Try again in a moment.';
-  if (['access_denied', 'invalid_grant'].includes(code)) return 'Check your username and password, or continue with Auth0 sign-in if verification is required.';
-  return 'Sign-in could not finish. Try again, or use Auth0 sign-in if your browser blocks embedded login.';
+  if (['access_denied', 'invalid_grant'].includes(code)) return 'Check your username and password and try again.';
+  return 'Your browser could not complete password sign-in. Please try again or use Google sign-in.';
 }
+
+export class AuthFlowError extends Error {}
 
 export async function passwordLogin(username, password) {
   const auth = await webAuth();
@@ -63,7 +68,8 @@ export async function resetPassword(email) {
 export async function completeEmbeddedLogin(hash) {
   const auth = await webAuth();
   const result = await new Promise((resolve, reject) => auth.parseHash({ hash }, (error, result) => {
-    if (error || !result?.accessToken) reject(new Error('Sign-in could not be verified. Start again.'));
+    if (error) reject(new AuthFlowError(authMessage(error)));
+    else if (!result?.accessToken) reject(new AuthFlowError('Sign-in could not be verified. Please try again.'));
     else resolve(result);
   }));
   // The backend independently verifies signature, issuer, audience and expiry.
@@ -72,7 +78,7 @@ export async function completeEmbeddedLogin(hash) {
     method: 'POST', credentials: 'same-origin', cache: 'no-store', signal: AbortSignal.timeout(15000),
     headers: { Authorization: `Bearer ${result.accessToken}` },
   });
-  if (!response.ok) throw new Error('Could not restore your session. Sign in again.');
+  if (!response.ok) throw new AuthFlowError('Your login was verified, but StockSight could not start your session. Please try again.');
   const session = await response.json();
   if (!session.authenticated) throw new Error('Sign-in could not be verified. Start again.');
   return { ...session, status: 'authenticated' };

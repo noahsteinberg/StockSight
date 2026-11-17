@@ -1,5 +1,33 @@
 # StockSight — continuation handoff for Gavin and the next agent
 
+## November 17 follow-up: embedded verification and error flow
+
+After PR #12 was merged, live Auth0 logs first showed `Cross origin login not
+allowed.` With explicit user approval, the existing SPA's cross-origin switch
+was enabled and Allowed Origins (CORS) was limited to the rose production origin.
+Subsequent attempts showed `Unable to configure verification page.`
+
+The follow-up adds the dedicated `/cross-origin-verification.html` Vite entry,
+using Auth0.js's verifier handshake with an origin/parent guard. After deployment,
+its exact production URL must be set in Auth0's Cross-Origin Verification Fallback
+URL field. It does not render the app, exchange user tokens or collect passwords.
+The user requested removal of the hosted Auth0 login fallback link; it is removed.
+Safe provider callback errors now survive the session restoration wrapper instead
+of all being reported as an app-session restoration problem. Google is preserved.
+
+Gavin chose to keep `vercel.app`. Auth0 documents that this verification fallback
+cannot overcome blocked third-party cookies in Chrome/Safari; a same-site custom
+domain is needed for reliable embedded password login in those conditions. Do not
+disable browser privacy/security protections or claim successful real-user login.
+See EMBEDDED_LOGIN.md for the setup and explicit acceptance boundary.
+
+Follow-up verification: frontend lint/build and both public/account Playwright
+suites passed (20 account cases). The verification-page tests cover standalone,
+untrusted-parent and trusted Auth0-origin SDK handshake behavior with intercepted
+provider traffic. These checks do not establish live password-login success or
+overcome browser third-party-cookie restrictions. Deployment and the tenant's
+verification fallback URL update remain pending.
+
 November 17 continuation: read [NEXT_AGENT_HANDOFF.md](NEXT_AGENT_HANDOFF.md)
 and [the detailed integration specification](FRONTEND_ML_INTEGRATION_SPEC.md).
 Noah reports Auth0 settings are fixed. Full hosted account acceptance is still
