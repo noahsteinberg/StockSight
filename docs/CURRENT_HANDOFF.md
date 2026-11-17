@@ -21,11 +21,27 @@ dependency list succeeded. The manifest-parity and hosted-entrypoint tests passe
 (5 tests); the new test passed Ruff lint/format checks and pip check found no
 broken requirements. These checks do not establish Vercel runtime acceptance.
 
-The fix needs publication/redeployment before hosted acceptance can resume.
-Also confirm STOCKSIGHT_APP_ORIGIN equals the actual rose domain and add that
-exact origin to the existing Auth0 callback/logout/web-origin allowlists.
-The earlier proposed stocksight.vercel.app address was not assigned. Do not
-interpret this diagnosis as evidence that database credentials or login work.
+Noah authorized publication; fix `a2cece2` was pushed to main. Native Git integration
+automatically created production deployment `dpl_FGJWUuT5dyvWkrz48n1ytEDwf4mo`
+from that exact SHA and reached READY. Its build installed pyproject dependencies.
+The repository's read-only `scripts/check_deployment.py` passed against the rose
+domain: frontend HTML, health, database readiness, AAPL search/history/indicators,
+guest session, private-watchlist rejection and invalid-range rejection. Storage
+reported database, 63 visible bars ending 2017-02-16, Plotly historical Apple data.
+No error/fatal records were returned for this deployment in the inspected window.
+
+The production smoke workflow's default origin now targets the rose domain;
+an existing repository PRODUCTION_URL variable, if present, takes precedence
+and should match it. Its current value and hosted Actions execution were not
+verified through the connected tooling. Earlier billing restrictions remain
+historical evidence, not a current CI diagnosis.
+
+Noah reports updating STOCKSIGHT_APP_ORIGIN. Verify the exact rose origin is also
+in the existing Auth0 callback/logout/web-origin allowlists. The earlier proposed
+stocksight.vercel.app address was not assigned. Browser host access was unavailable
+in this agent session, so rendered chart interaction and authenticated login,
+watchlist persistence, logout and two-account isolation remain for real-browser
+acceptance. API acceptance does not establish those account flows.
 
 This is the current implementation summary; dated review reports preserve past
 findings and are not current startup instructions.

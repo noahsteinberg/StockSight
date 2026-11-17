@@ -3,6 +3,21 @@
 Prepared November 16, 2026. This is the deployment runbook; recorded acceptance
 must distinguish configured infrastructure from a verified live application.
 
+## Active owner deployment — November 17, 2026
+
+Noah's active production project is `stocksight`, ID
+`prj_RjOsm0SDpprpf9iOWOA5NIfrAhtq`, in team
+`team_5tJ25Ir3aeN4EZ734n78riyE` (`noah-steinbergs-projects`). Its canonical origin
+is **https://stocksight-rose.vercel.app**. Use this origin for the Production
+STOCKSIGHT_APP_ORIGIN setting, existing Auth0 allowlists and PRODUCTION_URL.
+The Gavin project/domain described below are historical setup context.
+
+Pushing dependency fix `a2cece2` to main triggered native Git deployment and
+reached READY. The standard public smoke script passed with Supabase database
+storage and historical AAPL coverage ending 2017-02-16. Real-browser/account
+acceptance and current hosted CI remain unverified; see CURRENT_HANDOFF.md.
+Do not claim live market data, ML serving, or fully configured previews.
+
 ## Recorded delivery status — November 16, 2026
 
 Deployment configuration was committed as `1d620e2` and pushed to `main`, including

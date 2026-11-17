@@ -27,5 +27,5 @@ jobs:
           persist-credentials: false
       - name: Verify production frontend, database API and private-route protection
         env:
-          PRODUCTION_URL: ${{ vars.PRODUCTION_URL || 'https://stocksight-cse4095.vercel.app' }}
+          PRODUCTION_URL: ${{ vars.PRODUCTION_URL || 'https://stocksight-rose.vercel.app' }}
         run: python3 scripts/check_deployment.py "$PRODUCTION_URL"
