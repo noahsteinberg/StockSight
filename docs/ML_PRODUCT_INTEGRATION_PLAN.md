@@ -461,3 +461,19 @@ Only after that decision should implementation begin at section A.
 Deployment of latest `main` can proceed independently with the ML pages still
 unavailable. Deployment does not authorize a placeholder model or make the
 historical hosted AAPL fixture a live feed.
+
+## November 17 target-round checkpoint
+
+The continuous-target round is complete; see
+`ml/docs/NEXT_SESSION_TARGET_ROUND_REVIEW.md`. No absolute-direction candidate
+qualified. All six folds retain weak positive ranking evidence; excess HGB's
+gross extreme-decile spread exceeds the original HGB, while overall rank IC
+does not. This supports a narrow relative-ranking research follow-up rather
+than another broad absolute-direction model search.
+
+Before serving, audit concentration, turnover and the difference between
+close-to-close research labels and the app's actual publication/entry timing.
+Then record a separate protected-evaluation protocol if warranted. No model
+artifact, hosted data update, new API or frontend integration is approved by
+these research results. Preserve latest main's unavailable states and existing
+design until that checkpoint is resolved.
