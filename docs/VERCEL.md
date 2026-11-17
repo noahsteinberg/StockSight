@@ -49,6 +49,13 @@ remain available as documented in LOCAL_START.md.
 
 ## Production settings
 
+The backend runtime dependencies are declared in `backend/pyproject.toml` for
+Vercel's Python build and mirrored in `backend/requirements.txt` for local/CI
+installation. Keep both lists synchronized. A tool-only pyproject takes precedence
+over requirements.txt on this deployment path and can produce a READY build whose
+function crashes at import with a missing dependency. The manifest parity test
+guards that boundary; build success alone is not runtime acceptance.
+
 In the Vercel project's Environment Variables, set these for **Production**:
 
 | Setting | Value / source |

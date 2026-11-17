@@ -1,6 +1,32 @@
 # StockSight — continuation handoff for Gavin and the next agent
 
 Updated November 16, 2026. Start with the root [AGENTS.md](../AGENTS.md).
+
+## November 17 deployment diagnosis
+
+Noah's Vercel account imported current main (`ae3a80e`) into project
+`prj_RjOsm0SDpprpf9iOWOA5NIfrAhtq`, named `stocksight`, with production domain
+`https://stocksight-rose.vercel.app`. All seven environment-variable keys are
+present for Production. Secret values were not retrieved.
+
+The frontend renders, but public health, readiness and stock history returned
+HTTP 500. Build logs show dependency installation from the tool-only
+`backend/pyproject.toml`; runtime logs show `ModuleNotFoundError: pydantic`.
+This branch adds the existing pinned runtime dependencies to pyproject and a
+parity test against requirements.txt. No dependency versions, API behavior,
+database data or authentication provider were changed.
+
+Clean local Python 3.12 environment installation directly from the pyproject
+dependency list succeeded. The manifest-parity and hosted-entrypoint tests passed
+(5 tests); the new test passed Ruff lint/format checks and pip check found no
+broken requirements. These checks do not establish Vercel runtime acceptance.
+
+The fix needs publication/redeployment before hosted acceptance can resume.
+Also confirm STOCKSIGHT_APP_ORIGIN equals the actual rose domain and add that
+exact origin to the existing Auth0 callback/logout/web-origin allowlists.
+The earlier proposed stocksight.vercel.app address was not assigned. Do not
+interpret this diagnosis as evidence that database credentials or login work.
+
 This is the current implementation summary; dated review reports preserve past
 findings and are not current startup instructions.
 
