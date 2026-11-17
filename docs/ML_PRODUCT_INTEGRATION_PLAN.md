@@ -1,6 +1,6 @@
 # ML product integration plan
 
-Status: proposed for team review; not implemented
+Status: proposed for team review; ML integration not implemented
 
 Date: 2026-11-16
 
@@ -16,9 +16,19 @@ The same application boundary can support:
 - a market component plus a stock-specific component; and
 - risk and model-reliability context.
 
-The current app is still an early scaffold. It has a static React landing page
-and `GET /api/health`; it has no market-data, prediction, database, account, or
-watchlist integration. Nothing in this document claims those features exist.
+Latest `main` was reviewed at `ae3a80e` on 2026-11-16. It already contains the
+UConn-styled React research workspace, PostgreSQL/Supabase-backed historical
+analysis, SMA20/RSI14, Auth0-backed app sessions, private watchlists, and honest
+Predictions/Model Performance unavailable pages. It has no ML inference,
+persisted forecasts/outcomes, or automated market-data refresh. This document
+lives on the isolated research branch and must be reconciled through a focused
+branch from latest `main`; do not merge the research branch wholesale.
+
+The existing application patterns are binding for integration: thin typed
+FastAPI routes, repository-owned bounded reads, Alembic migrations, sanitized
+errors, hash navigation, `authorizedFetch` for private calls, explicit
+loading/error/unavailable states, request cancellation, and accessible mobile
+behavior. Training remains outside the web runtime.
 
 ## Product principle
 
@@ -122,6 +132,13 @@ For an educational demo, the first backend adapter can reuse that source after
 the team reviews provider terms, delays, rate limits, and attribution. It is not
 a reason to couple application code directly to `yfinance`.
 
+Latest `main` documents a successful small Yahoo feasibility check but does not
+implement recurring ingestion. Its hosted Supabase database contains only the
+selected 506-bar historical AAPL fixture ending 2017-02-16; the larger local
+snapshot is not automatically present in production. A public recommendation
+service therefore requires a deliberate hosted dataset/refresh decision in
+addition to model integration.
+
 Define a backend-owned provider interface with operations such as:
 
 ```text
@@ -202,8 +219,11 @@ version and retains the prior record for audit; it does not overwrite history.
 
 ## Candidate database entities
 
-The detailed schema and migrations belong to the database phase, but the design
-needs these responsibilities:
+Latest `main` already uses PostgreSQL, SQLAlchemy and Alembic through migration
+`0005_backend_only_access`. ML persistence should be added in a reviewed next
+migration without replacing the existing stock/bar/account/watchlist schema.
+New tables inherit the backend-only/RLS posture: no direct browser-role access.
+The design needs these responsibilities:
 
 1. **Stock**: canonical symbol, provider symbols, exchange, active support
    status, and display metadata.
@@ -220,8 +240,9 @@ needs these responsibilities:
    correctness where defined, and evaluation eligibility.
 7. **JobRun**: provider refresh, inference, outcome-resolution, and monitoring
    attempts with sanitized errors.
-8. **User/Watchlist/WatchlistEntry**: later account-owned records; no model data
-   or provider credentials live in the browser.
+8. **Existing user/watchlist records** remain unchanged. Prediction reads can
+   initially be public research data; watchlist composition stays private and
+   continues through the existing account/session boundary.
 
 ## Proposed API surface
 
@@ -283,6 +304,12 @@ The page should separate three evidence types visually:
 The signal card changes labels based on `target_kind` rather than pretending
 every model predicts price direction. It always includes a clear unavailable
 state and an educational/not-financial-advice explanation.
+
+Latest `main` already preserves selected-stock context into
+`#/predictions?symbol=...` and renders an explicit unavailable panel. Replace
+that panel only after the real response schema and fixture contract exist. A new
+public prediction hook should mirror the cancellation, timeout, retry and
+stale-response protections in the existing indicator hook.
 
 ### Recommendations
 
@@ -357,10 +384,12 @@ No stage is skipped because the model looks promising on one fold.
 
 ### B. Market data and persistence
 
-- Add PostgreSQL, SQLAlchemy, Alembic, and isolated migration tests.
-- Implement the provider interface and Yahoo demo adapter.
-- Add stock search and settled daily-bar cache with quality metadata.
-- Implement historical bars API before prediction serving.
+- Preserve the existing PostgreSQL/SQLAlchemy/Alembic foundation and migrations.
+- Decide whether the first deployed ML demo uses the historical hosted fixture,
+  a deliberately imported larger snapshot, or a reviewed incremental refresh.
+- Add the ML tables through the next Alembic migration with backend-only access.
+- Implement provider refresh separately; do not put provider calls in chart or
+  prediction HTTP requests.
 
 ### C. Model-serving boundary
 
@@ -375,14 +404,20 @@ No stage is skipped because the model looks promising on one fold.
 - Implement idempotent batch writes and outcome resolution.
 - Recompute public metrics only from resolved, eligible predictions.
 - Preserve baseline performance on exactly the same observations.
+- Prefer scheduled immutable batches plus `GET` reads. Do not reuse the roadmap's
+  old user-click "Generate prediction" concept unless historical replay is
+  separately named, bounded and approved.
 
 ### E. Frontend
 
-- Add stock search and observed-data chart first.
-- Add target-aware signal card and unavailable/stale/error states.
+- Preserve the implemented stock search, chart, indicator, watchlist, navigation
+  and selected-symbol flows.
+- Populate the existing Predictions and Model Performance pages only after the
+  API contract is real; retain unavailable/stale/error states.
 - Add recommendations only after eligibility rules are approved.
 - Add prediction history and model-performance context.
-- Add watchlists after authentication and ownership rules are implemented.
+- Later add prediction summaries to existing watchlist/dashboard cards without
+  bypassing `authorizedFetch` or owner-keyed UI state.
 
 ### F. Operations
 
@@ -411,13 +446,18 @@ No stage is skipped because the model looks promising on one fold.
 
 ## Immediate next checkpoint
 
-Finish and review the active next-session market/model round. Do not modify the
-app based on partial folds. The review chooses one of three actions:
+The next-session market/model round completed with no qualifying candidate; see
+`ml/docs/NEXT_SESSION_ROUND2_RESULTS.md`. The immediate research action is the
+bounded target-comparison round, after which the team chooses one of three
+actions:
 
 1. advance a qualifying candidate for the separately controlled evaluation
    process;
-2. run the bounded target-comparison round described in
-   `ml/docs/OPEN_SOURCE_MODEL_AUDIT.md`; or
-3. stop directional work and emphasize relative/risk analysis.
+2. continue relative/ranking research under a newly recorded hypothesis; or
+3. stop directional work and emphasize risk/educational analysis.
 
 Only after that decision should implementation begin at section A.
+
+Deployment of latest `main` can proceed independently with the ML pages still
+unavailable. Deployment does not authorize a placeholder model or make the
+historical hosted AAPL fixture a live feed.
