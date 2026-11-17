@@ -5,7 +5,8 @@ from app.db import Base, database_engine
 
 url = context.config.attributes.get("database_url")
 if url is None:
-    secret = Settings().database_url
+    settings = Settings()
+    secret = settings.migration_database_url or settings.database_url
     if secret is None:
         raise RuntimeError("Set STOCKSIGHT_DATABASE_URL before running migrations")
     url = secret.get_secret_value()
