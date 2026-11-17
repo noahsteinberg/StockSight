@@ -4,6 +4,12 @@ Updated November 16, 2026. Start with the root [AGENTS.md](../AGENTS.md).
 This is the current implementation summary; dated review reports preserve past
 findings and are not current startup instructions.
 
+Noah's November 16 meeting follow-up proposes a separate next-session direction
+research track: [NEXT_SESSION_RESEARCH_PLAN.md](NEXT_SESSION_RESEARCH_PLAN.md).
+It records the current app/ML branch boundary, a bounded four-configuration
+experiment and proposed UI mapping. This is planning only: no new model, changed
+acceptance gate, validation/test access or serving integration is implied.
+
 ## Checkout and delivery state
 
 Gavin's implementation checkout is on `feature/auth0-watchlists`, following
