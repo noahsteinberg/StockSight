@@ -5,6 +5,15 @@ must distinguish configured infrastructure from a verified live application.
 
 ## Active owner deployment — November 17, 2026
 
+Noah requested main-only automatic deployments. Preview deployments are disabled
+at project level (`previewDeploymentsDisabled: true`), including older research
+branches without the current Services configuration. Root vercel.json also
+disables Git deployments for `**` and explicitly enables `main`; the true main
+rule wins when both match. This repository rule protects new branches inheriting
+it; the project setting covers archived branches. Do not re-enable previews
+without an explicit request and the required Preview data/auth/origin setup.
+Historical failed preview records/emails are not removed by this setting.
+
 Noah's active production project is `stocksight`, ID
 `prj_RjOsm0SDpprpf9iOWOA5NIfrAhtq`, in team
 `team_5tJ25Ir3aeN4EZ734n78riyE` (`noah-steinbergs-projects`). Its canonical origin
