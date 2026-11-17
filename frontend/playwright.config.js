@@ -8,7 +8,7 @@ const apiApp = process.env.STOCKSIGHT_E2E_DATABASE_URL ? 'app.main:app' : 'app.d
 const python = process.env.STOCKSIGHT_PYTHON || path.join(root, 'backend', '.venv', process.platform === 'win32' ? 'Scripts/python.exe' : 'bin/python');
 export default defineConfig({
   testDir: './e2e',
-  testIgnore: 'accounts.spec.js',
+  testIgnore: ['accounts.spec.js', 'embedded.spec.js'],
   fullyParallel: false,
   workers: 1,
   retries: process.env.CI ? 1 : 0,

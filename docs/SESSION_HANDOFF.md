@@ -1,5 +1,9 @@
 # Persistent Auth0 app sessions
 
+November 17 update: [embedded account pages](EMBEDDED_LOGIN.md) now bootstrap the
+same app cookie after Auth0.js password login. Google retains React SDK PKCE.
+The session API, CSRF, expiry and account-isolation contracts below are unchanged.
+
 Implemented November 16, 2026 on feature/auth0-watchlists. This supersedes the
 earlier localhost refresh limitation in AUTH0_WATCHLIST_HANDOFF.md. The frontend
 design is unchanged; its redesign is deferred at Gavin's request.

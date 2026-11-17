@@ -16,7 +16,9 @@ and indicator integration are documented in [FRONTEND_REDESIGN.md](FRONTEND_REDE
 - `backend/app/config.py`: typed environment settings; optional `backend/.env` loading. Tests inject settings for a deterministic service name.
 - app/api/stocks.py selects explicit fixture or SQLAlchemy repository reads; database mode requires PostgreSQL. app/seed.py imports the historical fixture independently, and Alembic owns schema changes.
 - Vite proxies /api to localhost:8000 during development. Production hosting must supply equivalent routing.
-- AuthProvider.jsx uses Auth0 Universal Login through the React SDK. app/auth.py
+- AuthPage.jsx supplies local login/signup/recovery forms. AuthProvider.jsx uses
+  Auth0.js for embedded password login and the React SDK for Google/hosted PKCE.
+  See EMBEDDED_LOGIN.md for the callback/session boundary and tenant setup. app/auth.py
   validates API access tokens; app/api/accounts.py provisions verified identity
   references and restricts watchlist operations to the current user. Migration
   0003 adds identity/watchlist tables. No local password store is introduced.

@@ -1,0 +1,26 @@
+/* Preview only. The live form is rendered and themed by Auth0. */
+.preview-card { padding:36px; color:#f2f4f8; }
+.preview-card h1 { margin:0; text-align:center; font-size:27px; line-height:1.2; font-weight:600; letter-spacing:-.8px; }
+.preview-card .subtitle { margin:10px 0 30px; text-align:center; color:#aab5c7; font-size:14px; line-height:1.5; }
+.preview-field + .preview-field { margin-top:18px; }
+.preview-card label { display:block; margin-bottom:8px; font-size:13px; line-height:1.4; font-weight:500; color:#dce2ec; }
+.preview-card input, .preview-card button { width:100%; min-height:46px; padding:12px 14px; border:1px solid #ffffff14; border-radius:10px; background:#ffffff05; color:#f2f4f8; font:inherit; font-size:14px; transition:background 180ms ease,border-color 180ms ease,box-shadow 180ms ease,transform 150ms ease; }
+.preview-card input::placeholder { color:#98a4b8; opacity:1; }
+.preview-card input:disabled, .preview-card button:disabled { opacity:1; -webkit-text-fill-color:currentColor; cursor:not-allowed; }
+.preview-card input:focus-visible { border-color:#77acff; outline:3px solid #77acff55; outline-offset:2px; background:#ffffff0a; }
+.preview-card .primary { margin-top:24px; background:#2865d6; color:#fff; border-color:#3774e4; font-weight:600; box-shadow:0 2px 5px #0002; }
+.preview-card .primary:hover:not(:disabled) { background:#3270e4; }
+.preview-card .primary:active:not(:disabled) { background:#2159bf; transform:translateY(1px); }
+.preview-card .secondary { display:flex; align-items:center; justify-content:center; gap:10px; background:#ffffff04; font-weight:500; }
+.preview-card .secondary:hover:not(:disabled) { background:#ffffff09; border-color:#ffffff26; }
+.preview-card .secondary:active:not(:disabled) { background:#ffffff0e; transform:translateY(1px); }
+.preview-card .google-icon { width:18px; height:18px; flex:none; }
+.preview-card a { color:#9dc1ff; text-decoration:none; transition:color 180ms ease; }
+.preview-card a:hover { color:#c5daff; text-decoration:underline; text-underline-offset:3px; }
+.preview-card :where(a,button):focus-visible { outline:3px solid #77acff; outline-offset:4px; }
+.preview-card .switch { margin:24px 0 0; text-align:center; color:#aab5c7; font-size:13px; line-height:1.6; }
+.preview-divider { display:flex; align-items:center; gap:14px; margin:22px 0; color:#aab5c7; font-size:11px; }
+.preview-divider::before,.preview-divider::after { content:''; height:1px; background:#ffffff0d; flex:1; }
+.preview-card .preview-note { margin:24px 0 0; text-align:center; color:#aab5c7; font-size:11px; line-height:1.5; }
+@media(max-width:360px) { .preview-card { padding:32px; } .preview-card h1 { font-size:25px; } }
+@media(prefers-reduced-motion:reduce) { .preview-card * { transition:none; } }

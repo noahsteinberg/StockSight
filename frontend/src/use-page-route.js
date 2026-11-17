@@ -6,7 +6,7 @@ function subscribe(listener) {
 }
 
 const snapshot = () => window.location.hash;
-const knownPages = new Set(['analysis', 'dashboard', 'predictions', 'performance', 'methodology']);
+const knownPages = new Set(['analysis', 'dashboard', 'predictions', 'performance', 'methodology', 'login', 'signup', 'reset-password']);
 const aliases = { watchlist: 'dashboard', project: 'methodology', main: 'analysis' };
 
 export default function usePageRoute() {
