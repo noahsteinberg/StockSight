@@ -15,7 +15,7 @@ from sqlalchemy import (
     create_engine,
     event,
 )
-from sqlalchemy.engine import Engine
+from sqlalchemy.engine import Engine, make_url
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -94,10 +94,22 @@ class AuthSession(Base):
 
 
 def database_engine(url: str) -> Engine:
-    options = (
-        {"connect_args": {"connect_timeout": 3}} if url.startswith("postgresql") else {}
-    )
-    engine = create_engine(url, pool_pre_ping=True, hide_parameters=True, **options)
+    parsed = make_url(url)
+    options = {}
+    if parsed.drivername in {"postgres", "postgresql", "postgresql+psycopg"}:
+        # Supabase's Connect dialog supplies a driver-neutral PostgreSQL URL.
+        parsed = parsed.set(drivername="postgresql+psycopg")
+        options["connect_args"] = {"connect_timeout": 3}
+        host = (parsed.host or "").lower()
+        if host.endswith((".supabase.co", ".pooler.supabase.com")):
+            secure_modes = {"require", "verify-ca", "verify-full"}
+            if parsed.query.get("sslmode") not in secure_modes:
+                parsed = parsed.update_query_dict({"sslmode": "require"})
+            if parsed.port == 6543:
+                # Supavisor transaction mode cannot retain prepared statements.
+                options["connect_args"]["prepare_threshold"] = None
+                options.update(pool_size=1, max_overflow=0)
+    engine = create_engine(parsed, pool_pre_ping=True, hide_parameters=True, **options)
     if engine.dialect.name == "sqlite":
 
         @event.listens_for(engine, "connect")

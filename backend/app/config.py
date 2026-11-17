@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     app_name: str = "stocksight-api"
 
     database_url: SecretStr | None = None
+    migration_database_url: SecretStr | None = None
     auth0_domain: str | None = None
     auth0_audience: str | None = None
     app_origin: str = "http://127.0.0.1:5173"
@@ -61,7 +62,7 @@ class Settings(BaseSettings):
             raise ValueError("Use an Auth0 hostname without a scheme, path or port")
         return value
 
-    @field_validator("database_url", mode="before")
+    @field_validator("database_url", "migration_database_url", mode="before")
     @classmethod
     def empty_database_url(cls, value):
         return None if value == "" else value
