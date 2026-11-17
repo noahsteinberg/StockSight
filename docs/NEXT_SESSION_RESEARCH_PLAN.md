@@ -6,6 +6,34 @@ The pasted transcript skips approximately 1:00–9:38; no claim is made about th
 missing discussion. Noah and Vlad agreed to investigate targets independently
 and compare their findings. Team ownership in ROADMAP.md is unchanged.
 
+Noah clarified the current scope: planning only, focused on what the existing
+data can predict and which errors/limitations require changes. Do not implement
+frontend changes, prediction APIs, model serving or integration in this phase.
+The UI mapping below is context for a possible later decision, not authorized
+implementation. Model execution is a subsequent research step; this document
+does not claim new experiments have run.
+
+## Immediate questions answered
+
+- A new question does not require a new raw dataset. Existing daily adjusted
+  prices can produce next-session up/down labels. New derived label/report files
+  are needed; the source snapshot should remain unchanged.
+- Preserve five-day results means retain the old experiments as evidence and
+  avoid overwriting them. It does not mean continue optimizing the old target.
+- The old saved predictions cannot be converted to next-day predictions. Refit
+  models against the new labels; past-only feature values may be reusable.
+- A different question is a separate experiment, not a way to reinterpret the
+  old validation result as success. Compare against baselines appropriate to
+  each question and keep unseen periods protected across both researchers.
+- Start with the same data. Consider new inputs only after documenting a concrete
+  failure or hypothesis; daily OHLCV may simply have weak next-day signal.
+
+The first report should answer: does either model beat appropriate simple rules;
+does it hold across chronological folds; are up and down errors asymmetric; are
+probabilities reliable; do missing data/corporate actions explain errors; and
+is an apparent stock-specific advantage stable in later development folds?
+Predefined diagnostics explain failure; they do not justify unlimited tuning.
+
 ## Product question
 
 After a completed trading session, estimate whether a supported stock's next
