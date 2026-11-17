@@ -1,0 +1,78 @@
+{
+  "rows": 1979326,
+  "unchanged": 22023,
+  "invalid_forward": 835,
+  "traces": [
+    {
+      "ticker": "A",
+      "date": "2000-01-03 00:00:00",
+      "target_date": "2000-01-04 00:00:00",
+      "independent_return": -0.07638855150090729,
+      "label": 0.0
+    },
+    {
+      "ticker": "AAPL",
+      "date": "2000-01-03 00:00:00",
+      "target_date": "2000-01-04 00:00:00",
+      "independent_return": -0.0843100475986519,
+      "label": 0.0
+    },
+    {
+      "ticker": "ABBV",
+      "date": "2013-01-02 00:00:00",
+      "target_date": "2013-01-03 00:00:00",
+      "independent_return": -0.00825724896859592,
+      "label": 0.0
+    },
+    {
+      "ticker": "ABT",
+      "date": "2000-01-03 00:00:00",
+      "target_date": "2000-01-04 00:00:00",
+      "independent_return": -0.028571802779774114,
+      "label": 0.0
+    },
+    {
+      "ticker": "AAPL",
+      "date": "2018-12-20 00:00:00",
+      "target_date": "2018-12-21 00:00:00",
+      "independent_return": -0.0388956419967047,
+      "label": 0.0
+    },
+    {
+      "ticker": "AAPL",
+      "date": "2018-12-21 00:00:00",
+      "target_date": "2018-12-24 00:00:00",
+      "independent_return": -0.02587379908315568,
+      "label": 0.0
+    },
+    {
+      "ticker": "AAPL",
+      "date": "2018-12-24 00:00:00",
+      "target_date": "2018-12-26 00:00:00",
+      "independent_return": 0.07042117275579352,
+      "label": 1.0
+    },
+    {
+      "ticker": "AAPL",
+      "date": "2018-12-26 00:00:00",
+      "target_date": "2018-12-27 00:00:00",
+      "independent_return": -0.006489656897993634,
+      "label": 0.0
+    },
+    {
+      "ticker": "AAPL",
+      "date": "2018-12-27 00:00:00",
+      "target_date": "2018-12-28 00:00:00",
+      "independent_return": 0.0005122466869489362,
+      "label": 1.0
+    },
+    {
+      "ticker": "AAPL",
+      "date": "2018-12-28 00:00:00",
+      "target_date": "2018-12-31 00:00:00",
+      "independent_return": 0.009665239288037641,
+      "label": 1.0
+    }
+  ],
+  "eligible_rows": 1955893
+}

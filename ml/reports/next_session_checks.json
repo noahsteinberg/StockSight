@@ -1,0 +1,83 @@
+{
+  "checks": {
+    "lr": {
+      "tp": 480287,
+      "tn": 199458,
+      "fp": 429434,
+      "fn": 203031,
+      "up_recall": 0.7028747962149394,
+      "down_recall": 0.3171577949791061,
+      "double_precision_brier": 0.2496212626566241,
+      "brier_tolerance": 1e-07,
+      "coverage_of_prepared_evaluation_cases": 1.0,
+      "fold_counts": {
+        "0": 202903,
+        "1": 207574,
+        "2": 214894,
+        "3": 223200,
+        "4": 229625,
+        "5": 234014
+      }
+    },
+    "lr_sigmoid": {
+      "tp": 538859,
+      "tn": 139475,
+      "fp": 489417,
+      "fn": 144459,
+      "up_recall": 0.7885918415730304,
+      "down_recall": 0.22177893819606545,
+      "double_precision_brier": 0.2496738073753409,
+      "brier_tolerance": 1e-07,
+      "coverage_of_prepared_evaluation_cases": 1.0,
+      "fold_counts": {
+        "0": 202903,
+        "1": 207574,
+        "2": 214894,
+        "3": 223200,
+        "4": 229625,
+        "5": 234014
+      }
+    },
+    "hgb": {
+      "tp": 509222,
+      "tn": 176268,
+      "fp": 452624,
+      "fn": 174096,
+      "up_recall": 0.7452196488311446,
+      "down_recall": 0.2802834190926264,
+      "double_precision_brier": 0.24927405324736068,
+      "brier_tolerance": 1e-12,
+      "coverage_of_prepared_evaluation_cases": 1.0,
+      "fold_counts": {
+        "0": 202903,
+        "1": 207574,
+        "2": 214894,
+        "3": 223200,
+        "4": 229625,
+        "5": 234014
+      }
+    },
+    "hgb_sigmoid": {
+      "tp": 529028,
+      "tn": 154364,
+      "fp": 474528,
+      "fn": 154290,
+      "up_recall": 0.7742046894710808,
+      "down_recall": 0.2454539094152891,
+      "double_precision_brier": 0.2495877061494981,
+      "brier_tolerance": 1e-12,
+      "coverage_of_prepared_evaluation_cases": 1.0,
+      "fold_counts": {
+        "0": 202903,
+        "1": 207574,
+        "2": 214894,
+        "3": 223200,
+        "4": 229625,
+        "5": 234014
+      }
+    }
+  },
+  "same_observations": true,
+  "protected_hashes_verified": true,
+  "scope": "training folds only; no validation or final test scoring"
+}

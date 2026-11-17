@@ -1,0 +1,4 @@
+{"stage": "prepare", "pilot": false, "status": "completed"}
+{"stage": "run", "pilot": true, "status": "completed"}
+{"stage": "run", "pilot": false, "status": "completed"}
+{"stage": "report", "pilot": false, "status": "completed"}
