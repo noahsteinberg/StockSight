@@ -1,19 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import PricePlot from './PricePlot.jsx';
+import HistoricalChart from './HistoricalChart.jsx';
 import { useAccount } from './auth-context.js';
 import useIndicators from './use-indicators.js';
 
 const ranges = [['1mo', '1M'], ['3mo', '3M'], ['1y', '1Y'], ['all', 'Max']];
-const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
-
-function downloadPrices(symbol, range, bars) {
-  const rows = bars.map(({ date, open, high, low, close, volume }) => [date, open, high, low, close, volume].join(','));
-  const csv = ['Date,Open (USD),High (USD),Low (USD),Close (USD),Volume', ...rows].join('\r\n');
-  const link = document.createElement('a');
-  link.href = `data:text/csv;charset=utf-8,${encodeURIComponent(csv)}`;
-  link.download = `${symbol}-historical-prices-${range}.csv`;
-  link.click();
-}
 
 function responseError(status, searching = false) {
   if (status === 404) return 'Symbol unavailable. Search for a supported stock.';
@@ -32,7 +22,6 @@ export default function Analysis({ symbol, onSelectSymbol, watchlist }) {
   const [range, setRange] = useState('3mo');
   const [result, setResult] = useState({ loading: true });
   const [retry, setRetry] = useState(0);
-  const [selected, setSelected] = useState(null);
   const [searchRequest, setSearchRequest] = useState(null);
   const [search, setSearch] = useState(null);
   const [showSma, setShowSma] = useState(false);
@@ -76,7 +65,7 @@ export default function Analysis({ symbol, onSelectSymbol, watchlist }) {
     return () => { active = false; clearTimeout(timeout); controller.abort(); };
   }, [symbol, range, retry, requestKey]);
 
-  function reload() { setSelected(null); setResult({ loading: true, symbol }); }
+  function reload() { setResult({ loading: true, symbol }); }
   function closeSearch() {
     setSearch(null);
     setSearchRequest(null);
@@ -114,18 +103,8 @@ export default function Analysis({ symbol, onSelectSymbol, watchlist }) {
     setRetry(value => value + 1);
   }
   const loadingPrices = result.loading || result.key !== requestKey;
-  const bars = !loadingPrices && result.data ? result.data.bars : [];
-  const selectedIndex = selected?.key === requestKey && selected.index < bars.length ? selected.index : null;
-  const lastIndex = bars.length - 1;
-  const observation = selectedIndex ?? lastIndex;
-  const current = bars[observation];
-  function inspect(index) {
-    if (index < 0 || index > lastIndex) return;
-    setSelected(index === lastIndex ? null : { key: requestKey, index });
-  }
-  const indicators = useIndicators(symbol, range, showSma || showRsi, !loadingPrices ? result.data : null);
-  const indicatorPoint = indicators.data?.points[selectedIndex ?? bars.length - 1];
-  const rangeChange = bars.length > 1 && bars[0].close !== 0 ? (bars.at(-1).close / bars[0].close - 1) * 100 : null;
+  const data = loadingPrices ? null : result.data;
+  const indicators = useIndicators(symbol, range, showSma || showRsi, data);
 
   return (
     <section className="analysis" id="analysis" aria-labelledby="analysis-title">
@@ -157,40 +136,21 @@ export default function Analysis({ symbol, onSelectSymbol, watchlist }) {
       <div aria-live="polite" aria-busy={Boolean(loadingPrices)}>
         {loadingPrices && <div className="analysis-message loading-state" role="status"><span className="loading-spinner" aria-hidden="true" /><p>Loading prices.</p><div className="chart-skeleton" aria-hidden="true" /></div>}
         {result.error && !loadingPrices && <div className="analysis-message error-state" role="alert"><p>{result.error}</p><button onClick={() => { reload(); setRetry(value => value + 1); }}>Retry</button></div>}
-        {result.data && result.symbol === symbol && !loadingPrices && bars.length === 0 && <p className="analysis-message">No observations in this range.</p>}
+        {data?.bars.length === 0 && <p className="analysis-message">No observations in this range.</p>}
       </div>
-      {current && <>
-        <div className="quote"><div><h2>{result.data.symbol} <span>{result.data.name}</span></h2><div className="price-value"><strong>{money.format(current.close)}</strong><span className="quote-date">{current.date}<br />{selectedIndex == null ? 'Latest stored close' : 'Selected close'}</span></div></div>{rangeChange != null && <div className={`range-change ${rangeChange < 0 ? 'negative' : 'positive'}`}><strong>{rangeChange >= 0 ? '+' : ''}{rangeChange.toFixed(2)}%</strong><span>Range change</span></div>}</div>
-        <div className="indicator-toolbar" role="group" aria-label="Technical indicators"><span className="muted">Indicators</span><button type="button" aria-pressed={showSma} onClick={() => setShowSma(value => !value)}><span className="legend-swatch sma" aria-hidden="true" />SMA 20</button><button type="button" aria-pressed={showRsi} onClick={() => setShowRsi(value => !value)}><span className="legend-swatch rsi" aria-hidden="true" />RSI 14</button><span className="price-legend"><span className="legend-swatch" aria-hidden="true" />Close</span></div>
-        {indicators.loading && <p role="status" className="indicator-feedback">Loading indicators…</p>}
-        {indicators.error && <div role="alert" className="indicator-feedback error-state"><p>{indicators.error}</p>{indicators.mismatch ? <button type="button" onClick={() => { reload(); setRetry(value => value + 1); indicators.retry(); }}>Reload prices & indicators</button> : <button type="button" onClick={indicators.retry}>Retry indicators</button>}</div>}
-        <PricePlot bars={bars} points={indicators.data?.points} showSma={showSma} showRsi={showRsi} selectedIndex={selectedIndex} onInspect={inspect} />
-        <div className="observation-picker">
-          <label htmlFor="observation-date">Inspect date</label>
-          <input id="observation-date" aria-label="Inspect historical observation" type="range" min="0" max={lastIndex} value={observation} aria-valuetext={`${current.date}, ${money.format(current.close)}`} onChange={event => inspect(Number(event.target.value))} />
-          <time dateTime={current.date}>{current.date}</time>
-          <div className="observation-actions">
-            <button type="button" aria-label="Previous session" aria-disabled={observation === 0} onClick={() => inspect(observation - 1)}>←</button>
-            <button type="button" aria-label="Next session" aria-disabled={observation === lastIndex} onClick={() => inspect(observation + 1)}>→</button>
-            <button type="button" aria-disabled={observation === lastIndex} onClick={() => inspect(lastIndex)}>Latest</button>
-          </div>
-        </div>
-        <dl className="observation-stats"><div><dt>Open · USD</dt><dd>{money.format(current.open)}</dd></div><div><dt>High · USD</dt><dd>{money.format(current.high)}</dd></div><div><dt>Low · USD</dt><dd>{money.format(current.low)}</dd></div><div><dt>Volume</dt><dd>{current.volume.toLocaleString('en-US')}</dd></div></dl>
-        {indicators.data && <div className="indicator-values" aria-live="polite">{showSma && <span>SMA 20 · {indicatorPoint?.sma_20 == null ? 'Insufficient history (20 observations required)' : money.format(indicatorPoint.sma_20)}</span>}{showRsi && <span>RSI 14 · {indicatorPoint?.rsi_14 == null ? 'Insufficient history (15 observations required)' : `${indicatorPoint.rsi_14.toFixed(2)} / 100`}</span>}<p className="muted">SMA averages 20 stored closes. RSI measures momentum on a 0–100 scale. Neither is a forecast.</p></div>}
+      {data?.bars.length > 0 && <HistoricalChart
+        key={requestKey} data={data} range={range} showSma={showSma} showRsi={showRsi}
+        onToggleSma={() => setShowSma(value => !value)} onToggleRsi={() => setShowRsi(value => !value)}
+        indicators={indicators} onReload={() => { reload(); setRetry(value => value + 1); indicators.retry(); }}>
         <div className="chart-actions">
           {account.configured && <button type="button"
-            disabled={account.isLoading || watchlist.mutation.busy || (account.isAuthenticated && (watchlist.loading || Boolean(watchlist.error) || watchlist.items.some(stock => stock.symbol === result.data.symbol)))}
-            onClick={() => account.isAuthenticated ? watchlist.save(result.data.symbol) : account.login()}>
-            {!account.isAuthenticated ? 'Sign in to save' : watchlist.items.some(stock => stock.symbol === result.data.symbol) ? 'Saved to watchlist' : 'Save to watchlist'}
+            disabled={account.isLoading || watchlist.mutation.busy || (account.isAuthenticated && (watchlist.loading || Boolean(watchlist.error) || watchlist.items.some(stock => stock.symbol === data.symbol)))}
+            onClick={() => account.isAuthenticated ? watchlist.save(data.symbol) : account.login()}>
+            {!account.isAuthenticated ? 'Sign in to save' : watchlist.items.some(stock => stock.symbol === data.symbol) ? 'Saved to watchlist' : 'Save to watchlist'}
           </button>}
           <a href={`#/predictions?symbol=${encodeURIComponent(symbol)}`}>Predictions for {symbol} <span aria-hidden="true">↗</span></a>
         </div>
-        <div id="data-details" className="data-details"><p className="data-note">As of {result.data.as_of} · {bars.length} sessions · {bars[0].date} to {bars.at(-1).date} · <a href={result.data.source_url}>Source: {result.data.source}</a><br />{result.data.adjustment}</p>
-        {result.data.has_earlier && <p className="data-note">Earlier stored sessions are outside this view. Showing the latest {result.data.session_limit} sessions.{range === 'all' ? ' Max is capped at 2,000 sessions.' : ' Choose a longer range to see more.'}</p>}
-        <button className="csv-button" type="button" onClick={() => downloadPrices(result.data.symbol, range, bars)}>Download price CSV</button>
-        </div>
-        <details><summary>Price observations</summary><div className="table-scroll"><table><thead><tr><th scope="col">Date</th><th scope="col">Close (USD)</th><th scope="col">Volume</th></tr></thead><tbody>{bars.map(bar => <tr key={bar.date}><th scope="row">{bar.date}</th><td>{money.format(bar.close)}</td><td>{bar.volume.toLocaleString('en-US')}</td></tr>)}</tbody></table></div></details>
-      </>}
+      </HistoricalChart>}
       </div>
     </section>
   );

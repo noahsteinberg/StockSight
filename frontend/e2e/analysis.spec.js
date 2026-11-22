@@ -11,10 +11,9 @@ test('real API: ranges, keyboard inspection, and observations table', async ({ p
     await page.getByRole('button', { name: label, exact: true }).click();
     await expect(latest(page)).toContainText(`${count} sessions`);
   }
-  const slider = page.getByRole('slider');
-  await slider.focus();
-  await slider.press('Home');
-  await expect(slider).toHaveAttribute('aria-valuetext', '2015-02-17, $127.83');
+  const inspection = page.getByRole('group', { name: 'Inspect historical observations' });
+  await inspection.press('Home');
+  await expect(page.locator('.inspection-readout')).toContainText('2015-02-17$127.83');
   await page.getByText('Price observations', { exact: true }).click();
   await expect(page.getByRole('table')).toBeVisible();
   await expect(page.getByRole('table').getByText('2015-02-17')).toBeVisible();
@@ -170,24 +169,95 @@ test('Escape dismisses a pending search and Clear keeps the current chart', asyn
   await expect(latest(page)).toBeVisible();
 });
 
-test('the plot and session buttons inspect the same observations as the slider', async ({ page }) => {
+test('hover previews a session, clicking pins it, and keyboard inspection clears cleanly', async ({ page }) => {
+  const history = page.waitForResponse('**/prices?range=3mo');
   await page.goto('/');
-  const slider = page.getByRole('slider');
-  await expect(slider).toHaveAttribute('aria-valuetext', /^2017-02-16,/);
-  await page.getByRole('button', { name: 'Previous session' }).click();
-  await expect(slider).toHaveAttribute('aria-valuetext', /^2017-02-15,/);
-  const next = page.getByRole('button', { name: 'Next session' });
-  await next.press('Enter');
-  await expect(next).toBeFocused();
-  await expect(page.getByText('Latest stored close', { exact: false })).toBeVisible();
-
+  const { bars } = await (await history).json();
   const plot = page.locator('.plot-inspection-target');
+  const readout = page.locator('.inspection-readout');
+  await plot.hover({ position: { x: 1, y: 20 } });
+  await expect(readout).toContainText('Preview');
+  await expect(readout.locator('time')).toHaveText(bars[0].date);
+  await page.getByRole('heading', { name: 'Stock analysis' }).hover();
+  await expect(readout).toHaveCount(0);
+
   await plot.click({ position: { x: 1, y: 20 } });
-  await expect(slider).toHaveValue('0');
-  await expect(page.getByRole('button', { name: 'Previous session' })).toBeDisabled();
+  await expect(readout).toContainText('Pinned');
+  await page.getByRole('heading', { name: 'Stock analysis' }).hover();
+  await expect(readout.locator('time')).toHaveText(bars[0].date);
+
+  const inspection = page.getByRole('group', { name: 'Inspect historical observations' });
+  await inspection.press('ArrowRight');
+  await expect(readout.locator('time')).toHaveText(bars[1].date);
+  const stats = page.locator('.observation-stats');
+  const movement = new Intl.NumberFormat('en-US', { style: 'percent', signDisplay: 'exceptZero', maximumFractionDigits: 2 });
+  await expect(stats).toContainText(movement.format(bars[1].close / bars[0].close - 1));
+  await expect(stats).toContainText('1-session avg');
+
   await page.getByRole('button', { name: 'Latest', exact: true }).click();
-  await expect(slider).toHaveValue('62');
+  await expect(inspection).toBeFocused();
+  await expect(readout).toHaveCount(0);
+  await inspection.press('ArrowLeft');
+  await expect(readout.locator('time')).toHaveText(bars.at(-2).date);
+  await inspection.press('Escape');
+  await expect(readout).toHaveCount(0);
+  await expect(page.getByRole('slider')).toHaveCount(0);
+});
+
+test.describe('touch chart', () => {
+  test.use({ hasTouch: true, viewport: { width: 390, height: 844 } });
+
+  test('a tap pins a point without hovering', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('.plot-inspection-target').tap({ position: { x: 1, y: 20 } });
+    await expect(page.locator('.inspection-readout')).toContainText('Pinned');
+    await expect(page.locator('.inspection-readout time')).toHaveText('2016-11-16');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  });
+});
+
+test('replay reveals one session at a time across the chart, indicators, table, and CSV', async ({ page }) => {
+  const history = page.waitForResponse('**/prices?range=3mo');
+  await page.goto('/');
+  const { bars } = await (await history).json();
+  const start = bars.length - 3;
+  const startDate = bars[start].date;
+  const nextDate = bars[start + 1].date;
+  const finalDate = bars.at(-1).date;
+  await page.getByRole('button', { name: 'SMA 20', exact: true }).click();
+  await expect(page.locator('.sma-line')).toBeVisible();
+  await page.getByRole('button', { name: 'Historical replay', exact: true }).click();
+  await page.getByLabel('Start session').selectOption(String(start));
+  await page.getByRole('button', { name: 'Start replay', exact: true }).click();
+  const next = page.getByRole('button', { name: 'Next session' });
+  await expect(next).toBeFocused();
+  await expect(page.locator('.quote-date')).toContainText(startDate);
+  await expect(page.locator('.volume-bar')).toHaveCount(start + 1);
+  const smaBefore = await page.locator('.sma-line').getAttribute('d');
+
+  await page.getByText('Price observations', { exact: true }).click();
+  const table = page.getByRole('table');
+  await expect(table.getByText(nextDate, { exact: true })).toHaveCount(0);
+  const downloadPromise = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Download price CSV' }).click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toContain(`through-${startDate}`);
+  const csv = await readFile(await download.path(), 'utf8');
+  expect(csv).toContain(startDate);
+  expect(csv).not.toContain(nextDate);
+
+  await next.click();
+  await expect(page.locator('.quote-date')).toContainText(nextDate);
+  await expect(page.locator('.volume-bar')).toHaveCount(start + 2);
+  await expect(page.locator('.sma-line')).not.toHaveAttribute('d', smaBefore);
+  await expect(table.getByText(finalDate, { exact: true })).toHaveCount(0);
+  await next.click();
   await expect(next).toBeDisabled();
+  await expect(page.locator('.quote-date')).toContainText(finalDate);
+  await page.getByRole('button', { name: 'Restart', exact: true }).click();
+  await expect(page.locator('.quote-date')).toContainText(startDate);
+  await page.getByRole('button', { name: 'Exit replay', exact: true }).click();
+  await expect(latest(page)).toContainText('63 sessions');
 });
 
 test('CSV contains the raw OHLCV rows for the displayed range', async ({ page }) => {

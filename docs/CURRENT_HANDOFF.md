@@ -1,5 +1,27 @@
 # StockSight — continuation handoff for Gavin and the next agent
 
+## November 22 chart inspection and historical replay
+
+The local `feature/chart-inspection-replay` branch starts from the previewed
+frontend workspace and includes the published snapshot-alignment fixes.
+The chart previews the nearest session on hover. Click or tap to pin it.
+Keyboard inspection uses Left/Right Arrow, Home/End and Escape on the
+focusable chart. A pinned readout shows the close, price change versus the
+previous visible session, intraday range and volume against up to 20 preceding
+visible sessions. The first visible session has no prior-session comparison.
+
+**Historical replay** lets the user choose a start session in the selected
+range and reveal one stored session at a time. Quotes, axes, overlays,
+price observations and CSV export use only the visible prefix in replay.
+Indicators still come from the matching API snapshot and retain their normal
+warm-up conventions. Restart returns to the chosen start. Changing stocks or
+ranges resets replay. No forecasting or provider reads are involved.
+
+Lint, build, 33 public browser cases and 21 isolated account cases passed. The
+running local preview at `127.0.0.1:5173` uses the explicit AAPL fixture.
+Preview checks exercised the pinned desktop readout, matching indicator
+snapshot, and mobile replay at 320 px.
+
 ## November 22 frontend workspace and initial review
 
 The local `feature/frontend-workspace` branch starts from upstream main
