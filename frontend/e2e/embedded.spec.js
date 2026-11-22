@@ -108,13 +108,43 @@ test('unsolicited fragment tokens fail closed and are removed from the URL', asy
   expect(created).toBe(false);
 });
 
-test('provider callback errors stay specific and never offer another login page', async ({ page }) => {
+test('provider callback errors offer Auth0 recovery without exposing provider details', async ({ page }) => {
   await page.goto('/#error=server_error&error_description=private-provider-details&state=failed-transaction');
-  await expect(page.getByRole('alert')).toHaveText('Password sign-in is temporarily unavailable. Please try again or use Google sign-in.');
+  await expect(page.getByRole('alert')).toHaveText('Password sign-in is temporarily unavailable. Try again or continue on Auth0.');
   await expect(page.getByRole('alert')).not.toContainText('private-provider-details');
-  await expect(page.getByRole('button', { name: 'Continue with Auth0 sign-in' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Continue on Auth0' })).toBeEnabled();
   await expect(page.getByRole('button', { name: 'Continue with Google' })).toBeEnabled();
   expect(page.url()).toMatch(/#\/login$/);
+});
+
+test('password verification sends the user to the hosted database connection with PKCE', async ({ page }) => {
+  await page.route('https://e2e.auth0.test/co/authenticate', route => route.fulfill({
+    status: 403, json: { error: 'requires_verification' },
+  }));
+  let authorization;
+  await page.route('https://e2e.auth0.test/authorize**', route => {
+    authorization = new URL(route.request().url());
+    return route.fulfill({ contentType: 'text/html', body: '<p>Hosted test challenge</p>' });
+  });
+  await page.goto('http://127.0.0.1:5176/#/login');
+  const hosted = page.getByRole('button', { name: 'Continue on Auth0' });
+  await expect(hosted).toBeHidden();
+  await page.getByText('Trouble signing in?').click();
+  await expect(hosted).toBeVisible();
+  await page.getByText('Trouble signing in?').click();
+  await page.getByLabel('Username', { exact: true }).fill('test-username');
+  await page.getByLabel('Password', { exact: true }).fill('Synthetic-only!789');
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await expect(page.getByRole('alert')).toContainText('finish verifying your sign-in');
+  await expect(page.getByLabel('Password', { exact: true })).toHaveValue('');
+  await hosted.click();
+  await expect(page.getByText('Hosted test challenge')).toBeVisible();
+  expect(authorization.searchParams.get('connection')).toBe('Username-Password-Authentication');
+  expect(authorization.searchParams.get('prompt')).toBe('login');
+  expect(authorization.searchParams.get('response_type')).toBe('code');
+  expect(authorization.searchParams.get('code_challenge_method')).toBe('S256');
+  expect(authorization.searchParams.get('state')).toBeTruthy();
+  expect(authorization.searchParams.has('password')).toBe(false);
 });
 
 test('dedicated verification page is separate from the app and ignores untrusted parents', async ({ page }) => {

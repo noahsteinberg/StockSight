@@ -40,6 +40,8 @@ def check(origin):
     assert bars and len(bars) <= 63
     assert [bar["date"] for bar in bars] == sorted(bar["date"] for bar in bars)
     assert prices["as_of"] == bars[-1]["date"]
+    assert prices["snapshot_id"] == indicators["snapshot_id"]
+    assert prices["snapshot_id"]
     assert [point["date"] for point in indicators["points"]] == [
         bar["date"] for bar in bars
     ]

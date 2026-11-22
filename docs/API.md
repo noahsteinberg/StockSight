@@ -53,6 +53,12 @@ History now includes two required response fields:
 - `session_limit`: 21, 63, 252, or 2000 for the requested range.
 - `has_earlier`: true if stored observations exist before the returned window.
 
+Prices and indicators also return an opaque `snapshot_id`. It identifies a
+single stored series revision independent of range. When making separate
+requests, compare this value before overlaying indicators. The database reads
+the revision and its bounded bars in the same statement. Writers must advance
+the series revision in the same transaction as a price correction.
+
 The database reads at most `session_limit + 1` bars to detect the extra history,
 then returns at most `session_limit` bars in chronological order. Fixture mode
 has identical semantics. `all` remains the API range name for compatibility;

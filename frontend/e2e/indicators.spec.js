@@ -35,24 +35,29 @@ test('indicator failure retries independently while preserving the chart', async
   await expect(page.getByRole('alert')).toHaveCount(0);
 });
 
-test('mismatched snapshot cannot overlay unrelated indicators', async ({ page }) => {
-  await page.route(indicatorURL, async route => {
-    const response = await route.fetch();
-    const data = await response.json();
-    data.points[0].date = '1900-01-01';
-    await route.fulfill({ json: data });
+for (const mismatch of ['dates', 'same-date correction']) {
+  test(`a mismatch in ${mismatch} blocks the indicator overlay until both reload`, async ({ page }) => {
+    await page.route(indicatorURL, async route => {
+      const data = await (await route.fetch()).json();
+      if (mismatch === 'dates') data.points[0].date = '1900-01-01';
+      else {
+        data.snapshot_id = 'different-revision';
+        data.points.at(-1).sma_20 += 10;
+      }
+      await route.fulfill({ json: data });
+    });
+    await page.goto('/');
+    await expect(latest(page)).toBeVisible();
+    await page.getByRole('button', { name: 'SMA 20', exact: true }).click();
+    await expect(page.getByRole('alert')).toContainText('different data snapshots');
+    await expect(page.locator('.sma-line')).toHaveCount(0);
+    await expect(page.getByRole('img', { name: /Closing price/ })).toBeVisible();
+    await page.unroute(indicatorURL);
+    await page.getByRole('button', { name: 'Reload prices & indicators' }).click();
+    await expect(page.locator('.sma-line')).toBeVisible();
+    await expect(page.getByRole('alert')).toHaveCount(0);
   });
-  await page.goto('/');
-  await expect(latest(page)).toBeVisible();
-  await page.getByRole('button', { name: 'SMA 20', exact: true }).click();
-  await expect(page.getByRole('alert')).toContainText('dates or sources differ');
-  await expect(page.locator('.sma-line')).toHaveCount(0);
-  await expect(page.getByRole('img', { name: /Closing price/ })).toBeVisible();
-  await page.unroute(indicatorURL);
-  await page.getByRole('button', { name: 'Reload prices & indicators' }).click();
-  await expect(page.locator('.sma-line')).toBeVisible();
-  await expect(page.getByRole('alert')).toHaveCount(0);
-});
+}
 
 test('null warm-up values stay unavailable and date selection updates indicator values', async ({ page }) => {
   await page.route(indicatorURL, async route => {

@@ -1,5 +1,7 @@
 """Bounded reads of a canonical daily series; no provider calls in HTTP requests."""
 
+from hashlib import sha256
+
 from sqlalchemy import case, select
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
@@ -36,20 +38,24 @@ def database_history(
     # The optional internal limit supplies a fixed calculation window for indicators.
     limit = session_limit if session_limit is not None else SESSION_LIMITS[range_value]
     with Session(engine) as session:
-        series = session.scalar(select(PriceSeries).where(PriceSeries.symbol == symbol))
-        if series is None:
+        # One statement binds the rows to the exact series revision that supplied
+        # them, including when a writer commits between two API requests.
+        rows = session.execute(
+            select(PriceSeries, StockRecord.name, DailyBar)
+            .select_from(PriceSeries)
+            .join(StockRecord, StockRecord.symbol == PriceSeries.symbol)
+            .join(DailyBar, DailyBar.series_id == PriceSeries.id)
+            .where(PriceSeries.symbol == symbol)
+            .order_by(DailyBar.session_date.desc())
+            .limit(limit + 1)
+        ).all()
+        if not rows:
             return None
-        stock = session.get(StockRecord, symbol)
-        rows = list(
-            session.scalars(
-                select(DailyBar)
-                .where(DailyBar.series_id == series.id)
-                .order_by(DailyBar.session_date.desc())
-                .limit(limit + 1)
-            )
+        series, name, _ = rows[0]
+        revision = (
+            f"{series.id}:{series.fixture_sha256}:{series.imported_at.isoformat()}"
         )
         has_earlier = len(rows) > limit
-        rows = rows[:limit]
         bars = [
             Bar(
                 date=row.session_date,
@@ -59,17 +65,16 @@ def database_history(
                 close=float(row.close),
                 volume=row.volume,
             )
-            for row in reversed(rows)
+            for _, _, row in reversed(rows[:limit])
         ]
-        if not bars:
-            return None
         return History(
             symbol=symbol,
-            name=stock.name,
+            name=name,
             source=series.source,
             source_url=series.source_url,
             mode=series.mode,
             adjustment=series.adjustment,
+            snapshot_id=sha256(revision.encode()).hexdigest(),
             as_of=bars[-1].date,
             range=range_value,
             bars=bars,
