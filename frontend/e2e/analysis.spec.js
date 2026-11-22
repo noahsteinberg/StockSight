@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
 
 const barsURL = '**/api/stocks/*/prices?*';
 const latest = page => page.getByText(/As of.*2017-02-16/);
@@ -146,4 +147,61 @@ test('new search cancels an older pending query', async ({ page }) => {
   await page.getByRole('button', { name: 'Search', exact: true }).click();
   await expect(page.getByRole('button', { name: 'AAPL Apple Inc.' })).toBeVisible();
   await expect(page.getByText('Searching stocks.')).toHaveCount(0);
+});
+
+test('Escape dismisses a pending search and Clear keeps the current chart', async ({ page }) => {
+  await page.goto('/');
+  await expect(latest(page)).toBeVisible();
+  let intercepted;
+  const started = new Promise(resolve => { intercepted = resolve; });
+  await page.route('**/api/stocks?query=pending', () => { intercepted(); });
+  const ticker = page.getByLabel('Ticker', { exact: true });
+  await ticker.fill('pending');
+  await ticker.press('Enter');
+  await started;
+  const close = page.getByRole('button', { name: 'Close results' });
+  await close.focus();
+  await close.press('Escape');
+  await expect(close).toHaveCount(0);
+  await expect(ticker).toBeFocused();
+  await page.getByRole('button', { name: 'Clear stock search' }).click();
+  await expect(ticker).toHaveValue('');
+  await expect(ticker).toBeFocused();
+  await expect(latest(page)).toBeVisible();
+});
+
+test('the plot and session buttons inspect the same observations as the slider', async ({ page }) => {
+  await page.goto('/');
+  const slider = page.getByRole('slider');
+  await expect(slider).toHaveAttribute('aria-valuetext', /^2017-02-16,/);
+  await page.getByRole('button', { name: 'Previous session' }).click();
+  await expect(slider).toHaveAttribute('aria-valuetext', /^2017-02-15,/);
+  const next = page.getByRole('button', { name: 'Next session' });
+  await next.press('Enter');
+  await expect(next).toBeFocused();
+  await expect(page.getByText('Latest stored close', { exact: false })).toBeVisible();
+
+  const plot = page.locator('.plot-inspection-target');
+  await plot.click({ position: { x: 1, y: 20 } });
+  await expect(slider).toHaveValue('0');
+  await expect(page.getByRole('button', { name: 'Previous session' })).toBeDisabled();
+  await page.getByRole('button', { name: 'Latest', exact: true }).click();
+  await expect(slider).toHaveValue('62');
+  await expect(next).toBeDisabled();
+});
+
+test('CSV contains the raw OHLCV rows for the displayed range', async ({ page }) => {
+  await page.goto('/');
+  const response = page.waitForResponse('**/prices?range=1mo');
+  await page.getByRole('button', { name: '1M', exact: true }).click();
+  const { bars } = await (await response).json();
+  const download = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Download price CSV' }).click();
+  const file = await download;
+  expect(file.suggestedFilename()).toBe('AAPL-historical-prices-1mo.csv');
+  const contents = await readFile(await file.path(), 'utf8');
+  expect(contents.split('\r\n')).toEqual([
+    'Date,Open (USD),High (USD),Low (USD),Close (USD),Volume',
+    ...bars.map(bar => [bar.date, bar.open, bar.high, bar.low, bar.close, bar.volume].join(',')),
+  ]);
 });

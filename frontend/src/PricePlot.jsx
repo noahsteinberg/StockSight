@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 
 const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+const plotLeft = 66;
 
 function linePath(values, x, y) {
   let connected = false;
@@ -12,7 +13,7 @@ function linePath(values, x, y) {
   }).join(' ');
 }
 
-export default function PricePlot({ bars, points, showSma, showRsi, selectedIndex }) {
+export default function PricePlot({ bars, points, showSma, showRsi, selectedIndex, onInspect }) {
   const container = useRef(null);
   const gradient = useId();
   const [width, setWidth] = useState(800);
@@ -30,11 +31,17 @@ export default function PricePlot({ bars, points, showSma, showRsi, selectedInde
   const low = min - spread * .08;
   const high = max + spread * .08;
   const right = width - 12;
-  const x = index => 66 + index / Math.max(1, bars.length - 1) * (right - 66);
+  const x = index => plotLeft + index / Math.max(1, bars.length - 1) * (right - plotLeft);
   const y = value => 24 + (high - value) / (high - low) * 220;
   const path = linePath(values, x, y);
   const volumeMax = Math.max(1, ...bars.map(bar => bar.volume));
   const selected = selectedIndex ?? bars.length - 1;
+  function inspectPlot(event) {
+    const bounds = event.currentTarget.ownerSVGElement.getBoundingClientRect();
+    const xPosition = (event.clientX - bounds.left) / bounds.width * width;
+    const fraction = Math.min(1, Math.max(0, (xPosition - plotLeft) / (right - plotLeft)));
+    onInspect(Math.round(fraction * (bars.length - 1)));
+  }
   return <div ref={container} className="plot-container">
     <svg className="price-plot" viewBox={`0 0 ${width} 340`} role="img" aria-label={`Closing price and volume from ${bars[0].date} to ${bars.at(-1).date}${showSma && points ? ', with 20-session moving average' : ''}`}>
       <defs><linearGradient id={gradient} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#2563ab" stopOpacity=".13" /><stop offset="100%" stopColor="#2563ab" stopOpacity="0" /></linearGradient></defs>
@@ -46,6 +53,7 @@ export default function PricePlot({ bars, points, showSma, showRsi, selectedInde
       <circle cx={x(selected)} cy={y(values[selected])} r="4" className="inspection-dot" />
       {bars.map((bar, index) => <rect key={bar.date} x={Math.min(right - 1, x(index))} y={304 - bar.volume / volumeMax * 40} width={Math.max(.5, (right - 66) * .75 / bars.length)} height={bar.volume / volumeMax * 40} className="volume-bar" />)}
       <text x="0" y="282">Vol.</text><text x="66" y="332">{bars[0].date}</text><text x={right} y="332" textAnchor="end">{bars.at(-1).date}</text>
+      <rect x={plotLeft} y="18" width={right - plotLeft} height="290" className="plot-inspection-target" aria-hidden="true" onClick={inspectPlot} />
     </svg>
     {showRsi && points && <div className="rsi-panel"><div className="chart-caption"><span>RSI <span className="muted">14 · Wilder</span></span><span>{points[selected]?.rsi_14 == null ? 'Insufficient history' : points[selected].rsi_14.toFixed(2)}</span></div>
       <svg className="rsi-plot" viewBox={`0 0 ${width} 130`} role="img" aria-label="14-session relative strength index, scale 0 to 100">

@@ -12,12 +12,19 @@ const pages = [
   ['dashboard', 'Dashboard'], ['analysis', 'Analysis'], ['predictions', 'Predictions'],
   ['performance', 'Model performance'], ['methodology', 'Methodology'],
 ];
+const selectedSymbolKey = 'stocksight:selected-symbol';
+
+function getSavedSymbol() {
+  try { return sessionStorage.getItem(selectedSymbolKey); }
+  catch { return null; }
+}
 
 export default function App() {
   const route = usePageRoute();
   const main = useRef(null);
+  const navigation = useRef(null);
   const [selectedSymbol, setSelectedSymbol] = useState(() => {
-    const saved = new URLSearchParams(window.location.hash.split('?')[1]).get('symbol')?.trim().toUpperCase() || sessionStorage.getItem('stocksight:selected-symbol');
+    const saved = route.symbol || getSavedSymbol();
     return saved && /^[A-Z][A-Z0-9.^=-]{0,15}$/.test(saved) ? saved : 'AAPL';
   });
   const symbol = route.symbol || selectedSymbol;
@@ -27,13 +34,22 @@ export default function App() {
     document.title = `${({ login: 'Log in', signup: 'Create an account', 'reset-password': 'Reset password' })[route.page] || pages.find(([page]) => page === route.page)?.[1] || 'Page not found'} | StockSight`;
     main.current?.focus({ preventScroll: true });
     window.scrollTo(0, 0);
+    const nav = navigation.current;
+    const active = nav?.querySelector('[aria-current="page"]');
+    if (active) {
+      const viewport = nav.getBoundingClientRect();
+      const tab = active.getBoundingClientRect();
+      if (tab.left < viewport.left) nav.scrollLeft += tab.left - viewport.left;
+      if (tab.right > viewport.right) nav.scrollLeft += tab.right - viewport.right;
+    }
   }, [route.hash, route.page]);
   useEffect(() => {
     if (['login', 'signup', 'reset-password'].includes(route.page) && account.isAuthenticated && !account.pending) window.location.hash = '/dashboard';
   }, [route.page, account.isAuthenticated, account.pending]);
   function rememberStock(value) {
     setSelectedSymbol(value);
-    sessionStorage.setItem('stocksight:selected-symbol', value);
+    try { sessionStorage.setItem(selectedSymbolKey, value); }
+    catch { /* The current tab keeps the selection in state when storage is unavailable. */ }
   }
   function selectStock(value) {
     rememberStock(value);
@@ -52,7 +68,7 @@ export default function App() {
       </div>
     </header>
     <div className="navigation-bar">
-      <nav className="wrap" aria-label="Main navigation">
+      <nav ref={navigation} className="wrap" aria-label="Main navigation">
         {pages.map(([page, label]) => <a key={page} onClick={() => rememberStock(symbol)} href={`#/${page}${page === 'analysis' || page === 'predictions' ? `?symbol=${encodeURIComponent(symbol)}` : ''}`} aria-current={route.page === page ? 'page' : undefined}>{label}</a>)}
       </nav>
     </div>

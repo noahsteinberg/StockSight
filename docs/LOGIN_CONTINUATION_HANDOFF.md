@@ -4,6 +4,11 @@ Prepared November 17, 2026. Read this first in the next conversation, then
 [AGENTS.md](../AGENTS.md), [CURRENT_HANDOFF.md](CURRENT_HANDOFF.md), and
 [EMBEDDED_LOGIN.md](EMBEDDED_LOGIN.md).
 
+November 22 checkpoint. PR #13 is merged into main at `dcb4418`.
+The dedicated verification HTML and its script returned HTTP 200 from the rose
+origin. The public deployment smoke check passed against hosted database storage.
+The tenant's exact fallback URL and real-user sign-in are still unverified.
+
 ## Goal and user decisions
 
 Finish publishing and configuring the custom StockSight login/signup flow.
@@ -24,12 +29,12 @@ ML work is outside this task.
 - Branch: `fix/auth0-verification`, tracking `origin/fix/auth0-verification`.
 - Implementation commit: `d88a7a87dedba37d262eda09905ada0cb63db219`.
 - Fix branch is pushed. PR: <https://github.com/noahsteinberg/StockSight/pull/13>.
-- PR #13 was **open**, not merged, at the last browser observation.
+- PR #13 is **merged** into main at `dcb4418`.
 - Previous embedded-login implementation PR #12 was merged into main at
   `0c793499ac81c8be446fa4a2115ab740838ceb7c`; its Vercel deployment succeeded.
 - Production: <https://stocksight-rose.vercel.app>.
-- The new verification handler and fallback-link removal are **not confirmed live**.
-  Recheck current PR/deployment state before taking action; the user may merge it.
+- The dedicated verification handler is available on production. The live
+  account experience still needs the acceptance checks below.
 - Repository instructions expect verified local commits. Pushing/merging requires
   user instruction. Earlier user authorized pushing a branch/opening a PR;
   no instruction to merge PR #13 was received in this conversation.
@@ -93,26 +98,19 @@ the corrected HTTPS test and full account suite passed.
 
 ## Next steps, in order
 
-1. Check whether PR #13 has been merged. If still open, obtain merge instruction
-   or let the user merge it. Do not report the update as live just because it is pushed.
-2. Confirm Vercel successfully deploys the resulting **main** commit. Current
-   `vercel.json` enables automatic Git deployments only for main; branch pushes
-   do not establish production publication.
-3. Verify the live `/cross-origin-verification.html` serves the dedicated page
-   and its production JS assets, not a 404 or the main React app.
-4. In the **existing StockSight SPA** Auth0 settings, set **Cross-Origin Verification
-   Fallback URL** to exactly:
+1. In the **existing StockSight SPA** Auth0 settings, verify **Cross-Origin
+   Verification Fallback URL** is exactly:
    `https://stocksight-rose.vercel.app/cross-origin-verification.html`.
    Do this after the page is deployed. Preserve existing allowed URLs/origins and
    security policies. Apply any required action-time approval for security settings.
-5. Have the user enter their own credentials and test real sign-in. Do not handle
+2. Have the user enter their own credentials and test real sign-in. Do not handle
    or print their password, callback tokens, cookies, or reset links. Inspect safe
    Auth0 log descriptions to distinguish browser-cookie failure, provider rejection,
    and StockSight session creation failure.
-6. Confirm fallback link absent, Google still available, session refresh/logout,
+3. Confirm fallback link absent, Google still available, session refresh/logout,
    signup/reset behavior, and private watchlist isolation as appropriate. Clearly
    report any remaining browser limitation instead of declaring full acceptance.
-7. Update handoff with actual deployment/configuration/live test evidence.
+4. Update the handoff with tenant configuration and live account test evidence.
 
 Before starting servers or live HTTP/database tests, run backend virtualenv Python
 `-m app.environment_check` from `backend` as required by AGENTS.md. Use configured
@@ -143,6 +141,6 @@ permission errors. Do not seed/reset/reimport the normal database.
 ## Suggested next-conversation prompt
 
 > Read `docs/LOGIN_CONTINUATION_HANDOFF.md` and continue the StockSight login fix.
-> Check PR #13 and production first, then finish the pending Auth0 verification
-> configuration and real-login acceptance. Keep vercel.app, preserve the static
+> Verify the Auth0 fallback setting and finish real-login acceptance.
+> Keep vercel.app, preserve the static
 > navy-chart design, and do not claim browser-cookie restrictions are solved.

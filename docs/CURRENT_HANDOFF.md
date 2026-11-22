@@ -1,7 +1,45 @@
 # StockSight — continuation handoff for Gavin and the next agent
 
-For the latest login task and exact pending publication/configuration steps, start
-with [LOGIN_CONTINUATION_HANDOFF.md](LOGIN_CONTINUATION_HANDOFF.md) (November 17).
+## November 22 frontend workspace and handoff review
+
+The local `feature/frontend-workspace` branch starts from upstream main
+`dcb4418` (the PR #13 merge) and carries forward the local login handoff. PR #13's
+source was reviewed against its pre-merge base `0c79349`. Production serves the
+dedicated verification page and JavaScript. The read-only deployment smoke passed
+against database storage and returned 63 AAPL sessions ending 2017-02-16.
+
+For tenant verification and real-browser account acceptance, see
+[LOGIN_CONTINUATION_HANDOFF.md](LOGIN_CONTINUATION_HANDOFF.md). Auth0 documents
+that the current cross-site embedded-password flow still depends on third-party
+cookie support in Chrome and Safari. Hosted tenant configuration, real accounts,
+and hosted Actions runs were outside this verification. The application serves
+historical AAPL data on production. Forecasts and model evaluation remain paused.
+
+The workspace refresh keeps the UConn color palette and IBM Plex typography,
+condenses the masthead and navigation on mobile, and moves secondary chart
+actions below the observation controls. Search has a clear control and
+dismissible results. The chart supports direct point inspection, adjacent
+sessions, return to the latest close, and raw OHLCV CSV export for the displayed
+range. If session storage is unavailable, the current tab keeps its selection
+in memory. These changes are local.
+
+Review findings and acceptance boundaries:
+
+- Auth0 does not support Bot Detection challenges in the embedded cross-origin
+  password flow. The form displays a support message if Auth0 requires additional
+  verification. Password-only users have no interactive challenge path in the
+  current UI. This was established from source and provider documentation, with
+  no live tenant challenge triggered. See [Auth0 flow limitations](https://auth0.com/docs/secure/attack-protection/bot-detection#flow-limitations).
+- Prices and indicators compare dates and source metadata. If a same-date
+  correction lands between reads, they can still refer to different snapshots.
+  A local browser probe delivered revised indicator values with identical metadata
+  and confirmed the overlay was drawn over the original prices. A shared snapshot
+  identifier would make this detectable before overlaying. No import was run.
+- The isolated review passed 26 public and 20 account browser cases. Backend
+  pytest passed 93 cases and skipped two disposable PostgreSQL cases. The refreshed
+  frontend passed lint/build and 30 public and 20 account cases against the
+  fixture API and disposable SQLite account harness. Guest screenshots cover
+  Analysis at 1440, 390, and 320 px.
 
 ## November 17 follow-up: embedded verification and error flow
 
@@ -27,9 +65,8 @@ See EMBEDDED_LOGIN.md for the setup and explicit acceptance boundary.
 Follow-up verification: frontend lint/build and both public/account Playwright
 suites passed (20 account cases). The verification-page tests cover standalone,
 untrusted-parent and trusted Auth0-origin SDK handshake behavior with intercepted
-provider traffic. These checks do not establish live password-login success or
-overcome browser third-party-cookie restrictions. Deployment and the tenant's
-verification fallback URL update remain pending.
+provider traffic. The November 22 checkpoint above records production
+availability and the remaining tenant and account checks.
 
 November 17 continuation: read [NEXT_AGENT_HANDOFF.md](NEXT_AGENT_HANDOFF.md)
 and [the detailed integration specification](FRONTEND_ML_INTEGRATION_SPEC.md).
@@ -333,7 +370,7 @@ return 404; `/api/health` checks liveness, `/api/ready` checks configured storag
 Never infer reachability from a ready log. Production must proxy `/api` to the API;
 Vite's development proxy is not a production routing solution.
 
-The database must migrate through `0004_app_sessions`. API startup does not
+The database must migrate through `0005_backend_only_access`. API startup does not
 migrate, seed or import. An already imported database needs migration/readiness
 checks, not another import. `app.seed` is only for a deliberately chosen blank
 fixture/test database; it conflicts with the imported AAPL canonical series.

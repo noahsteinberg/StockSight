@@ -80,3 +80,16 @@ test('new pages fit desktop and mobile viewports', async ({ page }) => {
     }
   }
 });
+
+test('compact navigation reveals the active tab on a mobile deep link', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.goto('/#/methodology');
+  const nav = page.getByRole('navigation', { name: 'Main navigation' });
+  const active = nav.getByRole('link', { name: 'Methodology', exact: true });
+  await expect(active).toHaveAttribute('aria-current', 'page');
+  await expect.poll(() => active.evaluate(element => {
+    const tab = element.getBoundingClientRect();
+    const container = element.closest('nav').getBoundingClientRect();
+    return tab.left >= container.left && tab.right <= container.right + 1;
+  })).toBe(true);
+});
