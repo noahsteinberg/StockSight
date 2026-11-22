@@ -14,6 +14,7 @@ from app.market import (
     History,
     HistoryRange,
     Stock,
+    fixture_snapshot_id,
     load_bars,
 )
 from app.repository import database_history, search_database
@@ -87,6 +88,7 @@ def read_history(
             source=SOURCE,
             source_url=SOURCE_URL,
             adjustment=ADJUSTMENT,
+            snapshot_id=fixture_snapshot_id(),
             as_of=bars[-1].date,
             range=range,
             bars=list(bars[-count:]),

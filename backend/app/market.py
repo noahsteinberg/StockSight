@@ -3,6 +3,7 @@
 import csv
 from datetime import date
 from functools import lru_cache
+from hashlib import sha256
 from pathlib import Path
 from typing import Literal
 
@@ -37,11 +38,17 @@ class History(BaseModel):
     source_url: str
     mode: Literal["historical_fixture", "historical_snapshot"] = "historical_fixture"
     adjustment: str = "Unadjusted OHLC; historical values are not current quotes"
+    snapshot_id: str
     as_of: date
     range: str
     bars: list[Bar]
     session_limit: int
     has_earlier: bool
+
+
+@lru_cache(maxsize=1)
+def fixture_snapshot_id() -> str:
+    return sha256(FIXTURE_PATH.read_bytes()).hexdigest()
 
 
 @lru_cache(maxsize=1)

@@ -3,7 +3,7 @@
 const domain = import.meta.env.VITE_AUTH0_DOMAIN?.trim();
 const clientID = import.meta.env.VITE_AUTH0_CLIENT_ID?.trim();
 const audience = import.meta.env.VITE_AUTH0_AUDIENCE?.trim();
-const connection = import.meta.env.VITE_AUTH0_DATABASE_CONNECTION?.trim() || 'Username-Password-Authentication';
+export const passwordConnection = import.meta.env.VITE_AUTH0_DATABASE_CONNECTION?.trim() || 'Username-Password-Authentication';
 let client;
 
 export async function webAuth() {
@@ -25,14 +25,14 @@ export function authMessage(error, operation = 'login') {
   if (['too_many_attempts', 'too_many_requests'].includes(code)) return 'Too many attempts. Wait a few minutes before trying again.';
   if (['password_strength_error', 'invalid_password', 'password_dictionary_error', 'password_no_user_info_error'].includes(code)) return 'Choose a stronger password with upper and lowercase letters, a number, and a symbol.';
   if (code === 'password_leaked') return 'This password was found in a data breach. Reset your password before signing in.';
-  if (['mfa_required', 'requires_verification'].includes(code)) return 'This account requires additional verification. Contact support to complete sign-in.';
+  if (['mfa_required', 'requires_verification'].includes(code)) return 'Continue on Auth0 to finish verifying your sign-in.';
   if (code === 'blocked_user') return 'This account is blocked. Use password recovery or contact support.';
-  if (['unauthorized_client', 'unsupported_credential_type', 'server_error'].includes(code)) return 'Password sign-in is temporarily unavailable. Please try again or use Google sign-in.';
+  if (['unauthorized_client', 'unsupported_credential_type', 'server_error'].includes(code)) return 'Password sign-in is temporarily unavailable. Try again or continue on Auth0.';
   if (code === 'invalid_token') return 'Sign-in could not be verified. Please enter your details and try again.';
   if (operation === 'signup') return 'Could not create the account. Check your details and password, or try signing in if you already have an account.';
   if (operation === 'reset') return 'Could not send the reset email. Try again in a moment.';
   if (['access_denied', 'invalid_grant'].includes(code)) return 'Check your username and password and try again.';
-  return 'Your browser could not complete password sign-in. Please try again or use Google sign-in.';
+  return 'Your browser could not complete password sign-in. Try again or continue on Auth0.';
 }
 
 export class AuthFlowError extends Error {}
@@ -41,7 +41,7 @@ export async function passwordLogin(username, password) {
   const auth = await webAuth();
   return new Promise((resolve, reject) => {
     // Successful cross-origin login navigates to the callback. Never use ROPG.
-    auth.login({ realm: connection, username, password }, error => error ? reject(new Error(authMessage(error))) : resolve());
+    auth.login({ realm: passwordConnection, username, password }, error => error ? reject(new Error(authMessage(error))) : resolve());
   });
 }
 
@@ -51,7 +51,7 @@ export async function signup({ username, password, email }) {
   const response = await fetch(`https://${domain}/dbconnections/signup`, {
     method: 'POST', credentials: 'omit', signal: AbortSignal.timeout(15000),
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ client_id: clientID, connection, username, password, ...(email ? { email } : {}) }),
+    body: JSON.stringify({ client_id: clientID, connection: passwordConnection, username, password, ...(email ? { email } : {}) }),
   }).catch(() => { throw new Error(authMessage(null, 'signup')); });
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
@@ -61,7 +61,7 @@ export async function signup({ username, password, email }) {
 
 export async function resetPassword(email) {
   const auth = await webAuth();
-  return new Promise((resolve, reject) => auth.changePassword({ connection, email }, error =>
+  return new Promise((resolve, reject) => auth.changePassword({ connection: passwordConnection, email }, error =>
     error ? reject(new Error(authMessage(error, 'reset'))) : resolve()));
 }
 

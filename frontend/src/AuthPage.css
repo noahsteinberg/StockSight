@@ -53,6 +53,9 @@
 .auth-card .auth-status { margin:0 0 20px; padding:12px; border:1px solid #4d6f9c; border-radius:10px; color:#dce8fa; font-size:13px; line-height:1.6; }
 .auth-card .auth-error { border-color:#9d5555; color:#ffc3c3; }
 .auth-card .auth-help { display:block; width:fit-content; margin:12px 0 0 auto; font-size:12px; }
+.auth-recovery { margin-top:16px; color:#aab5c7; font-size:13px; }
+.auth-card .auth-recovery summary { padding:6px 0; color:#9dc1ff; }
+.auth-recovery p { margin:4px 0 10px; }
 .auth-card .password-control { position:relative; }
 .auth-card .password-control input { padding-right:58px; }
 .auth-card .password-control button { position:absolute; right:4px; top:4px; width:auto; min-height:38px; padding:8px; border:0; background:transparent; color:#b7c6dd; font-size:12px; }

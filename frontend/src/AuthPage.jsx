@@ -103,8 +103,13 @@ export default function AuthPage({ mode }) {
             {!reset && <>
               <p className="switch">{signup ? <>Already have an account? <a href="#/login">Log in</a></> : <>New to StockSight? <a href="#/signup">Create an account</a></>}</p>
               <div className="preview-divider">or</div>
-              <button className="secondary" type="button" disabled={busy || unavailable} onClick={() => account.loginHosted(false, true)}><GoogleIcon/>Continue with Google</button>
+              <button className="secondary" type="button" disabled={busy || unavailable} onClick={() => account.loginHosted('google')}><GoogleIcon/>Continue with Google</button>
             </>}
+            {!signup && !reset && !unavailable && <details className="auth-recovery" open={Boolean(error || account.error)}>
+              <summary>Trouble signing in?</summary>
+              <p>Use Auth0 if your browser blocks password sign-in or your account needs verification.</p>
+              <button className="secondary" type="button" disabled={busy} onClick={() => account.loginHosted('password')}>Continue on Auth0</button>
+            </details>}
             {reset && <p className="switch"><a href="#/login">Back to log in</a></p>}
           </div>
         </section>

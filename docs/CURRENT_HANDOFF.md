@@ -1,5 +1,25 @@
 # StockSight — continuation handoff for Gavin and the next agent
 
+## November 22 review fixes
+
+The Analysis client now compares the opaque series revision returned by prices
+and indicators. The API reads revision metadata and bars together. When an
+import corrects values on the same dates, reload both responses to draw an
+indicator overlay. This release does not require a schema migration.
+
+On the login form, **Trouble signing in?** offers the existing Auth0 database
+connection through hosted Universal Login with PKCE. It opens when an embedded
+attempt reports an error. Users can use that path if cross-site cookies block
+the embedded form or if Auth0 requires interactive verification. StockSight's
+app-session exchange and the Google button continue through their existing
+paths. Local browser tests intercept the Auth0 boundary.
+
+Verification includes a same-date database correction, a rejected mismatched
+overlay and reload, and the hosted PKCE redirect for an intercepted Auth0
+verification challenge. Ruff, frontend lint/build, 94 backend tests, 27 public
+browser tests and 21 account browser tests passed. Two disposable PostgreSQL
+cases were skipped.
+
 ## November 17 follow-up: embedded verification and error flow
 
 After PR #12 was merged, live Auth0 logs first showed `Cross origin login not
