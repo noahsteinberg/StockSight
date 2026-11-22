@@ -13,7 +13,7 @@ from app.config import Settings
 from app.db import DailyBar
 from app.indicators import CALCULATION_LIMIT, calculate_indicators
 from app.main import create_app
-from app.market import Bar, History
+from app.market import Bar, History, load_bars
 from app.seed import SERIES_ID, seed_fixture
 
 
@@ -34,6 +34,7 @@ def history(closes):
         name="Numerical fixture",
         source="Test",
         source_url="",
+        snapshot_id="numerical-test",
         as_of=bars[-1].date,
         range="all",
         bars=bars,
@@ -95,7 +96,8 @@ def assert_api_contract(client):
     prices = client.get("/api/stocks/AAPL/prices?range=all").json()
     assert full["symbol"] == "AAPL"
     assert full["methodology"] == "close-sma20-wilder-rsi14-v1"
-    for key in ("source", "source_url", "adjustment", "mode", "as_of"):
+    assert full["snapshot_id"]
+    for key in ("source", "source_url", "adjustment", "mode", "as_of", "snapshot_id"):
         assert full[key] == prices[key]
     assert [point["date"] for point in full["points"]] == [
         bar["date"] for bar in prices["bars"]
@@ -105,6 +107,7 @@ def assert_api_contract(client):
     )
     for range_value, count in (("1mo", 21), ("3mo", 63), ("1y", 252)):
         short = client.get(f"/api/stocks/AAPL/indicators?range={range_value}").json()
+        assert short["snapshot_id"] == full["snapshot_id"]
         assert short["points"] == full["points"][-count:]
         assert short["calculation_start"] == full["calculation_start"]
         assert short["session_limit"] == count
@@ -130,7 +133,28 @@ def test_database_api_matches_fixture_and_survives_restart(database):
     with TestClient(create_app(db_settings(url))) as restarted:
         assert restarted.get("/api/stocks/AAPL/indicators?range=all").json() == stored
     with TestClient(create_app(Settings(_env_file=None, database_url=None))) as fixture:
-        assert fixture.get("/api/stocks/AAPL/indicators?range=all").json() == stored
+        offline = fixture.get("/api/stocks/AAPL/indicators?range=all").json()
+        assert offline | {"snapshot_id": stored["snapshot_id"]} == stored
+
+
+def test_same_date_correction_changes_the_shared_snapshot(database, monkeypatch):
+    url, engine = database
+    seed_fixture(engine)
+    original = load_bars()
+    revised = original[-1].model_copy(update={"close": original[-1].close - 0.01})
+    with TestClient(create_app(db_settings(url))) as client:
+        old_prices = client.get("/api/stocks/AAPL/prices").json()
+        old_indicators = client.get("/api/stocks/AAPL/indicators").json()
+        monkeypatch.setattr("app.seed.load_bars", lambda: (*original[:-1], revised))
+        seed_fixture(engine)
+        prices = client.get("/api/stocks/AAPL/prices").json()
+        indicators = client.get("/api/stocks/AAPL/indicators").json()
+
+    assert prices["as_of"] == old_prices["as_of"]
+    assert prices["source"] == old_prices["source"]
+    assert prices["snapshot_id"] != old_prices["snapshot_id"]
+    assert indicators["snapshot_id"] == prices["snapshot_id"]
+    assert indicators["points"][-1]["sma_20"] != old_indicators["points"][-1]["sma_20"]
 
 
 def test_calculation_bound_and_display_bound_are_separate(database):

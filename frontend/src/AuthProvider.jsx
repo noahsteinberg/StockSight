@@ -1,6 +1,6 @@
 import { Auth0Provider, useAuth0 } from '@auth0/auth0-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AuthFlowError, completeEmbeddedLogin, embeddedCallback, passwordLogin, signup, resetPassword } from './embedded-auth.js';
+import { AuthFlowError, completeEmbeddedLogin, embeddedCallback, passwordConnection, passwordLogin, signup, resetPassword } from './embedded-auth.js';
 import { AccountContext } from './auth-context.js';
 
 const domain = import.meta.env.VITE_AUTH0_DOMAIN?.trim();
@@ -112,14 +112,16 @@ function Session({ children }) {
       document.removeEventListener('visibilitychange', recheck);
     };
   }, [session.authenticated, sessionUserId]);
-  const loginHosted = useCallback(async (signup = false, google = false) => {
+  const loginHosted = useCallback(async (method) => {
     setAction('login');
     setActionError('');
     setExpired(false);
     exchange.current = null;
     setSession(guest);
     try {
-      await loginWithRedirect({ authorizationParams: google ? { connection: 'google-oauth2' } : signup ? { screen_hint: 'signup' } : {} });
+      const authorizationParams = method === 'google' ? { connection: 'google-oauth2' } :
+        { connection: passwordConnection, prompt: 'login' };
+      await loginWithRedirect({ authorizationParams });
     } catch {
       setActionError('Could not sign in. Try again.');
     } finally { setAction(null); }

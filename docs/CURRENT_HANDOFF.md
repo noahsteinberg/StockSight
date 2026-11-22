@@ -1,6 +1,6 @@
 # StockSight — continuation handoff for Gavin and the next agent
 
-## November 22 frontend workspace and handoff review
+## November 22 frontend workspace and initial review
 
 The local `feature/frontend-workspace` branch starts from upstream main
 `dcb4418` (the PR #13 merge) and carries forward the local login handoff. PR #13's
@@ -23,7 +23,7 @@ sessions, return to the latest close, and raw OHLCV CSV export for the displayed
 range. If session storage is unavailable, the current tab keeps its selection
 in memory. These changes are local.
 
-Review findings and acceptance boundaries:
+Initial review findings (addressed by the review fixes below):
 
 - Auth0 does not support Bot Detection challenges in the embedded cross-origin
   password flow. The form displays a support message if Auth0 requires additional
@@ -40,6 +40,26 @@ Review findings and acceptance boundaries:
   frontend passed lint/build and 30 public and 20 account cases against the
   fixture API and disposable SQLite account harness. Guest screenshots cover
   Analysis at 1440, 390, and 320 px.
+
+## November 22 review fixes
+
+The Analysis client now compares the opaque series revision returned by prices
+and indicators. The API reads revision metadata and bars together. When an
+import corrects values on the same dates, reload both responses to draw an
+indicator overlay. This release does not require a schema migration.
+
+On the login form, **Trouble signing in?** offers the existing Auth0 database
+connection through hosted Universal Login with PKCE. It opens when an embedded
+attempt reports an error. Users can use that path if cross-site cookies block
+the embedded form or if Auth0 requires interactive verification. StockSight's
+app-session exchange and the Google button continue through their existing
+paths. Local browser tests intercept the Auth0 boundary.
+
+Verification includes a same-date database correction, a rejected mismatched
+overlay and reload, and the hosted PKCE redirect for an intercepted Auth0
+verification challenge. Ruff, frontend lint/build, 94 backend tests, 27 public
+browser tests and 21 account browser tests passed. Two disposable PostgreSQL
+cases were skipped.
 
 ## November 17 follow-up: embedded verification and error flow
 

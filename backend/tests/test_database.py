@@ -84,7 +84,8 @@ def test_idempotent_import_correction_and_restart(database):
     with TestClient(create_app(db_settings(url))) as restarted:
         assert restarted.get("/api/stocks/AAPL/prices?range=all").json() == first
     with TestClient(create_app(Settings(_env_file=None, database_url=None))) as fixture:
-        assert fixture.get("/api/stocks/AAPL/prices?range=all").json() == first
+        offline = fixture.get("/api/stocks/AAPL/prices?range=all").json()
+        assert offline | {"snapshot_id": first["snapshot_id"]} == first
     command.check(migration_config(url))
 
 
@@ -220,7 +221,10 @@ def test_search_history_adapter_contract_parity(database):
         assert search_stocks(persisted, query) == search_stocks(fixture, query)
     for range_value in ("1mo", "3mo", "1y", "all"):
         stored = prices(persisted, " aapl ", range_value)
-        assert stored == prices(fixture, "AAPL", range_value)
+        offline = prices(fixture, "AAPL", range_value)
+        assert stored.model_dump(exclude={"snapshot_id"}) == offline.model_dump(
+            exclude={"snapshot_id"}
+        )
         assert len(stored.bars) <= stored.session_limit
     with pytest.raises(HTTPException) as unsupported:
         prices(persisted, "MSFT", "all")

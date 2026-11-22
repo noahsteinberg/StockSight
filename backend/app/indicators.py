@@ -26,6 +26,7 @@ class IndicatorHistory(BaseModel):
     source_url: str
     mode: Literal["historical_fixture", "historical_snapshot"]
     adjustment: str
+    snapshot_id: str
     as_of: date
     range: HistoryRange
     session_limit: int
@@ -82,6 +83,7 @@ def calculate_indicators(
         source_url=history.source_url,
         mode=history.mode,
         adjustment=history.adjustment,
+        snapshot_id=history.snapshot_id,
         as_of=history.as_of,
         range=range_value,
         session_limit=limit,

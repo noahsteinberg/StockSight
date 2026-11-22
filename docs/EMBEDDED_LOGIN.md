@@ -24,9 +24,10 @@ The existing backend session, CSRF, ownership and watchlist contracts are unchan
   an account exists. Accounts without recovery email may need administrator help.
 - Google uses the existing official React SDK, Authorization Code + PKCE, and
   `connection=google-oauth2`; the provider consent/sign-in screens remain external.
-- The local form does not offer a second hosted Auth0 login link. Google remains
-  available. MFA/account verification requirements still apply; removing that
-  link does not disable them or make blocked cross-site cookies usable.
+- **Trouble signing in?** opens a password recovery option for blocked cross-site
+  cookies or an interactive Auth0 challenge. It uses hosted Universal Login with
+  the same database connection and Authorization Code + PKCE. Google retains its
+  own connection and button.
 
 ## Session boundary
 
@@ -86,8 +87,8 @@ In the Auth0 SPA settings:
 6. For reliable embedded login in production browsers, place the app and Auth0
    custom domain under the same top-level domain. Third-party-cookie restrictions
    can otherwise block the password flow. The user chose to keep the vercel.app
-   address for now, so Google is the alternative when embedded password login is
-   blocked. Do not promise that the verifier page fixes modern cookie restrictions.
+   address for now. Use **Trouble signing in?** for the hosted password path when
+   cross-site cookies block the embedded form. Google is also available.
 
 These settings are not applied automatically by the source changes. The old
 Universal Login Liquid template/theme upload is not needed for these local forms.

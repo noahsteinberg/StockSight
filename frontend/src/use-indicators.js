@@ -25,13 +25,14 @@ export default function useIndicators(symbol, range, enabled, priceData) {
   const current = enabled && result?.key === key ? result : null;
   const data = current?.data;
   const aligned = data && priceData && data.symbol === symbol && data.range === range &&
+    Boolean(priceData.snapshot_id) && data.snapshot_id === priceData.snapshot_id &&
     data.as_of === priceData.as_of && data.source === priceData.source && data.adjustment === priceData.adjustment &&
     data.points?.length === priceData.bars.length && data.points.every((point, index) => point.date === priceData.bars[index].date);
   return {
     data: aligned ? data : null,
     loading: enabled && !current,
     mismatch: Boolean(data && priceData && !aligned),
-    error: current?.error || (data && priceData && !aligned ? 'Price and indicator dates or sources differ. Reload prices, then retry indicators.' : null),
+    error: current?.error || (data && priceData && !aligned ? 'Prices and indicators came from different data snapshots. Reload both to continue.' : null),
     retry: () => setAttempt(value => value + 1),
   };
 }
