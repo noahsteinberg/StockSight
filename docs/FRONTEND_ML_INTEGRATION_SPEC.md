@@ -15,7 +15,7 @@ absolute up/down prediction has not qualified for serving.
 Working today: existing React/Vite pages, hash navigation, sourced daily price/
 volume charts, SMA20/RSI14, FastAPI, SQLAlchemy/Alembic, Supabase storage, Auth0
 and app-session/private-watchlist code. Production is stocksight-rose.vercel.app.
-Hosted data is the historical AAPL sample ending 2017-02-16. Predictions and
+Current hosted coverage is recorded in CURRENT_HANDOFF.md. Predictions and
 performance intentionally show unavailable states. No current quote feed,
 automated refresh, approved model artifact, prediction persistence or ML API exists.
 Noah reports Auth0 settings were fixed; complete hosted account acceptance still
@@ -260,8 +260,10 @@ before implementing list pages. No training endpoint or click-to-train UI.
 
 ## 7. Current data versus future daily refresh
 
-Current: 506 AAPL historical bars in Supabase; the broad 494-stock research
-snapshot lives locally. Connecting Supabase never transfers that snapshot.
+Current: the hosted historical dataset and its retention limit are recorded in
+CURRENT_HANDOFF.md. The complete 494-stock research snapshot remains a separate
+local dataset. Hosted retention does not redefine the offline evaluation sample,
+and connecting Supabase alone never transfers a dataset or enables refresh.
 
 Future flow:
 
@@ -272,9 +274,9 @@ Provider adapter -> validated settled daily bars -> database/cache
   -> later outcome resolver -> versioned evaluation records
 ```
 
-Decide first hosted universe and provider terms/adjustment/freshness before
-import or scheduling. Refresh is a job outside chart requests. Use an exchange
-calendar for holidays and next sessions, source timestamps, bounded retries,
+Review provider terms, adjustment compatibility and freshness before scheduling
+refresh or extending the hosted universe. Refresh is a job outside chart requests.
+Use an exchange calendar for holidays and next sessions, source timestamps, bounded retries,
 provisional/settled flags and sanitized job logs. Quotes may refresh more often;
 the current model design uses completed daily bars and updates once per session.
 

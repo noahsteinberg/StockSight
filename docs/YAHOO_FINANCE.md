@@ -4,6 +4,38 @@ Prepared November 16, 2026. The meeting assigned research into fresh Yahoo Finan
 data, with the existing stored snapshot kept for the current presentation.
 This document is an integration proposal, not a running refresh service.
 
+## November 23 API comparison
+
+Parth wants fresh completed daily history plus latest available quotes. He has
+no market-data API account yet and chose to finish the file migration first.
+No provider key, scheduled job or quote endpoint has been configured.
+
+Alpaca is the leading technical candidate for a private research pilot. Its
+[Basic plan](https://docs.alpaca.markets/us/v1.1/docs/about-market-data-api)
+provides 200 historical calls per minute, history since 2016 and IEX-only live
+equity data. It requires a key ID and secret, stored only on the server. The
+[official FAQ](https://docs.alpaca.markets/us/docs/market-data-faq) distinguishes
+IEX from consolidated SIP: free historical SIP queries must end at least
+15 minutes ago; latest SIP endpoints require a subscription. Use an explicit
+feed and show its timestamp/coverage. IEX represents one exchange, so its prices
+and volume must not be treated as consolidated market data.
+
+[Twelve Data Basic](https://twelvedata.com/pricing) offers 8 credits per minute
+and 800 per day, with internal non-display usage. That daily quota leaves little
+room for separate daily-history and quote requests for 494 symbols. Public
+StockSight display also needs a provider plan or permission that covers the
+actual audience; confirm that before activating a public feed. Alpaca's
+[data terms](https://files.alpaca.markets/disclosures/library/TermsAndConditions.pdf)
+need the same review. These are candidates, not an approved public-data license.
+
+For the next implementation, compare overlapping daily bars with the team Yahoo
+snapshot before deciding whether to replace or extend its canonical series.
+Keep latest bid/ask/trade quotes in a separate timestamped contract rather than
+overwriting a completed daily close. Refresh outside browser requests, retain
+up to the agreed hosted history limit, and preserve the prior success date on
+provider failure. The incremental writer and provider-series provenance remain
+unfinished.
+
 ## Finding
 
 The practical Python research option is the community `yfinance` package. Its

@@ -98,6 +98,17 @@ review which dataset belongs there; replacement changes the selected histories.
 Check actual database/index size and plan capacity before importing all 494
 symbols / roughly three million observations.
 
+The November 23 dashboard check confirmed this project's Free plan with a
+500 MB database allowance. The real MSFT pilot indicated the complete team
+history would exceed that allowance. Parth chose all 494 symbols with up to
+2,500 recent accepted sessions per symbol, preserving the complete source file
+outside Git. Use the explicit retention option in
+[the import guide](PRICES_IMPORT.md#limit-retained-history-for-a-hosted-database)
+for a deliberate replacement; full-history import remains the default and must
+not be run blindly against this hosted database. Leave capacity headroom for
+indexes, system tables, account data and future refreshes. See the handoff for
+the observed import result and actual size.
+
 If the team snapshot is unavailable, a deliberately chosen **blank demo database**
 can use `.venv/bin/python -m app.seed` for 506 historical AAPL fixture observations.
 Label that dataset as historical. Do not seed over the team snapshot or blindly
