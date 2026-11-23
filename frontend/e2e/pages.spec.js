@@ -81,15 +81,56 @@ test('new pages fit desktop and mobile viewports', async ({ page }) => {
   }
 });
 
-test('compact navigation reveals the active tab on a mobile deep link', async ({ page }) => {
+test('the desktop rail expands from icons, resizes the content, and stays fixed on scroll', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 600 });
+  await page.goto('/');
+  const nav = page.getByRole('navigation', { name: 'Main navigation' });
+  const active = nav.getByRole('link', { name: 'Analysis', exact: true });
+  const label = active.locator('span');
+  await expect(active).toHaveAttribute('aria-current', 'page');
+  await expect(nav.locator('a svg')).toHaveCount(5);
+  await expect(label).toHaveCSS('opacity', '0');
+  const before = await page.locator('main').boundingBox();
+  const rail = await nav.boundingBox();
+  await nav.hover({ position: { x: 26, y: 30 } });
+  await expect(label).toHaveCSS('opacity', '1');
+  await expect.poll(async () => (await page.locator('main').boundingBox()).x).toBeGreaterThan(before.x + 100);
+  await expect.poll(async () => {
+    const panel = await page.locator('main').boundingBox();
+    return Math.abs(panel.x + panel.width - before.x - before.width);
+  }).toBeLessThan(2);
+  await page.evaluate(() => window.scrollTo({ top: 500, behavior: 'instant' }));
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+  expect((await nav.boundingBox()).y).toBe(rail.y);
+  await page.mouse.move(600, 200);
+  await expect(label).toHaveCSS('opacity', '0');
+  await active.focus();
+  await expect(label).toHaveCSS('opacity', '1');
+});
+
+test('the mobile hamburger reveals the current page, supports Escape, and closes on navigation', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
   await page.goto('/#/methodology');
-  const nav = page.getByRole('navigation', { name: 'Main navigation' });
+  const nav = page.locator('#site-navigation');
+  const toggle = page.getByRole('button', { name: 'Open navigation' });
+  await expect(nav).toBeHidden();
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  await toggle.click();
   const active = nav.getByRole('link', { name: 'Methodology', exact: true });
+  await expect(active).toBeFocused();
   await expect(active).toHaveAttribute('aria-current', 'page');
-  await expect.poll(() => active.evaluate(element => {
-    const tab = element.getBoundingClientRect();
-    const container = element.closest('nav').getBoundingClientRect();
-    return tab.left >= container.left && tab.right <= container.right + 1;
-  })).toBe(true);
+  await expect(active.locator('span')).toHaveCSS('opacity', '1');
+  await active.press('Escape');
+  await expect(nav).toBeHidden();
+  await expect(toggle).toBeFocused();
+  await toggle.click();
+  await nav.getByRole('link', { name: 'Analysis', exact: true }).click();
+  await expect(nav).toBeHidden();
+  await expect(page.getByRole('heading', { name: 'Stock analysis' })).toBeVisible();
+  await expect(page.locator('main')).toBeFocused();
+  await toggle.click();
+  await expect(nav.getByRole('link', { name: 'Analysis', exact: true })).toHaveAttribute('aria-current', 'page');
+  await page.mouse.click(317, 420);
+  await expect(nav).toBeHidden();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
 });

@@ -135,6 +135,7 @@ test('mobile account and saved-stock actions fit the viewport', async ({ page })
   await signIn(page);
   await page.getByRole('button', { name: 'Save to watchlist', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Remove AAPL' })).toBeVisible();
+  await page.getByRole('button', { name: 'Open navigation' }).click();
   await page.getByRole('link', { name: 'Dashboard', exact: true }).click();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   if (process.env.STOCKSIGHT_VISUAL_QA === '1') await page.screenshot({ path: '../.local-data/accounts-mobile.png', fullPage: true });

@@ -1,5 +1,17 @@
 # StockSight — continuation handoff for Gavin and the next agent
 
+## November 22 fixed sidebar navigation
+
+Desktop navigation uses a fixed icon rail. Hover or keyboard focus reveals the
+page labels and expands the rail. The content area tracks the rail width.
+The existing routes retain their active-page highlight and selected stock
+context. At widths of 740 px and below, the masthead hamburger opens the
+navigation panel. Escape returns focus to the toggle, and selecting a route or
+interacting outside the panel dismisses it.
+
+Lint, build, 34 public browser tests and 21 isolated account tests passed.
+The running preview was visually checked at 1440 px and 320 px.
+
 ## November 22 chart inspection and historical replay
 
 The local `feature/chart-inspection-replay` branch starts from the previewed
