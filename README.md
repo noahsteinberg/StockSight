@@ -86,6 +86,7 @@ for team responsibilities and MVP gates.
 
 ## Documentation
 
+- [Parth's November 23 data migration: work summary and evidence](docs/PARTH_DATA_UPDATE_2026-11-23.md)
 - [Current handoff](docs/CURRENT_HANDOFF.md) and [local startup](docs/LOCAL_START.md)
 - [Architecture and navigation](docs/ARCHITECTURE.md), [API](docs/API.md) and [indicators](docs/INDICATORS.md)
 - [Auth0 accounts, sessions and watchlists](docs/ACCOUNTS.md) and [security](docs/SECURITY.md)
