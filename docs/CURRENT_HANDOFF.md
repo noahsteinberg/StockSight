@@ -1,5 +1,19 @@
 # StockSight — continuation handoff for Gavin and the next agent
 
+## November 22 stock search autocomplete
+
+The existing Analysis search field shows up to eight local suggestions after a
+200 ms debounce. Matching is case-insensitive and ranks ticker and company
+prefixes before substring and one-edit matches. The input keeps focus while
+the arrow keys move the active option. Enter selects the highlighted stock,
+and Escape or an outside click closes the suggestions. A disabled row shows
+when there are no matches.
+
+`frontend/src/stock-suggestions.js` supplies an asynchronous, abortable
+`{ symbol, name }` provider that can be backed by an API later. Suggestions
+come from a small curated list, and the configured price API determines which
+symbols have history. The explicit Search action still queries the server.
+
 ## November 22 fixed sidebar navigation
 
 Desktop navigation uses a fixed icon rail. Hover or keyboard focus reveals the
@@ -10,7 +24,7 @@ navigation panel. Escape returns focus to the toggle, and selecting a route or
 interacting outside the panel dismisses it.
 
 One Framer Motion highlight stretches between active items. Its leading edge
-moves first and its trailing edge starts 80 ms later. Each edge uses a 300 ms
+moves first and its trailing edge starts 30 ms later. Each edge uses a 300 ms
 ease-out tween. MotionConfig respects the system preference, and the highlight
 switches instantly when reduced motion is on.
 

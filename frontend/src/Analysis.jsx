@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import HistoricalChart from './HistoricalChart.jsx';
+import StockSearchInput from './StockSearchInput.jsx';
 import { useAccount } from './auth-context.js';
 import useIndicators from './use-indicators.js';
 
@@ -112,11 +113,8 @@ export default function Analysis({ symbol, onSelectSymbol, watchlist }) {
       <div className="analysis-search" onKeyDown={handleSearchKeys}>
       <form className="analysis-toolbar" onSubmit={startSearch} role="search" noValidate>
         <label className="sr-only" htmlFor="ticker">Ticker</label>
-        <div className="search-input">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="5.5" /><path d="m15 15 4 4" /></svg>
-          <input ref={tickerInput} id="ticker" placeholder="Ticker or company name" value={input} onChange={event => { setInput(event.target.value); setInputError(''); }} aria-invalid={Boolean(inputError)} aria-describedby={inputError ? 'ticker-error' : undefined} maxLength={40} required autoComplete="off" spellCheck="false" />
-          {input && <button className="clear-search" type="button" aria-label="Clear stock search" onClick={clearSearch}>×</button>}
-        </div>
+        <StockSearchInput inputRef={tickerInput} value={input} invalid={inputError}
+          onChange={value => { setInput(value); setInputError(''); }} onClear={clearSearch} onSelect={openStock} />
         <button type="submit">Search</button>
       </form>
       {inputError && <p id="ticker-error" role="alert" className="validation-error">{inputError}</p>}

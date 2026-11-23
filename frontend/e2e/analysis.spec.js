@@ -169,10 +169,95 @@ test('Escape dismisses a pending search and Clear keeps the current chart', asyn
   await expect(latest(page)).toBeVisible();
 });
 
-test('hover previews a session, clicking pins it, and keyboard inspection clears cleanly', async ({ page }) => {
-  const history = page.waitForResponse('**/prices?range=3mo');
+test('autocomplete debounces edits, prioritizes prefixes, and caps the list at eight', async ({ page }) => {
   await page.goto('/');
-  const { bars } = await (await history).json();
+  await expect(latest(page)).toBeVisible();
+  await page.clock.install({ time: new Date('2026-11-22T15:00:00Z') });
+  await page.clock.pauseAt(new Date('2026-11-22T15:00:01Z'));
+  const input = page.getByRole('combobox', { name: 'Ticker' });
+  await input.fill('MS');
+  await page.clock.runFor(150);
+  await input.fill('A');
+  await page.clock.runFor(199);
+  await expect(input).toHaveAttribute('aria-expanded', 'false');
+  await page.clock.runFor(1);
+  const list = page.getByRole('listbox', { name: 'Stock suggestions' });
+  await expect(list.getByRole('option')).toHaveCount(8);
+  await expect(list.getByRole('option').first()).toContainText('AAPL');
+  await expect(list.getByRole('option', { name: /MSFT/ })).toHaveCount(0);
+  await expect(input).toHaveAttribute('aria-autocomplete', 'list');
+  await expect(input).toHaveAttribute('aria-controls', await list.getAttribute('id'));
+});
+
+test('typed company names and light typos suggest the stock for keyboard selection', async ({ page }) => {
+  await page.goto('/');
+  const input = page.getByRole('combobox', { name: 'Ticker' });
+  const list = page.getByRole('listbox', { name: 'Stock suggestions' });
+  await input.fill('a');
+  const options = list.getByRole('option');
+  await expect(options).toHaveCount(8);
+  await input.press('ArrowDown');
+  await expect(options.first()).toHaveAttribute('aria-selected', 'true');
+  await input.press('ArrowDown');
+  await expect(options.nth(1)).toHaveAttribute('aria-selected', 'true');
+  await input.press('ArrowUp');
+  await expect(input).toHaveAttribute('aria-activedescendant', await options.first().getAttribute('id'));
+  await expect(input).toBeFocused();
+
+  await input.fill('aPLe');
+  await expect(options.first()).toHaveText('AAPLApple Inc.');
+  await input.press('ArrowDown');
+  await expect(options.first()).toHaveAttribute('aria-selected', 'true');
+  const prices = page.waitForResponse('**/api/stocks/AAPL/prices?*');
+  await input.press('Enter');
+  expect((await prices).status()).toBe(200);
+  await expect(input).toHaveValue('AAPL');
+  await expect(input).toHaveAttribute('aria-expanded', 'false');
+  await expect(list).toBeHidden();
+  await expect(page).toHaveURL(/#\/analysis\?symbol=AAPL$/);
+  await expect(latest(page)).toBeVisible();
+});
+
+test('Escape and outside clicks dismiss suggestions and empty matches are non-selectable', async ({ page }) => {
+  await page.goto('/');
+  const input = page.getByRole('combobox', { name: 'Ticker' });
+  const list = page.getByRole('listbox', { name: 'Stock suggestions' });
+  await input.fill('zzzz-not-a-stock');
+  await expect(list.getByRole('option', { name: 'No matches' })).toHaveAttribute('aria-disabled', 'true');
+  await input.press('ArrowDown');
+  await expect(input).not.toHaveAttribute('aria-activedescendant');
+  await input.press('Escape');
+  await expect(input).toBeFocused();
+  await expect(input).toHaveValue('zzzz-not-a-stock');
+  await expect(list).toBeHidden();
+  await input.fill('MICROsoft');
+  await expect(list.getByRole('option', { name: /MSFT Microsoft/ })).toBeVisible();
+  await page.getByRole('heading', { name: 'Stock analysis' }).click();
+  await expect(list).toBeHidden();
+});
+
+test.describe('touch autocomplete', () => {
+  test.use({ hasTouch: true, viewport: { width: 320, height: 720 } });
+
+  test('tapping a suggestion fills the field and loads its symbol', async ({ page }) => {
+    await page.goto('/');
+    await expect(latest(page)).toBeVisible();
+    const input = page.getByRole('combobox', { name: 'Ticker' });
+    await input.fill('apple');
+    const option = page.getByRole('option', { name: /AAPL Apple Inc/ });
+    const response = page.waitForResponse('**/api/stocks/AAPL/prices?*');
+    await option.tap();
+    expect((await response).status()).toBe(200);
+    await expect(input).toHaveValue('AAPL');
+    await expect(page.getByRole('listbox', { name: 'Stock suggestions' })).toBeHidden();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
+  });
+});
+
+test('hover previews a session, clicking pins it, and keyboard inspection clears cleanly', async ({ page, request }) => {
+  const response = await request.get('/api/stocks/AAPL/prices?range=3mo');
+  const { bars } = await response.json();
+  await page.goto('/');
   const plot = page.locator('.plot-inspection-target');
   const readout = page.locator('.inspection-readout');
   await plot.hover({ position: { x: 1, y: 20 } });
@@ -216,10 +301,10 @@ test.describe('touch chart', () => {
   });
 });
 
-test('replay reveals one session at a time across the chart, indicators, table, and CSV', async ({ page }) => {
-  const history = page.waitForResponse('**/prices?range=3mo');
+test('replay reveals one session at a time across the chart, indicators, table, and CSV', async ({ page, request }) => {
+  const response = await request.get('/api/stocks/AAPL/prices?range=3mo');
+  const { bars } = await response.json();
   await page.goto('/');
-  const { bars } = await (await history).json();
   const start = bars.length - 3;
   const startDate = bars[start].date;
   const nextDate = bars[start + 1].date;

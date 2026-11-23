@@ -2,7 +2,7 @@ import { useLayoutEffect, useRef } from 'react';
 import { animate, motion, useMotionValue, useTransform } from 'framer-motion';
 
 const edgeMotion = { type: 'tween', duration: 0.3, ease: 'easeOut' };
-const trailingDelay = 0.08;
+const trailingDelay = 0.03;
 
 export default function SidebarHighlight({ activeIndex, itemHeight, itemGap, reduceMotion }) {
   const targetTop = activeIndex * (itemHeight + itemGap);

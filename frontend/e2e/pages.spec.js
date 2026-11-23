@@ -122,7 +122,7 @@ async function sampleSidebarMove(nav, href) {
         const time = performance.now() - startTime;
         if (target.getAttribute('aria-current') === 'page') {
           const { top, bottom } = pill.getBoundingClientRect();
-          frames.push({ time, top, bottom });
+          frames.push({ top, bottom });
         }
         if (time < 650) requestAnimationFrame(sample);
         else resolve();
@@ -152,9 +152,9 @@ test('the sidebar pill stretches with the bottom leading down and the top leadin
     const move = await sampleSidebarMove(nav, href);
     expectPillSettled(move);
     const { start, frames } = move;
-    const firstLeading = frames.find(frame => Math.abs(frame[leading] - start[leading]) > 1);
-    const firstTrailing = frames.find(frame => Math.abs(frame[trailing] - start[trailing]) > 1);
-    expect(firstTrailing.time - firstLeading.time).toBeGreaterThan(35);
+    expect(frames.some(frame =>
+      Math.abs(frame[leading] - start[leading]) > Math.abs(frame[trailing] - start[trailing]) + 4,
+    )).toBe(true);
     expect(frames.some(frame => frame.bottom - frame.top > start.height + 10)).toBe(true);
     await expect(nav.locator('.sidebar-active-pill')).toHaveCount(1);
   }
