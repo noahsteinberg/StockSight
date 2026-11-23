@@ -2,9 +2,8 @@
 
 `GET /api/stocks/{symbol}/indicators?range=3mo` is public and reads the same
 canonical stored daily series as `/prices`. It performs no provider downloads,
-imports, training or database writes. Fixture mode remains explicit. No schema
-migration is needed. The later frontend redesign now consumes this endpoint;
-see [FRONTEND_REDESIGN.md](FRONTEND_REDESIGN.md).
+imports, training or database writes. Fixture mode remains explicit. The frontend consumes this endpoint through SMA20/RSI14 toggles.
+See [application architecture](ARCHITECTURE.md).
 
 ## Contract
 
@@ -76,7 +75,7 @@ corrections or replacement imports can also change results. Consumers must retai
 the methodology and calculation start when reproducing outputs. A future ML
 pipeline must share these conventions or version its alternative explicitly.
 
-## Verification and next phase
+## Verification
 
 `backend/tests/test_indicators.py` covers hand-derived mixed RSI seed/recursive
 values, exact SMA values, rising/falling/flat/short input, gaps, no future leakage,
@@ -86,9 +85,7 @@ run on SQLite and opt-in disposable PostgreSQL using the existing test fixture.
 
 The later frontend phase implements SMA/RSI rendering, toggles, units,
 insufficient-history states and browser acceptance, including real fixture API
-and imported PostgreSQL browser checks. See FRONTEND_REDESIGN.md for scope.
-ML, persisted forecasts/outcomes and model
-evaluation remain outstanding MVP work. Team ownership in ROADMAP.md is unchanged.
+and imported PostgreSQL browser checks. See [local verification](LOCAL_START.md#verification).
 
 Local verification on November 16, 2026: the full backend suite passed with 95
 tests and one expected SQLite invocation skipped for a PostgreSQL-only concurrency

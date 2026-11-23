@@ -12,9 +12,8 @@ own terminal before restarting it. The website is on port 5173; port 8000 is the
 API. A 404 for the API's `/` or favicon is expected.
 
 For the account/watchlist integration, configure Auth0 as described in
-[the handoff](AUTH0_WATCHLIST_HANDOFF.md). The historical chart remains available
-without Auth0. Migrate the normal database to head `0005_backend_only_access`.
-See SESSION_HANDOFF.md for session/origin settings and current verification.
+[Accounts, sessions and watchlists](ACCOUNTS.md). The historical chart remains
+available without Auth0. Migrate the database to the current Alembic head.
 
 ## Explicit demo without PostgreSQL
 
@@ -46,7 +45,7 @@ Start Docker Desktop, then from the repository root:
 ```powershell
 cd backend
 .\.venv\Scripts\python.exe -m app.environment_check --require-docker
-# Stop on access denial; use the supported approval path (ENVIRONMENT_ACCESS.md).
+# Stop on access denial; use the supported approval path.
 cd ..
 docker compose up -d --wait
 cd backend
@@ -91,3 +90,45 @@ schema, imports data, drops tables, switches storage modes, or prints raw errors
 Startup complete and `/api/health` prove process health only. `/api/ready` now
 checks mapped market/account/session schema and requires usable joined history in database mode.
 Database failure never silently falls back to demo data.
+
+## Execution access
+
+Run the environment check from the backend before starting listeners, using
+Docker or testing live services. If it reports permission denied, compare the
+same check in a normal developer terminal or use the runner's approval path.
+A denied Docker pipe, socket or loopback request establishes an execution limit.
+A listener that is not running or a database that rejects credentials needs its
+own diagnosis. The check avoids printing secrets and does not modify storage.
+
+## Verification
+
+From the backend, after the environment check:
+
+```powershell
+.\.venv\Scripts\python.exe -m ruff check .
+.\.venv\Scripts\python.exe -m ruff format --check .
+.\.venv\Scripts\python.exe -m pytest -q --basetemp=.pytest_cache/verification-001
+```
+
+Use a fresh basetemp suffix per run. Set STOCKSIGHT_TEST_DATABASE_URL only to a
+disposable PostgreSQL database ending in _test. These tests can reset schemas.
+
+From the frontend, install Chromium once with npm exec playwright install chromium:
+
+```powershell
+npm run lint
+npm run build
+npm run test:e2e
+npm run test:e2e:accounts
+```
+
+The public suite starts its own services on 5174/8101 and uses the explicit
+fixture by default. STOCKSIGHT_E2E_DATABASE_URL can point to a separate migrated,
+fixture-seeded test database. The account suite uses ports 5175/5176/8102 and
+disposable SQLite by default. STOCKSIGHT_E2E_ACCOUNTS_DATABASE_URL may point to
+a separate disposable PostgreSQL _test database. Run suites sequentially when
+they share a test database. STOCKSIGHT_PYTHON can override the venv interpreter.
+
+Keep credentials and local output outside Git. The account suite disables capture
+by default. Local browser checks use signed test identities and do not establish
+live Auth0 or hosted PostgreSQL acceptance.

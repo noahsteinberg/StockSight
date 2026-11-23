@@ -1,7 +1,7 @@
 # StockSight Universal Login
 
 **Current implementation:** the app now renders its own functional login/signup
-and recovery forms. See [embedded login setup](../docs/EMBEDDED_LOGIN.md).
+and recovery forms. See [account setup](../docs/ACCOUNTS.md).
 The files in this directory preserve the earlier hosted-template design and its
 disabled standalone preview; uploading them is not required for the local forms.
 
@@ -10,7 +10,6 @@ stock chart. System typography, a quiet border, 22px corners, 36px preview paddi
 filled inputs, and a restrained blue action keep the form in focus. The chart
 background is static; there is no animation control or background JavaScript.
 The decorative chart is illustrative and does not display live prices.
-The checked-out `feature/frontend-redesign` branch still has the older app styling.
 
 `universal-login.html` is an Auth0 **New Universal Login Liquid page template**.
 It keeps the Auth0 widget intact for login, signup, password reset, MFA,

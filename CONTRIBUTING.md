@@ -5,20 +5,15 @@ Team: Noah Steinberg, Gavin Javier Pino, Parth Sachdev, and Vladislav Lagutin.
 ## Continuing the current foundation
 
 Read [AGENTS.md](AGENTS.md) and [CURRENT_HANDOFF.md](docs/CURRENT_HANDOFF.md) first.
-Inspect the actual branch and working tree before switching or pulling. The
-current foundation may include unpublished changes after `6131c5e`; main and the
-older frontend-redesign snapshot need not contain them. Preserve local work and
-coordinate transfer through normal review. Documentation work alone does not
-authorize publication. Keep indicator UI and the deferred redesign separate.
-Run the environment access check before Docker, servers or live integration tests;
-use only disposable `_test` databases for test commands that reset schemas.
+Inspect the actual branch and working tree before switching or pulling. Preserve unpublished work.
+Use disposable test databases as described in [local verification](docs/LOCAL_START.md#verification).
 
 ## Workflow
 
 1. Pull the latest `main`: `git switch main`, then `git pull --ff-only origin main`.
 2. Create a branch: `git switch -c feature/watchlists`.
 3. Make a focused change and update affected documentation.
-4. Run frontend `npm run lint` and `npm run build` in `frontend/`; run Ruff check, Ruff format check, and pytest in `backend/` as shown in the README.
+4. Run frontend `npm run lint` and `npm run build` in `frontend/`; run Ruff check, Ruff format check, and pytest in `backend/` as described in [local verification](docs/LOCAL_START.md#verification).
 5. Review `git diff` and `git status`; commit with a clear description.
 6. Push your branch: `git push -u origin feature/watchlists`.
 7. Open a pull request using the template.

@@ -7,13 +7,13 @@ The moving-average/RSI backend contract is in [INDICATORS.md](INDICATORS.md):
 `GET /api/stocks/{symbol}/indicators?range=3mo`. It returns dated SMA20 and Wilder
 RSI14 values, null warm-up values and explicit calculation-window metadata.
 The frontend consumes it through independent SMA20/RSI14 toggles and checks
-price/indicator snapshot alignment; see FRONTEND_REDESIGN.md.
+price/indicator snapshot alignment.
 
 Local base URL: `http://127.0.0.1:8000`.
 
 Private endpoints accept an Auth0 bearer token or the first-party app session.
 Session creation/restoration/logout, CSRF headers and lifetimes are documented in
-[SESSION_HANDOFF.md](SESSION_HANDOFF.md). The frontend uses the app cookie so a
+[the account guide](ACCOUNTS.md#session-api). The frontend uses the app cookie so a
 page refresh does not require another Auth0 prompt.
 
 ## GET /api/health
@@ -28,25 +28,34 @@ No authentication, parameters, database, or provider access. Returns HTTP 200 wi
 
 PowerShell: `Invoke-RestMethod http://127.0.0.1:8000/api/health`.
 
-FastAPI supplies `/docs`, `/redoc`, and `/openapi.json`. Auth0-protected current-user and watchlist endpoints are documented in [the account API contract](AUTH0_WATCHLIST_HANDOFF.md). Prediction and evaluation endpoints remain unimplemented. Stock endpoints are described below.
+FastAPI supplies `/docs`, `/redoc`, and `/openapi.json`. Auth0-protected current-user and watchlist endpoints are documented in [the account API contract](ACCOUNTS.md#watchlist-api). Prediction and evaluation endpoints remain unimplemented. Stock endpoints are described below.
 
-## Phase 1 historical API
+## Historical stock API
 
-GET /api/stocks?query=apple lists supported symbol/name matches. GET /api/stocks/AAPL/prices?range=3mo returns dated OHLCV bars and provenance. Ranges: 1mo (21 sessions), 3mo (63), 1y (252), all. Unknown symbol: 404; invalid range: 422. All ranges end at the latest bundled historical observation. See [Phase 1](PHASE_1.md) for the contract and data conventions.
+GET /api/stocks?query=apple lists supported symbol/name matches.
+GET /api/stocks/AAPL/prices?range=3mo returns dated OHLCV bars and provenance.
+Ranges are 1mo (21 stored sessions), 3mo (63), 1y (252) and all (up to 2,000).
+Session dates are calendar dates. The response includes symbol, name, source,
+source_url, mode, adjustment, as_of and ascending bars (date, open, high, low,
+close, volume). The bundled AAPL fixture uses historical unadjusted Plotly OHLCV displayed
+in USD. The [source license](../backend/app/fixtures/SOURCE_LICENSE) is tracked
+with the fixture.
+See [import policy](PRICES_IMPORT.md) for the separate team snapshot.
 
 ## Storage selection and readiness
 
 A nonempty STOCKSIGHT_DATABASE_URL selects database reads with the same history response. Missing/empty URL explicitly selects fixture mode. GET /api/ready checks storage/schema (200 or sanitized 503); /api/health remains liveness only. Stock routes return 503 DATA_UNAVAILABLE if database reads fail, without fixture fallback. Search is capped at 50 and all-history at the latest 2,000 daily bars.
 
 
-## Search/chart integration update (November 16, 2026)
+## Search and chart integration
 
-The analysis form calls `GET /api/stocks?query=...` with a ticker or company
+Submitting the Analysis search form calls `GET /api/stocks?query=...` with a ticker or company
 name. The response is an array of `{symbol, name}`
 objects, capped at 50 matches, with an exact ticker match ranked first and other
 matches ordered alphabetically. Select a result to request its price history;
 searching alone preserves the currently displayed chart. Empty matches and
-storage errors have separate visible states.
+storage errors have separate visible states. The local autocomplete suggestions
+are curated separately. A selected suggestion still loads history from the API.
 
 History now includes two required response fields:
 

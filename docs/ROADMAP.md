@@ -1,21 +1,14 @@
 # Proposed StockSight team roadmap
 
-Current implementation update (November 16, 2026): historical PostgreSQL charts,
-validated snapshot import, Auth0/private watchlists and persistent app sessions
-are implemented locally. SMA20/RSI14 backend is verified; indicator frontend
-integration remains incomplete, so M3 has not passed. ML/forecasts/outcomes and
-evaluation remain unimplemented. The frontend redesign is explicitly deferred;
-continue in separate phases. See [CURRENT_HANDOFF.md](CURRENT_HANDOFF.md) for current
-contracts, dated checks and checkout/publication limits. The ownership table and
-full MVP gates below remain unchanged; earlier baseline prose is historical.
+See the [current handoff](CURRENT_HANDOFF.md) for implementation, release and
+verification status. This roadmap defines team responsibilities and the full
+MVP's acceptance gates.
 
 Prepared October 29, 2026; revised November 15, 2026 against the submitted team proposal. Status: proposal for team agreement, not an approved schedule. Owners below follow the team proposal and may be reassigned by agreement. No GitHub issues are created by this document.
 
 ## 1. Outcome and current starting point
 
 The goal is a working application the four team members can start, explain, and demonstrate to the professor. The final demonstration should connect real user actions to API requests, persisted data, and reproducible analysis. A model that fails to beat a simple baseline is an acceptable research result; broken integration or unsupported accuracy claims are not.
-
-At the October 29 baseline, the repository contained an informational React/Vite page, a Python/FastAPI health endpoint, and lint/build/test configuration. The frontend redesign is local and not yet merged. At that baseline, stock data, persistence, authentication, charts, indicators, predictions, and evaluation remained to be implemented. Current milestone status must be recorded with a commit and verification evidence; this paragraph is not a live progress report. Do not confuse the removed repository's demo with current functionality.
 
 Keep React, FastAPI, PostgreSQL, and a separate offline Python ML pipeline. Use one frontend, one API, and one database. Add infrastructure only for a demonstrated requirement.
 
@@ -282,17 +275,3 @@ The next action is a team review of this proposal: confirm dates and grading con
 At each review, replace TBD references with issue numbers, test paths, and demo steps. Keep the submitted proposal unchanged. Record scope decisions with date, owner, rationale, affected submission commitment, and approval evidence. Removing signup, reducing the required indicator set, or dropping integrated predictions requires explicit scope agreement; fallback demonstrations do not automatically satisfy the full MVP.
 
 Revision log: November 15, 2026 — corrected optional registration, added dashboard and prediction workflow gates, proposed a final indicator minimum, and introduced scheduling/traceability approval checks. Actual calendar and capacity remain unresolved until the team supplies them.
-
-Phase 1 implementation update (November 15, 2026): the local implementation now provides fixture-backed AAPL analysis through FastAPI; see [Phase 1](PHASE_1.md) for scope and verification. This is not approval of the undated schedule or completion of later milestones.
-
-Phase 2 persistence foundation update (November 15, 2026): PostgreSQL schema/migrations, explicit fixture upsert, bounded database reads, readiness/failure behavior, and PostgreSQL integration/browser checks are implemented. See [database setup and evidence](DATABASE.md). This completes the initial persistence slice only; selecting a live provider, scheduled incremental ingestion, freshness policy, and broader symbol coverage remain M2 work. Gavin and Noah jointly own frontend/backend integration; other role assignments require team agreement.
-
-Account/watchlist foundation update (November 16, 2026): Auth0 React integration,
-validated access-token protection, private watchlist APIs/storage and the personal
-dashboard UI are implemented. PostgreSQL-backed automated integration checks pass.
-Real Auth0 signup/login/logout, first-party session restoration, saved-stock
-removal and two-real-user isolation now pass locally. Invalid/duplicate signup was
-rejected and recovery email delivery was confirmed. Hosted CI/team acceptance is
-still pending; this is not team-wide milestone approval. See
-[the session handoff](SESSION_HANDOFF.md).
-Existing ownership assignments remain unchanged. M3 and M5 remain outstanding.

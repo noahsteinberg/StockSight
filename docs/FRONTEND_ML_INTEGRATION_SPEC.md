@@ -2,7 +2,7 @@
 
 Prepared November 17, 2026 for the next implementing AI and team reviewers.
 Status: proposed implementation specification, not implemented ML functionality.
-Read NEXT_AGENT_HANDOFF.md first. ML research is paused at Noah's request.
+Read [the current handoff](CURRENT_HANDOFF.md) first. ML research is paused at Noah's request.
 
 ## 1. Product and current boundary
 
@@ -304,7 +304,7 @@ schema/RLS/ownership constraints, artifact/feature parity, idempotency and a fro
 prediction surviving outcome resolution. Label TestClient, live HTTP, database,
 browser and real Auth0 evidence separately. New screenshots contain no credentials.
 
-## 9. Handoff decisions that remain open
+## 9. Open decisions
 
 Exact signal schema/enums; model/target approval; public reliability language;
 ranking eligibility; data provider/hosted coverage; execution/publication timing;

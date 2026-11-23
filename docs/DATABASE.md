@@ -33,7 +33,7 @@ Gavin's local snapshot contains 2,947,701 bars in 494 canonical series. It was
 verified after a container restart; later account/session migrations preserved
 market counts and hashes. The latest indicator HTTP check preserved market and
 watchlist counts. These are dated local findings, not a guarantee of another
-checkout's database. See DATASET_HANDOFF.md and INDICATORS.md for evidence.
+checkout's database. See [import evidence](PRICES_IMPORT.md#source-file-audit) and [indicator checks](INDICATORS.md).
 
 **Do not run `app.seed` over the snapshot, delete Docker volumes, or reimport as
 routine troubleshooting.** The Plotly seed conflicts with the imported canonical
