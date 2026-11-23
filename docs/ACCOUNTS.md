@@ -10,7 +10,10 @@
   No StockSight password endpoint, password table or client secret is introduced.
 - Signup uses Auth0's public `/dbconnections/signup` endpoint so the existing
   flexible-identifier connection can continue accepting usernames without an email.
-  After account creation, the current flow directs the user to sign in.
+  After account creation, StockSight attempts password sign-in immediately.
+  If the provider requires another step or blocks embedded sign-in, the page
+  confirms account creation and offers regular sign-in or hosted Auth0. The
+  signup form is cleared and closed to avoid submitting the account again.
   The optional email can be used for recovery; Auth0 owns verification requirements.
 - Reset sends Auth0's recovery email. The confirmation does not identify whether
   an account exists. Accounts without recovery email may need administrator help.

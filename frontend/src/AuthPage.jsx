@@ -18,6 +18,7 @@ export default function AuthPage({ mode }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [created, setCreated] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const submitting = useRef(false);
   const mounted = useRef(false);
@@ -35,7 +36,7 @@ export default function AuthPage({ mode }) {
 
   async function submit(event) {
     event.preventDefault();
-    if (busy || unavailable || submitting.current) return;
+    if (busy || unavailable || created || submitting.current) return;
     submitting.current = true;
     setPending(true);
     setError('');
@@ -47,8 +48,14 @@ export default function AuthPage({ mode }) {
         await account.resetPassword(String(fields.get('email')).trim());
         if (mounted.current) setNotice('If an account has this recovery email, Auth0 will send a password reset link.');
       } else if (signup) {
-        await account.signup({ username: String(fields.get('username')).trim(), password: fields.get('password'), email: String(fields.get('email') || '').trim() });
-        if (mounted.current) setNotice('Account created. You can now log in. If Auth0 requires email verification, check your inbox.');
+        const username = String(fields.get('username')).trim();
+        const password = fields.get('password');
+        await account.signup({ username, password, email: String(fields.get('email') || '').trim() });
+        form.elements.password.value = '';
+        fields.delete('password');
+        if (!mounted.current) return;
+        setCreated(true);
+        await account.loginWithPassword(username, password);
       } else {
         await account.loginWithPassword(String(fields.get('username')).trim(), fields.get('password'));
       }
@@ -80,8 +87,11 @@ export default function AuthPage({ mode }) {
             {(error || account.error) &&
               <p className="auth-status auth-error" role="alert">{error || account.error}</p>
             }
-            {notice && <p className="auth-status" role="status">{notice} {signup && <a href="#/login">Log in</a>}</p>}
-            <form onSubmit={submit} aria-busy={Boolean(busy)}>
+            {notice && <p className="auth-status" role="status">{notice}</p>}
+            {created && <p className="auth-status" role="status">
+              {busy ? 'Account created. Signing you in…' : <>Account created. <a href="#/login">Log in</a> to continue.</>}
+            </p>}
+            {!created && <form onSubmit={submit} aria-busy={Boolean(busy)}>
               {!reset && <div className="auth-field">
                 <label htmlFor="username">Username</label>
                 <input id="username" name="username" autoComplete="username" autoCapitalize="none" spellCheck="false" required maxLength="128" placeholder="Your username" disabled={busy || unavailable}/>
@@ -99,13 +109,13 @@ export default function AuthPage({ mode }) {
               </div>}
               {!signup && !reset && <a className="auth-help" href="#/reset-password">Forgot password?</a>}
               <button className="primary" type="submit" disabled={busy || unavailable}>{busy ? 'Please wait…' : reset ? 'Send reset link' : signup ? 'Create account' : 'Continue'}</button>
-            </form>
-            {!reset && <>
+            </form>}
+            {!reset && !created && <>
               <p className="switch">{signup ? <>Already have an account? <a href="#/login">Log in</a></> : <>New to StockSight? <a href="#/signup">Create an account</a></>}</p>
               <div className="preview-divider">or</div>
               <button className="secondary" type="button" disabled={busy || unavailable} onClick={() => account.loginHosted('google')}><GoogleIcon/>Continue with Google</button>
             </>}
-            {!signup && !reset && !unavailable && <details className="auth-recovery" open={Boolean(error || account.error)}>
+            {(!signup || (created && !busy)) && !reset && !unavailable && <details className="auth-recovery" open={Boolean(error || account.error)}>
               <summary>Trouble signing in?</summary>
               <p>Use Auth0 if your browser blocks password sign-in or your account needs verification.</p>
               <button className="secondary" type="button" disabled={busy} onClick={() => account.loginHosted('password')}>Continue on Auth0</button>

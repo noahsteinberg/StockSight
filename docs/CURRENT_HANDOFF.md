@@ -4,10 +4,8 @@ Update this file when implementation, delivery state or acceptance changes.
 Use Git history for earlier checkpoints and the linked guides for setup and
 contracts.
 
-## Local frontend checkout
+## Frontend release
 
-- Branch: `feature/chart-inspection-replay`. Last application commit:
-  `77e1e04`. The UI changes on this branch are local.
 - Analysis has a full-width chart, a horizontal row of saved tickers, and a star
   beside the stock title. Watchlist chips use the latest two stored closes.
   The Dashboard retains the filterable watchlist table.
@@ -21,12 +19,13 @@ contracts.
   available. Historical replay limits the displayed data and CSV to the visible
   prefix while keeping the indicator calculation anchored to the API snapshot.
 - The last local preview used the explicit AAPL fixture on port 5173. The tested
-  widths were 1440 px and 320 px. The latest application change passed lint,
-  build, 95 backend tests, 40 public browser cases and 22 isolated account cases.
-  Two PostgreSQL-only backend cases were skipped.
-- Signup currently sends the user to sign-in after successful creation. Automatic
-  sign-in after signup is on local branch `feature/signup-auto-login` at `d18cf4b`.
-  It has not been integrated into this branch or released.
+  widths were 1440 px and 320 px. The combined frontend and signup changes
+  passed lint, build, 40 public browser cases and 24 isolated account cases.
+  The watchlist increment previously passed 95 backend tests, with two
+  PostgreSQL-only cases skipped.
+- Signup attempts to sign the user in immediately after account creation.
+  If the provider blocks that step, the account stays created and the page
+  offers regular sign-in and the hosted Auth0 fallback.
 
 ## Last observed hosted state
 
