@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { motion } from 'framer-motion';
 import Analysis from './Analysis.jsx';
 import AuthPage from './AuthPage.jsx';
 import AccountControls from './AccountControls.jsx';
@@ -16,6 +17,13 @@ const pages = [
   ['methodology', 'Methodology', 'M6 4h9l3 3v13H6zM14 4v4h4M9 12h6m-6 4h6'],
 ];
 const selectedSymbolKey = 'stocksight:selected-symbol';
+const sidebarSpring = { type: 'spring', stiffness: 400, damping: 35 };
+const reducedMotionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+function subscribeToMotionPreference(listener) {
+  reducedMotionPreference.addEventListener('change', listener);
+  return () => reducedMotionPreference.removeEventListener('change', listener);
+}
 
 function getSavedSymbol() {
   try { return sessionStorage.getItem(selectedSymbolKey); }
@@ -24,6 +32,7 @@ function getSavedSymbol() {
 
 export default function App() {
   const route = usePageRoute();
+  const reduceMotion = useSyncExternalStore(subscribeToMotionPreference, () => reducedMotionPreference.matches);
   const main = useRef(null);
   const navigation = useRef(null);
   const menuButton = useRef(null);
@@ -96,24 +105,26 @@ export default function App() {
         <AccountControls />
       </div>
     </header>
-    <nav id="site-navigation" ref={navigation} className="site-sidebar" aria-label="Main navigation" data-open={menuOpen}
+    <motion.nav layoutRoot layoutScroll id="site-navigation" ref={navigation} className="site-sidebar" aria-label="Main navigation" data-open={menuOpen}
       onBlur={event => {
         if (menuOpen && !event.currentTarget.contains(event.relatedTarget) && event.relatedTarget !== menuButton.current) setMenuOpen(false);
       }}>
       {pages.map(([page, label, icon]) => {
+        const active = route.page === page;
         const href = `#/${page}${page === 'analysis' || page === 'predictions' ? `?symbol=${encodeURIComponent(symbol)}` : ''}`;
-        return <a key={page} href={href} aria-label={label} aria-current={route.page === page ? 'page' : undefined} onClick={() => {
+        return <a key={page} href={href} aria-label={label} aria-current={active ? 'page' : undefined} onClick={() => {
           rememberStock(symbol);
           if (menuOpen) {
             setMenuOpen(false);
             if (href === route.hash) main.current?.focus({ preventScroll: true });
           }
         }}>
+          {active && <motion.div className="sidebar-active-pill" layoutId={reduceMotion ? undefined : 'sidebar-active-pill'} transition={sidebarSpring} aria-hidden="true" />}
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon} /></svg>
           <span aria-hidden="true">{label}</span>
         </a>;
       })}
-    </nav>
+    </motion.nav>
     <div className="app-content">
     <main ref={main} id="main" className="wrap" tabIndex="-1">
       {account.error && <div role="alert" className="account-error">{account.error}</div>}

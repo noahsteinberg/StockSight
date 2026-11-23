@@ -108,6 +108,47 @@ test('the desktop rail expands from icons, resizes the content, and stays fixed 
   await expect(label).toHaveCSS('opacity', '1');
 });
 
+for (const preference of ['no-preference', 'reduce']) {
+  test(`the sidebar highlight follows the active link with reduced motion set to ${preference}`, async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.goto('/#/analysis?symbol=AAPL');
+    const nav = page.getByRole('navigation', { name: 'Main navigation' });
+    await expect(nav.getByRole('link', { name: 'Analysis', exact: true }).locator('.sidebar-active-pill')).toBeVisible();
+    await page.emulateMedia({ reducedMotion: preference });
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+
+    const { start, end, frames } = await nav.evaluate(async element => {
+      const from = element.querySelector('.sidebar-active-pill');
+      const target = element.querySelector('a[href="#/methodology"]');
+      const start = from.getBoundingClientRect().top;
+      const end = target.getBoundingClientRect().top;
+      const frames = [];
+      const deadline = performance.now() + 800;
+      window.location.hash = target.hash;
+      await new Promise(resolve => {
+        function sample() {
+          const pill = target.querySelector('.sidebar-active-pill');
+          if (pill) frames.push(pill.getBoundingClientRect().top);
+          if (performance.now() < deadline) requestAnimationFrame(sample);
+          else resolve();
+        }
+        requestAnimationFrame(sample);
+      });
+      return { start, end, frames };
+    });
+
+    await expect(nav.getByRole('link', { name: 'Methodology', exact: true })).toHaveAttribute('aria-current', 'page');
+    await expect(nav.locator('.sidebar-active-pill')).toHaveCount(1);
+    expect(frames.length).toBeGreaterThan(0);
+    expect(Math.abs(frames.at(-1) - end)).toBeLessThan(1);
+    if (preference === 'reduce') {
+      expect(frames.every(y => Math.abs(y - end) < 1)).toBe(true);
+    } else {
+      expect(frames.some(y => y > start + 1 && y < end - 1)).toBe(true);
+    }
+  });
+}
+
 test('the mobile hamburger reveals the current page, supports Escape, and closes on navigation', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
   await page.goto('/#/methodology');

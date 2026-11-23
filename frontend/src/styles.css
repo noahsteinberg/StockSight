@@ -48,11 +48,15 @@ input { min-width: 0; }
 .account-name { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .menu-toggle { display: none; }
 .site-sidebar { position: fixed; z-index: 9; inset-block: var(--masthead-height) 0; inset-inline-start: 0; width: var(--rail-size); padding: 16px 9px; overflow: hidden auto; background: var(--surface); border-inline-end: 1px solid var(--line); transition: width .18s ease-out; }
-.site-sidebar a { display: flex; align-items: center; gap: 12px; min-height: 48px; margin-bottom: 5px; padding-inline: 13px; border-radius: 7px; color: #43526a; text-decoration: none; font-size: 14px; font-weight: 500; white-space: nowrap; }
+.site-sidebar a { position: relative; display: flex; align-items: center; gap: 12px; min-height: 48px; margin-bottom: 5px; padding-inline: 13px; border-radius: 7px; color: #43526a; text-decoration: none; font-size: 14px; font-weight: 500; white-space: nowrap; transition: color .16s, font-weight .16s; }
 .site-sidebar a:hover, .site-sidebar a:focus-visible { color: var(--navy); background: #f0f4fa; }
 .site-sidebar a:focus-visible { outline-offset: -3px; }
-.site-sidebar a[aria-current=page] { color: #164f91; background: #eaf1fb; box-shadow: inset 3px 0 #2467ad; font-weight: 600; }
+.site-sidebar a[aria-current=page] { color: #164f91; font-weight: 600; }
+.sidebar-active-pill { position: absolute; inset: 0; z-index: 0; border-radius: inherit; border-inline-start: 3px solid #2467ad; background: #eaf1fb; pointer-events: none; }
+.site-sidebar a > svg, .site-sidebar a > span { position: relative; z-index: 10; }
 .site-sidebar svg, .menu-toggle svg { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.site-sidebar a > svg { transition: stroke-width .16s; }
+.site-sidebar a[aria-current=page] > svg { stroke-width: 2; }
 .site-sidebar a span { opacity: 0; transition: opacity .12s; }
 .app-content { padding-inline-start: var(--rail-size); transition: padding-inline-start .18s ease-out; }
 .app-content > .wrap { width: auto; margin-inline: clamp(16px, 3vw, 48px); }
