@@ -2,22 +2,17 @@
 
 ## Start here
 
-Read this file, [current continuation handoff](docs/CURRENT_HANDOFF.md),
-[local startup](docs/LOCAL_START.md), [API](docs/API.md), and
-[architecture](docs/ARCHITECTURE.md) before implementation. Read the relevant
-specialist contract: [indicators](docs/INDICATORS.md),
-[sessions](docs/SESSION_HANDOFF.md), [accounts](docs/AUTH0_WATCHLIST_HANDOFF.md),
-or [imports](docs/PRICES_IMPORT.md). Use [TODO.md](TODO.md) for incremental work
-and [ROADMAP.md](docs/ROADMAP.md) for the complete MVP gates and team ownership.
+Read [the current handoff](docs/CURRENT_HANDOFF.md), [local startup](docs/LOCAL_START.md),
+[API](docs/API.md) and [architecture](docs/ARCHITECTURE.md). Use the specialist
+guides for [indicators](docs/INDICATORS.md), [accounts](docs/ACCOUNTS.md) and
+[imports](docs/PRICES_IMPORT.md). [ROADMAP.md](docs/ROADMAP.md) holds team
+ownership and MVP gates.
 
-This is the canonical agent instruction file (`AGENTS.md`, not `agent.md`).
-Current baseline: November 16, 2026. Read the checkout's `git status` and branch;
-do not assume Gavin's uncommitted work, ignored configuration or local database
-is present in another conversation or checkout. The current working branch is
-`feature/auth0-watchlists`; indicator work and this documentation update follow
-commit `6131c5e` and are delivered with this handoff in a local commit. Inspect
-Git history for the actual current head. No push, merge or hosted CI success is
-claimed. This worktree is the preferred continuation location.
+Use docs/CURRENT_HANDOFF.md as the sole continuation handoff. Update it with
+current work, delivery state and evidence. Keep durable procedures and contracts
+in their guides. Inspect the actual branch and working tree before making
+changes. Ignored configuration, local data and unpublished commits vary by
+checkout.
 
 Gavin's standing preference: commit completed changes after appropriate
 verification at the end of each task. Include intended source/docs changes, keep
@@ -40,25 +35,18 @@ requires instruction.
 - SMA20/Wilder RSI14 backend API and frontend toggles/plots are implemented and
   locally verified. See INDICATORS.md for null
   warm-up values, fixed calculation history and versioned numerical conventions.
-- ML training/inference, stored forecasts/outcomes, evaluation, incremental
-  provider refresh and production deployment remain unfinished. Do not add fake
+- Product ML inference, stored forecasts/outcomes, evaluation and incremental
+  provider refresh remain unfinished. Do not add fake
   scores, prices, forecasts or claims that the full MVP is complete.
 
-Gavin subsequently authorized a UConn-inspired frontend redesign and existing
-indicator integration. That phase is implemented; see docs/FRONTEND_REDESIGN.md
-for reference research, changes and dated verification. Keep subsequent phases
-digestible and follow the current request. ML remains for Vlad per Gavin's direction.
-The following app-view phase adds hash navigation, a full private dashboard,
-methodology and explicit unavailable prediction/performance views. Read
-docs/APP_VIEWS.md before wiring ML; no prediction/evaluation APIs exist yet.
-Preserve the team ownership table in ROADMAP.md; it is coordination, not a ban
-on implementing across layers. Follow the current user's task scope.
+Read the [application view contracts](docs/ARCHITECTURE.md) before wiring ML.
+Preserve team ownership in ROADMAP.md and follow the current task scope.
 
 ## Execution and data safety
 
 Before Docker commands, development-server startup or live HTTP/database tests,
 run backend's virtual-environment Python with `-m app.environment_check` from
-backend. This is a read-only execution-access check; see docs/ENVIRONMENT_ACCESS.md.
+backend. This is a read-only execution-access check; see docs/LOCAL_START.md.
 
 Distinguish permission_denied from not_running/not_listening. If access is denied,
 do not repeatedly restart servers or scan/import the dataset to troubleshoot it.
@@ -99,4 +87,4 @@ themselves. Test identity routes/SDK aliases must remain test-only.
 - Before finishing, run checks relevant to changed behavior and update the handoff.
   Distinguish numerical/unit, TestClient, live HTTP, browser, PostgreSQL and hosted
   Auth0 evidence. Old test counts are dated evidence, not a new verification run.
-  Exact commands, test ports and acceptance steps are in CURRENT_HANDOFF.md.
+  Verification commands and test ports are in LOCAL_START.md.

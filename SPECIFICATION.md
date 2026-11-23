@@ -6,14 +6,11 @@ Build an educational full-stack stock analysis and prediction platform for stude
 
 ## Current deliverable
 
-The current implementation provides PostgreSQL-backed historical search/charts,
-repeatable snapshot import, and an Auth0/private-watchlist integration foundation.
-Real hosted sign-in, persistent sessions, username signup with optional recovery
-email and two-user private watchlists are locally verified. SMA20/Wilder RSI14
-are implemented in the backend; indicator frontend integration is next when
-assigned. The redesign is explicitly deferred. Inference, prediction history and
-evaluation remain unimplemented. Read [the current handoff](docs/CURRENT_HANDOFF.md)
-and [indicator contract](docs/INDICATORS.md) for the working boundary and evidence.
+The current app supports PostgreSQL-backed historical search and charts,
+repeatable snapshot imports, SMA20 and Wilder RSI14, chart inspection and
+replay, Auth0 accounts, restored sessions and private watchlists. Inference,
+prediction history and evaluation remain planned. See the
+[current handoff](docs/CURRENT_HANDOFF.md) for delivery and verification status.
 
 ## Planned MVP
 
@@ -44,10 +41,10 @@ The original Phase 0 was a scaffold; its exclusions are not the current implemen
 
 - Provider usage rights, reproducible cleaning, adjustments/calendar and incremental refresh
 - Production password-reset acceptance and provider-driven session revocation (Auth0 and app sessions are implemented)
-- Hosting choice and operational recovery (SQLAlchemy/Alembic schema is implemented through 0004)
+- Operational recovery and backup policy for the Vercel and Supabase deployment
 - Exact prediction definition: close-to-close or another horizon, cutoff time, timezone, neutral/unchanged prices, and adjusted-price policy
 - Baseline, model comparison metrics, probability calibration, and retraining cadence
 - Prediction-history visibility and data retention
 - Deployment services, budget, and demo acceptance criteria
 
-Candidate models include Logistic Regression and Random Forest; neither is selected or implemented.
+See [ML research](ml/README.md) for experiment results and promotion criteria.

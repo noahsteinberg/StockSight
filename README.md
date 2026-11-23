@@ -3,24 +3,20 @@
 A University of Connecticut CSE 4095 team project for historical stock analysis
 and measurable machine-learning predictions. Educational use, not financial advice.
 
-**Current foundation (November 16, 2026):** PostgreSQL-backed search/charts,
-Auth0 signup/login, persistent app sessions, private watchlists and a tested
-SMA20/RSI14 backend API. The frontend does not display indicators yet. ML,
-forecasts/outcomes, evaluation and incremental provider refresh are unfinished.
-The frontend redesign is deferred so work can proceed in separate phases.
+StockSight supports historical stock search and charts, SMA20/RSI14, chart
+inspection and replay, Auth0 accounts, and private watchlists. Predictions,
+model evaluation and incremental market-data refresh remain future work.
 
-**Start here:** [AGENTS.md](AGENTS.md), [current continuation handoff](docs/CURRENT_HANDOFF.md),
-[local startup](docs/LOCAL_START.md), [API](docs/API.md) and
-[architecture](docs/ARCHITECTURE.md). The handoff records the branch/working-tree
-boundary, exact contracts, verification limits and proposed next increment.
-No publication, hosted CI success or complete MVP is implied by local checks.
+Start with the [current handoff](docs/CURRENT_HANDOFF.md) for the latest checkout,
+release and verification status. Use [local startup](docs/LOCAL_START.md) to run
+the app.
 
 ## Stack and source map
 
 React/Vite JavaScript, plain CSS and native SVG communicate with FastAPI through
 same-origin `/api`. PostgreSQL uses SQLAlchemy/Alembic. Auth0 owns credentials;
 opaque HttpOnly server sessions restore login after refresh. Training will run
-offline, separately from inference. No chart library, router or ML stack is installed.
+offline, separately from inference. The chart uses native SVG and navigation uses URL fragments.
 
 | Directory | Contents |
 | --- | --- |
@@ -29,8 +25,8 @@ offline, separately from inference. No chart library, router or ML stack is inst
 | `backend/app` | API, authentication/sessions, repositories, indicators and imports |
 | `backend/migrations` | Schema/access controls through `0005_backend_only_access` |
 | `backend/tests` | Numerical, HTTP-contract, migration, persistence and security tests |
-| `docs` | Current handoffs, contracts, setup and dated reviews |
-| `ml` | Planned feature/training/evaluation pipeline; no model implemented |
+| `docs` | Current handoff, contracts, setup and product plans |
+| `ml` | Offline research evidence and evaluation protocols |
 
 ## Install and start
 
@@ -48,7 +44,7 @@ python -m venv .venv
 Use the venv interpreter directly; activation is optional. On macOS/Linux use
 `.venv/bin/python`. Before Docker or PostgreSQL verification add `--require-docker`
 to the check. An access denial requires the runner's supported approval path,
-not repeated restarts or reimports; see [execution access](docs/ENVIRONMENT_ACCESS.md).
+as described in [execution access](docs/LOCAL_START.md#execution-access).
 
 For a deliberate database-free historical demo, from backend:
 
@@ -78,39 +74,21 @@ Root `.env` configures Compose; `backend/.env` configures FastAPI;
 a new setup and keep real values ignored. Vite `VITE_*` values are public and
 must contain no secrets. Auth0 setup needs no client secret.
 
-Use [the current handoff](docs/CURRENT_HANDOFF.md#verification-to-preserve) for exact
-backend/browser commands, disposable database variables, test ports and evidence.
-Latest backend phase: 95 passed, one expected skip, Ruff passed; live imported-data
-HTTP indicator checks passed. Prior session phase: 11 chart and 9 account browser
-tests plus frontend lint/build passed. These are dated local results. CI definitions
-provision PostgreSQL and run backend and browser checks; hosted CI still needs a
-verified run on the published head.
+Run the documented [lint, build, backend and browser checks](docs/LOCAL_START.md#verification).
+Use a disposable database for tests that migrate or reset schemas.
 
 ## Collaboration and scope
 
 Team: Noah Steinberg, Gavin Javier Pino, Parth Sachdev, Vladislav Lagutin.
-See [CONTRIBUTING.md](CONTRIBUTING.md) for review workflow, [TODO.md](TODO.md)
-for incremental status, [SPECIFICATION.md](SPECIFICATION.md) for scope, and
-[ROADMAP.md](docs/ROADMAP.md) for unchanged ownership and complete MVP gates.
-Noah extends the working foundation; indicator UI is the proposed next phase,
-with redesign separate and deferred. Never show fabricated predictions or call
-the full MVP finished while ML, persistence/outcomes and evaluation remain absent.
+See [contributing](CONTRIBUTING.md) for review workflow,
+[specification](SPECIFICATION.md) for scope and [roadmap](docs/ROADMAP.md)
+for team responsibilities and MVP gates.
 
-## Documentation map
+## Documentation
 
-- **[November 17 next-AI handoff](docs/NEXT_AGENT_HANDOFF.md)** — current continuation and stop state
-- [Detailed frontend/ML integration specification](docs/FRONTEND_ML_INTEGRATION_SPEC.md)
-- [ML integration architecture](docs/ML_PRODUCT_INTEGRATION_PLAN.md)
-- [Paused ML research handoff](ml/docs/RESEARCH_STATUS_HANDOFF.md)
-- [Six next-step issue drafts](docs/handoff-issues/README.md)
-
-- [Supabase setup](docs/SUPABASE.md) and [Yahoo Finance investigation](docs/YAHOO_FINANCE.md)
-- [Current handoff](docs/CURRENT_HANDOFF.md) and [startup](docs/LOCAL_START.md)
-- [API](docs/API.md), [indicator conventions](docs/INDICATORS.md), [architecture](docs/ARCHITECTURE.md)
-- [Auth0/watchlists](docs/AUTH0_WATCHLIST_HANDOFF.md) and [sessions](docs/SESSION_HANDOFF.md)
-- [Database](docs/DATABASE.md), [dataset evidence](docs/DATASET_HANDOFF.md), [import policy](docs/PRICES_IMPORT.md)
-- [Security](docs/SECURITY.md), [deployment](docs/DEPLOYMENT.md), [ML plan](ml/README.md)
-- [Frontend/backend acceptance guide](docs/FRONTEND_BACKEND_REVIEW.md)
-
-Dated review reports and Phase 1 notes describe their historical scope. Current
-contracts and startup instructions supersede old limitations and commands.
+- [Current handoff](docs/CURRENT_HANDOFF.md) and [local startup](docs/LOCAL_START.md)
+- [Architecture and navigation](docs/ARCHITECTURE.md), [API](docs/API.md) and [indicators](docs/INDICATORS.md)
+- [Auth0 accounts, sessions and watchlists](docs/ACCOUNTS.md) and [security](docs/SECURITY.md)
+- [Database](docs/DATABASE.md), [historical imports](docs/PRICES_IMPORT.md) and [provider research](docs/YAHOO_FINANCE.md)
+- [Vercel deployment](docs/VERCEL.md) and [Supabase setup](docs/SUPABASE.md)
+- [ML research](ml/README.md), [frontend integration spec](docs/FRONTEND_ML_INTEGRATION_SPEC.md) and [product integration plan](docs/ML_PRODUCT_INTEGRATION_PLAN.md)

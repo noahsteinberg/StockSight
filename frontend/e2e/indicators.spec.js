@@ -72,12 +72,13 @@ test('null warm-up values stay unavailable and date selection updates indicator 
   await page.getByRole('button', { name: 'SMA 20', exact: true }).click();
   await page.getByRole('button', { name: 'RSI 14', exact: true }).click();
   await expect(page.locator('.sma-line')).toBeVisible();
-  await page.getByRole('slider').focus();
-  await page.getByRole('slider').press('Home');
+  await page.getByRole('group', { name: 'Inspect historical observations' }).press('Home');
   await expect(page.locator('.indicator-values')).toContainText('20 observations required');
   await expect(page.locator('.indicator-values')).toContainText('15 observations required');
   await page.getByRole('button', { name: '1M', exact: true }).click();
-  await expect(page.getByRole('slider')).toHaveAttribute('aria-valuetext', '2017-02-16, $135.35');
+  await expect(page.locator('.quote-date')).toContainText('2017-02-16');
+  await expect(page.locator('.price-value strong')).toHaveText('$135.35');
+  await expect(page.locator('.inspection-readout')).toHaveCount(0);
 });
 
 test('superseded indicator requests cannot replace the current range', async ({ page }) => {

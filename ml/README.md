@@ -1,38 +1,70 @@
-# Machine learning foundation
+# StockSight ML research
 
-No ML features/training/inference, predictions or model artifacts are implemented.
-The application already imports historical data and exposes tested close-based
-SMA20/RSI14. Read [INDICATORS.md](../docs/INDICATORS.md) before reusing those
-calculations: it defines a fixed history anchor/cap, null warm-up and flat-price
-behavior. A shared/versioned feature implementation is still required; do not
-silently use different training and inference conventions.
+The project has offline research evidence and no approved serving model.
+The [current handoff](../docs/CURRENT_HANDOFF.md) tracks whether research is
+active. Product architecture and promotion gates are documented in the
+[ML product integration plan](../docs/ML_PRODUCT_INTEGRATION_PLAN.md).
 
-[CURRENT_HANDOFF.md](../docs/CURRENT_HANDOFF.md) records current scope. The snapshot's
-adjustment/calendar/universe limitations remain unresolved, so chart acceptance
-is not ML suitability approval. Frontend redesign is a separately deferred task.
+## Frozen results
 
-Planned pipeline:
+- [Open-source model audit](docs/OPEN_SOURCE_MODEL_AUDIT.md)
+- [Next-session model round](docs/NEXT_SESSION_ROUND2_RESULTS.md)
+- [Continuous-target experiment protocol](docs/NEXT_SESSION_TARGET_ROUND.md)
+- [Continuous-target results](docs/NEXT_SESSION_TARGET_ROUND_RESULTS.md) and
+  [paired ranking review](docs/NEXT_SESSION_TARGET_ROUND_REVIEW.md)
 
-```text
-Historical Data
-      ↓
-Feature Engineering
-      ↓
-Time-Aware Train/Validation/Test Split
-      ↓
-Model Training
-      ↓
-Evaluation
-      ↓
-Saved Model
-      ↓
-Backend Inference
-```
+The earlier five-session relative classifier and confidence-filter follow-up
+did not qualify for promotion. The next-session work did not improve absolute
+direction enough to qualify either. Excess-return ranking remained weak and
+positive in six development folds, with later-period decay. The paired review
+records uncertainty and publication timing limits.
 
-First define a measurable target, potentially next-trading-day up/down direction, including prediction cutoff, exchange calendar, price adjustment policy, and treatment of unchanged prices. Candidate features include recent returns, moving averages, RSI, MACD, Bollinger position, volatility, and volume changes. Candidate models include Logistic Regression and Random Forest.
+## Evaluation and reproducibility
 
-Split chronologically rather than carelessly at random: random stock/time-series splits can leak future information. Construct each feature only from information available at the prediction cutoff. Fit scalers, imputers, and feature selection only on training folds. Account for label horizons at split boundaries; keep overlapping future labels out of training/validation boundaries and synchronize dates across symbols. Reserve an untouched later test period and consider walk-forward validation.
+The supplied snapshot's hash, adjustment and coverage limits are documented in
+[the import guide](../docs/PRICES_IMPORT.md). Development target dates end
+2018-12-31. Next-session 2019-2021 access requires a recorded candidate-selection
+protocol. Preserve the record of earlier five-session validation access.
+Final 2022-01-03 through 2026-11-12 remains reserved.
 
-Compare models to a simple baseline with agreed metrics such as balanced accuracy and a confusion matrix; evaluate probabilities if provided. Record provider/data version, date ranges, feature definitions, seeds, model version, and limitations. Do not imply classification accuracy guarantees trading profitability.
+Define the target, cutoff, calendar and adjustment policy before any fit. Keep
+features past-only, fit preprocessing only on training folds, and purge labels
+that cross split boundaries. Use the same observations for model and baseline
+comparisons. Version feature and model conventions, including any use of
+[SMA20/RSI14](../docs/INDICATORS.md). Keep training offline and load artifacts
+only from trusted sources.
 
-Keep training offline, separate from request handling. Define a versioned feature/model contract before adding backend inference. Downloaded datasets and generated artifacts belong in ignored storage, never in Git; artifact loading must use trusted sources.
+## Reproducing the research
+
+Research branches preserve complete source/history:
+
+- research/ml-round2: c983860, five-session and confidence follow-up.
+- research/next-session-direction: 8dbae2a, original next-session pipeline.
+- research/next-session-market-models: 531db99, market/model round.
+- research/next-session-targets: a67e642, continuous round and paired review.
+
+Main carries OPEN_SOURCE_MODEL_AUDIT.md, NEXT_SESSION_ROUND2_RESULTS.md,
+NEXT_SESSION_TARGET_ROUND.md, NEXT_SESSION_TARGET_ROUND_RESULTS.md,
+NEXT_SESSION_TARGET_ROUND_REVIEW.md and three corresponding JSON reports under
+ml/reports. These reports are frozen evidence; old source worktree locations
+remain historical. Do not merge research branches wholesale: they contain old
+application files. Port needed research modules later through a focused PR.
+
+Git intentionally excludes data, checkpoints, environments and secrets. Another
+machine needs an authorized transfer of clean/prices_clean.parquet,
+features/features.parquet, the complete next-session frame/manifest/prepared
+metadata and six HGB parquet/JSON predictions. Transfer target checkpoints,
+manifests and attempts for saved-result auditing. Verify hashes; do not silently
+download/rebuild and call it the same snapshot. The launcher assumes Noah's
+sibling/worktree layout. A different layout must explicitly configure
+STOCKSIGHT_DATA_DIR, STOCKSIGHT_PRIOR_NEXT_DIR and STOCKSIGHT_TARGET_DIR and use
+the pinned research environment. Frozen manifests reject source/package drift.
+
+## Next research checkpoint
+
+Audit saved rankings for stock/day concentration, turnover and realistic
+publication/next-available entry timing. Audit OHLC adjustment/alignment first.
+No broad model sweep or confidence-cutoff tuning. If this survives, predeclare
+candidate/comparator/metrics before protected scoring. Otherwise emphasize
+descriptive risk/education. Qlib motivated continuous/ranking targets; MASTER
+motivated market context, not copied weights or a reproduced transformer.

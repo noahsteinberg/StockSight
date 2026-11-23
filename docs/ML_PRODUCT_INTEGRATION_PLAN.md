@@ -443,36 +443,9 @@ No stage is skipped because the model looks promising on one fold.
 - End-to-end test proving a stored prediction remains unchanged after its
   outcome is recorded.
 
-## Immediate next checkpoint
+## Research status and next checkpoint
 
-The next-session market/model round completed with no qualifying candidate; see
-`ml/docs/NEXT_SESSION_ROUND2_RESULTS.md`. The immediate research action is the
-bounded target-comparison round, after which the team chooses one of three
-actions:
-
-1. advance a qualifying candidate for the separately controlled evaluation
-   process;
-2. continue relative/ranking research under a newly recorded hypothesis; or
-3. stop directional work and emphasize risk/educational analysis.
-
-Only after that decision should implementation begin at section A.
-
-Deployment of latest `main` can proceed independently with the ML pages still
-unavailable. Deployment does not authorize a placeholder model or make the
-historical hosted AAPL fixture a live feed.
-
-## November 17 target-round checkpoint
-
-The continuous-target round is complete; see
-`ml/docs/NEXT_SESSION_TARGET_ROUND_REVIEW.md`. No absolute-direction candidate
-qualified. All six folds retain weak positive ranking evidence; excess HGB's
-gross extreme-decile spread exceeds the original HGB, while overall rank IC
-does not. This supports a narrow relative-ranking research follow-up rather
-than another broad absolute-direction model search.
-
-Before serving, audit concentration, turnover and the difference between
-close-to-close research labels and the app's actual publication/entry timing.
-Then record a separate protected-evaluation protocol if warranted. No model
-artifact, hosted data update, new API or frontend integration is approved by
-these research results. Preserve latest main's unavailable states and existing
-design until that checkpoint is resolved.
+See [frozen results and research criteria](../ml/README.md) for the evidence
+needed to approve a candidate. The [handoff](CURRENT_HANDOFF.md) records which
+work is active. The [frontend integration spec](FRONTEND_ML_INTEGRATION_SPEC.md)
+defines the earlier unavailable API increment that can proceed without a model.

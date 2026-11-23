@@ -135,6 +135,6 @@ Using an administrative SQL Editor session alone does not prove that denial.
 - [Official row-level security documentation](https://supabase.com/docs/guides/database/postgres/row-level-security)
 - [Yahoo Finance investigation](YAHOO_FINANCE.md)
 
-Local verification is recorded in CURRENT_HANDOFF.md. A hosted project, imported
-team data, working Vercel routing, live refresh and hosted Auth0 acceptance require
-their own observed results; this setup code does not establish them.
+The last hosted verification and sample coverage are recorded in the
+[current handoff](CURRENT_HANDOFF.md). See [Vercel deployment](VERCEL.md) for
+application routing and release checks.

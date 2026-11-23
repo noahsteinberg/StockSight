@@ -22,16 +22,18 @@ test.beforeEach(async ({ request }) => {
 
 test('account creation entry, save, refresh, open analysis and persistent removal', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByText('Sign in to keep your saved stocks here.')).toBeVisible();
+  await expect(page.getByText('Star a stock to add it here')).toBeVisible();
   await page.getByRole('button', { name: 'Create account', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Create an account' })).toBeVisible();
   await page.getByRole('button', { name: 'Continue with Google', exact: true }).click();
   await expect(page.getByText('Alice Example')).toBeVisible();
   await page.getByRole('link', { name: 'Analysis', exact: true }).click();
   const save = page.waitForResponse(response => response.url().endsWith('/api/watchlist') && response.request().method() === 'POST');
-  await page.getByRole('button', { name: 'Save to watchlist', exact: true }).click();
+  await page.getByRole('button', { name: 'Watchlist for AAPL', exact: true }).click();
   expect((await save).status()).toBe(201);
-  await expect(page.getByRole('button', { name: 'Saved to watchlist' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Watchlist for AAPL' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('link', { name: 'Open AAPL analysis' })).toContainText('0.12%');
+  await expect(page.getByRole('link', { name: 'Open AAPL analysis' }).locator('.negative')).toBeVisible();
   // Drop all simulated SDK state: only the HttpOnly app cookie may restore login.
   await page.evaluate(() => sessionStorage.removeItem('stocksight:e2e-user'));
   let exchangedAfterRefresh = false;
@@ -43,16 +45,17 @@ test('account creation entry, save, refresh, open analysis and persistent remova
   expect(cookie.httpOnly).toBe(true);
   await page.getByRole('link', { name: 'Open AAPL analysis' }).click();
   await expect(page.getByRole('heading', { name: 'AAPL Apple Inc.' })).toBeVisible();
-  await page.getByRole('button', { name: 'Remove AAPL' }).click();
-  await expect(page.getByText('No saved stocks yet.')).toBeVisible();
+  await page.getByRole('button', { name: 'Watchlist for AAPL' }).click();
+  await expect(page.getByText('Star a stock to add it here')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Watchlist for AAPL' })).toHaveAttribute('aria-pressed', 'false');
   await page.reload();
-  await expect(page.getByText('No saved stocks yet.')).toBeVisible();
+  await expect(page.getByText('Star a stock to add it here')).toBeVisible();
 });
 
 test('two users have isolated lists; sign-out removes private UI', async ({ page, browser, request }) => {
   await page.goto('/');
   await signIn(page);
-  await page.getByRole('button', { name: 'Save to watchlist', exact: true }).click();
+  await page.getByRole('button', { name: 'Watchlist for AAPL', exact: true }).click();
   await expect(page.getByRole('link', { name: 'Open AAPL analysis' })).toBeVisible();
   const priorCookie = (await page.context().cookies()).find(cookie => cookie.name === 'stocksight_session');
   const context = await browser.newContext({ baseURL: 'http://127.0.0.1:5175' });
@@ -62,7 +65,7 @@ test('two users have isolated lists; sign-out removes private UI', async ({ page
     await bob.goto('/');
     await signIn(bob);
     await expect(bob.getByText('Bob Example')).toBeVisible();
-    await expect(bob.getByText('No saved stocks yet.')).toBeVisible();
+    await expect(bob.getByText('Star a stock to add it here')).toBeVisible();
     const bobToken = await token(request, 'bob');
     expect((await request.delete('/api/watchlist/AAPL', { headers: { Authorization: `Bearer ${bobToken}` } })).status()).toBe(204);
     await page.reload();
@@ -70,7 +73,7 @@ test('two users have isolated lists; sign-out removes private UI', async ({ page
   } finally { await context.close(); }
   await page.getByRole('button', { name: 'Sign out', exact: true }).click();
   await expect(page.getByRole('link', { name: 'Open AAPL analysis' })).toHaveCount(0);
-  await expect(page.getByText('Sign in to keep your saved stocks here.')).toBeVisible();
+  await expect(page.getByText('Star a stock to add it here')).toBeVisible();
   expect((await request.get('/api/watchlist')).status()).toBe(401);
   expect((await request.get('/api/watchlist', { headers: { Cookie: `stocksight_session=${priorCookie.value}` } })).status()).toBe(401);
 });
@@ -78,10 +81,10 @@ test('two users have isolated lists; sign-out removes private UI', async ({ page
 test('expired app session hides private data and rejects the attempted mutation', async ({ page, request }) => {
   await page.goto('/');
   await signIn(page);
-  await page.getByRole('button', { name: 'Save to watchlist', exact: true }).click();
+  await page.getByRole('button', { name: 'Watchlist for AAPL', exact: true }).click();
   await expect(page.getByRole('link', { name: 'Open AAPL analysis' })).toBeVisible();
   await request.post('/api/test/expire?user=alice');
-  await page.getByRole('button', { name: 'Remove AAPL' }).click();
+  await page.getByRole('button', { name: 'Watchlist for AAPL' }).click();
   await expect(page.getByRole('link', { name: 'Open AAPL analysis' })).toHaveCount(0);
   await expect(page.getByRole('alert')).toContainText('session expired');
   await signIn(page);
@@ -91,7 +94,7 @@ test('expired app session hides private data and rejects the attempted mutation'
 test('an existing tab detects an account switch without exposing the old list', async ({ page }) => {
   await page.goto('/');
   await signIn(page);
-  await page.getByRole('button', { name: 'Save to watchlist', exact: true }).click();
+  await page.getByRole('button', { name: 'Watchlist for AAPL', exact: true }).click();
   await expect(page.getByRole('link', { name: 'Open AAPL analysis' })).toBeVisible();
   const other = await page.context().newPage();
   await other.goto('/');
@@ -102,7 +105,7 @@ test('an existing tab detects an account switch without exposing the old list', 
   await page.bringToFront();
   await page.evaluate(() => window.dispatchEvent(new Event('focus')));
   await expect(page.getByRole('link', { name: 'Open AAPL analysis' })).toHaveCount(0);
-  await expect(page.getByText('No saved stocks yet.')).toBeVisible();
+  await expect(page.getByText('Star a stock to add it here')).toBeVisible();
   await other.close();
 });
 
@@ -113,7 +116,7 @@ test('storage failure has a real retry path', async ({ page }) => {
   await expect(page.getByRole('alert')).toContainText('Your watchlist is unavailable. Try again.');
   await page.unroute('**/api/watchlist');
   await page.getByRole('button', { name: 'Retry watchlist' }).click();
-  await expect(page.getByText('No saved stocks yet.')).toBeVisible();
+  await expect(page.getByText('Star a stock to add it here')).toBeVisible();
 });
 
 test('expired Auth0 proof cannot establish an app session', async ({ page, request }) => {
@@ -126,18 +129,42 @@ test('expired Auth0 proof cannot establish an app session', async ({ page, reque
   await page.unroute('**/api/test/identity?user=alice');
   await page.getByRole('button', { name: 'Continue with Google' }).click();
   await page.getByRole('link', { name: 'Analysis', exact: true }).click();
-  await expect(page.getByText('No saved stocks yet.')).toBeVisible();
+  await expect(page.getByText('Star a stock to add it here')).toBeVisible();
 });
 
 test('mobile account and saved-stock actions fit the viewport', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
   await signIn(page);
-  await page.getByRole('button', { name: 'Save to watchlist', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Remove AAPL' })).toBeVisible();
+  await page.getByRole('button', { name: 'Watchlist for AAPL', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Watchlist for AAPL' })).toBeVisible();
+  await page.getByRole('button', { name: 'Open navigation' }).click();
   await page.getByRole('link', { name: 'Dashboard', exact: true }).click();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   if (process.env.STOCKSIGHT_VISUAL_QA === '1') await page.screenshot({ path: '../.local-data/accounts-mobile.png', fullPage: true });
+});
+
+test('mobile watchlist chips stay in one scrollable row and open the chosen stock', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 800 });
+  const symbols = ['MSFT', 'AMD', 'AMZN', 'NVDA', 'ORCL', 'AAPL'];
+  await page.route('**/api/watchlist', route => route.request().method() === 'GET' ? route.fulfill({
+    json: { items: symbols.map((symbol, index) => ({
+      symbol, name: symbol, daily_change_pct: index === 1 ? null : index === 0 ? 1.25 : -0.12,
+    })) },
+  }) : route.continue());
+  await page.goto('/#/analysis?symbol=MSFT');
+  await signIn(page);
+  const row = page.getByRole('list', { name: 'Saved stocks' });
+  await expect(row.getByRole('link')).toHaveCount(symbols.length);
+  await expect(row.getByRole('link', { name: /Open MSFT/ }).locator('.positive')).toHaveText('+1.25%');
+  await expect(row.getByRole('link', { name: /Open AMD.*unavailable/ })).toContainText('—');
+  expect(await row.evaluate(element => ({
+    overflow: element.scrollWidth > element.clientWidth,
+    rows: new Set([...element.children].map(chip => chip.offsetTop)).size,
+  }))).toEqual({ overflow: true, rows: 1 });
+  await row.getByRole('link', { name: /Open AAPL/ }).click();
+  await expect(page.getByRole('heading', { name: 'AAPL Apple Inc.' })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
 });
 
 test('official Auth0 SDK sends Google directly to authorization with PKCE', async ({ page }) => {
@@ -171,7 +198,7 @@ test('invalid OAuth callback fails safely in the official SDK', async ({ page })
 test('dashboard filters persisted stocks and opens analysis after refresh', async ({ page }) => {
   await page.goto('/');
   await signIn(page);
-  await page.getByRole('button', { name: 'Save to watchlist', exact: true }).click();
+  await page.getByRole('button', { name: 'Watchlist for AAPL', exact: true }).click();
   await expect(page.getByRole('link', { name: 'Open AAPL analysis' })).toBeVisible();
   await page.getByRole('link', { name: 'Dashboard', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'My dashboard' })).toBeVisible();
@@ -196,7 +223,7 @@ test('dashboard loading, storage retry and sign-out preserve privacy', async ({ 
   await page.goto('/#/dashboard');
   await signIn(page);
   await page.getByRole('link', { name: 'Find a stock', exact: true }).click();
-  await page.getByRole('button', { name: 'Save to watchlist', exact: true }).click();
+  await page.getByRole('button', { name: 'Watchlist for AAPL', exact: true }).click();
   await expect(page.getByRole('link', { name: 'Open AAPL analysis' })).toBeVisible();
   await page.route('**/api/watchlist', route => route.request().method() === 'GET' ? route.fulfill({ status: 503, json: { detail: { code: 'ACCOUNT_STORAGE_UNAVAILABLE' } } }) : route.continue());
   await page.goto('/#/dashboard');

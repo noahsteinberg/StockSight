@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
 
 const barsURL = '**/api/stocks/*/prices?*';
 const latest = page => page.getByText(/As of.*2017-02-16/);
@@ -10,10 +11,9 @@ test('real API: ranges, keyboard inspection, and observations table', async ({ p
     await page.getByRole('button', { name: label, exact: true }).click();
     await expect(latest(page)).toContainText(`${count} sessions`);
   }
-  const slider = page.getByRole('slider');
-  await slider.focus();
-  await slider.press('Home');
-  await expect(slider).toHaveAttribute('aria-valuetext', '2015-02-17, $127.83');
+  const inspection = page.getByRole('group', { name: 'Inspect historical observations' });
+  await inspection.press('Home');
+  await expect(page.locator('.inspection-readout')).toContainText('2015-02-17$127.83');
   await page.getByText('Price observations', { exact: true }).click();
   await expect(page.getByRole('table')).toBeVisible();
   await expect(page.getByRole('table').getByText('2015-02-17')).toBeVisible();
@@ -146,4 +146,217 @@ test('new search cancels an older pending query', async ({ page }) => {
   await page.getByRole('button', { name: 'Search', exact: true }).click();
   await expect(page.getByRole('button', { name: 'AAPL Apple Inc.' })).toBeVisible();
   await expect(page.getByText('Searching stocks.')).toHaveCount(0);
+});
+
+test('Escape dismisses a pending search and Clear keeps the current chart', async ({ page }) => {
+  await page.goto('/');
+  await expect(latest(page)).toBeVisible();
+  let intercepted;
+  const started = new Promise(resolve => { intercepted = resolve; });
+  await page.route('**/api/stocks?query=pending', () => { intercepted(); });
+  const ticker = page.getByLabel('Ticker', { exact: true });
+  await ticker.fill('pending');
+  await ticker.press('Enter');
+  await started;
+  const close = page.getByRole('button', { name: 'Close results' });
+  await close.focus();
+  await close.press('Escape');
+  await expect(close).toHaveCount(0);
+  await expect(ticker).toBeFocused();
+  await page.getByRole('button', { name: 'Clear stock search' }).click();
+  await expect(ticker).toHaveValue('');
+  await expect(ticker).toBeFocused();
+  await expect(latest(page)).toBeVisible();
+});
+
+test('autocomplete debounces edits, prioritizes prefixes, and caps the list at eight', async ({ page }) => {
+  await page.goto('/');
+  await expect(latest(page)).toBeVisible();
+  await page.clock.install({ time: new Date('2026-11-22T15:00:00Z') });
+  await page.clock.pauseAt(new Date('2026-11-22T15:00:01Z'));
+  const input = page.getByRole('combobox', { name: 'Ticker' });
+  await input.fill('MS');
+  await page.clock.runFor(150);
+  await input.fill('A');
+  await page.clock.runFor(199);
+  await expect(input).toHaveAttribute('aria-expanded', 'false');
+  await page.clock.runFor(1);
+  const list = page.getByRole('listbox', { name: 'Stock suggestions' });
+  await expect(list.getByRole('option')).toHaveCount(8);
+  await expect(list.getByRole('option').first()).toContainText('AAPL');
+  await expect(list.getByRole('option', { name: /MSFT/ })).toHaveCount(0);
+  await expect(input).toHaveAttribute('aria-autocomplete', 'list');
+  await expect(input).toHaveAttribute('aria-controls', await list.getAttribute('id'));
+});
+
+test('typed company names and light typos suggest the stock for keyboard selection', async ({ page }) => {
+  await page.goto('/');
+  const input = page.getByRole('combobox', { name: 'Ticker' });
+  const list = page.getByRole('listbox', { name: 'Stock suggestions' });
+  await input.fill('a');
+  const options = list.getByRole('option');
+  await expect(options).toHaveCount(8);
+  await input.press('ArrowDown');
+  await expect(options.first()).toHaveAttribute('aria-selected', 'true');
+  await input.press('ArrowDown');
+  await expect(options.nth(1)).toHaveAttribute('aria-selected', 'true');
+  await input.press('ArrowUp');
+  await expect(input).toHaveAttribute('aria-activedescendant', await options.first().getAttribute('id'));
+  await expect(input).toBeFocused();
+
+  await input.fill('aPLe');
+  await expect(options.first()).toHaveText('AAPLApple Inc.');
+  await input.press('ArrowDown');
+  await expect(options.first()).toHaveAttribute('aria-selected', 'true');
+  const prices = page.waitForResponse('**/api/stocks/AAPL/prices?*');
+  await input.press('Enter');
+  expect((await prices).status()).toBe(200);
+  await expect(input).toHaveValue('AAPL');
+  await expect(input).toHaveAttribute('aria-expanded', 'false');
+  await expect(list).toBeHidden();
+  await expect(page).toHaveURL(/#\/analysis\?symbol=AAPL$/);
+  await expect(latest(page)).toBeVisible();
+});
+
+test('Escape and outside clicks dismiss suggestions and empty matches are non-selectable', async ({ page }) => {
+  await page.goto('/');
+  const input = page.getByRole('combobox', { name: 'Ticker' });
+  const list = page.getByRole('listbox', { name: 'Stock suggestions' });
+  await input.fill('zzzz-not-a-stock');
+  await expect(list.getByRole('option', { name: 'No matches' })).toHaveAttribute('aria-disabled', 'true');
+  await input.press('ArrowDown');
+  await expect(input).not.toHaveAttribute('aria-activedescendant');
+  await input.press('Escape');
+  await expect(input).toBeFocused();
+  await expect(input).toHaveValue('zzzz-not-a-stock');
+  await expect(list).toBeHidden();
+  await input.fill('MICROsoft');
+  await expect(list.getByRole('option', { name: /MSFT Microsoft/ })).toBeVisible();
+  await page.getByRole('heading', { name: 'Stock analysis' }).click();
+  await expect(list).toBeHidden();
+});
+
+test.describe('touch autocomplete', () => {
+  test.use({ hasTouch: true, viewport: { width: 320, height: 720 } });
+
+  test('tapping a suggestion fills the field and loads its symbol', async ({ page }) => {
+    await page.goto('/');
+    await expect(latest(page)).toBeVisible();
+    const input = page.getByRole('combobox', { name: 'Ticker' });
+    await input.fill('apple');
+    const option = page.getByRole('option', { name: /AAPL Apple Inc/ });
+    const response = page.waitForResponse('**/api/stocks/AAPL/prices?*');
+    await option.tap();
+    expect((await response).status()).toBe(200);
+    await expect(input).toHaveValue('AAPL');
+    await expect(page.getByRole('listbox', { name: 'Stock suggestions' })).toBeHidden();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
+  });
+});
+
+test('hover previews a session, clicking pins it, and keyboard inspection clears cleanly', async ({ page, request }) => {
+  const response = await request.get('/api/stocks/AAPL/prices?range=3mo');
+  const { bars } = await response.json();
+  await page.goto('/');
+  const plot = page.locator('.plot-inspection-target');
+  const readout = page.locator('.inspection-readout');
+  await plot.hover({ position: { x: 1, y: 20 } });
+  await expect(readout).toContainText('Preview');
+  await expect(readout.locator('time')).toHaveText(bars[0].date);
+  await page.getByRole('heading', { name: 'Stock analysis' }).hover();
+  await expect(readout).toHaveCount(0);
+
+  await plot.click({ position: { x: 1, y: 20 } });
+  await expect(readout).toContainText('Pinned');
+  await page.getByRole('heading', { name: 'Stock analysis' }).hover();
+  await expect(readout.locator('time')).toHaveText(bars[0].date);
+
+  const inspection = page.getByRole('group', { name: 'Inspect historical observations' });
+  await inspection.press('ArrowRight');
+  await expect(readout.locator('time')).toHaveText(bars[1].date);
+  const stats = page.locator('.observation-stats');
+  const movement = new Intl.NumberFormat('en-US', { style: 'percent', signDisplay: 'exceptZero', maximumFractionDigits: 2 });
+  await expect(stats).toContainText(movement.format(bars[1].close / bars[0].close - 1));
+  await expect(stats).toContainText('1-session avg');
+
+  await page.getByRole('button', { name: 'Latest', exact: true }).click();
+  await expect(inspection).toBeFocused();
+  await expect(readout).toHaveCount(0);
+  await inspection.press('ArrowLeft');
+  await expect(readout.locator('time')).toHaveText(bars.at(-2).date);
+  await inspection.press('Escape');
+  await expect(readout).toHaveCount(0);
+  await expect(page.getByRole('slider')).toHaveCount(0);
+});
+
+test.describe('touch chart', () => {
+  test.use({ hasTouch: true, viewport: { width: 390, height: 844 } });
+
+  test('a tap pins a point without hovering', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('.plot-inspection-target').tap({ position: { x: 1, y: 20 } });
+    await expect(page.locator('.inspection-readout')).toContainText('Pinned');
+    await expect(page.locator('.inspection-readout time')).toHaveText('2016-11-16');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  });
+});
+
+test('replay reveals one session at a time across the chart, indicators, table, and CSV', async ({ page, request }) => {
+  const response = await request.get('/api/stocks/AAPL/prices?range=3mo');
+  const { bars } = await response.json();
+  await page.goto('/');
+  const start = bars.length - 3;
+  const startDate = bars[start].date;
+  const nextDate = bars[start + 1].date;
+  const finalDate = bars.at(-1).date;
+  await page.getByRole('button', { name: 'SMA 20', exact: true }).click();
+  await expect(page.locator('.sma-line')).toBeVisible();
+  await page.getByRole('button', { name: 'Historical replay', exact: true }).click();
+  await page.getByLabel('Start session').selectOption(String(start));
+  await page.getByRole('button', { name: 'Start replay', exact: true }).click();
+  const next = page.getByRole('button', { name: 'Next session' });
+  await expect(next).toBeFocused();
+  await expect(page.locator('.quote-date')).toContainText(startDate);
+  await expect(page.locator('.volume-bar')).toHaveCount(start + 1);
+  const smaBefore = await page.locator('.sma-line').getAttribute('d');
+
+  await page.getByText('Price observations', { exact: true }).click();
+  const table = page.getByRole('table');
+  await expect(table.getByText(nextDate, { exact: true })).toHaveCount(0);
+  const downloadPromise = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Download price CSV' }).click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toContain(`through-${startDate}`);
+  const csv = await readFile(await download.path(), 'utf8');
+  expect(csv).toContain(startDate);
+  expect(csv).not.toContain(nextDate);
+
+  await next.click();
+  await expect(page.locator('.quote-date')).toContainText(nextDate);
+  await expect(page.locator('.volume-bar')).toHaveCount(start + 2);
+  await expect(page.locator('.sma-line')).not.toHaveAttribute('d', smaBefore);
+  await expect(table.getByText(finalDate, { exact: true })).toHaveCount(0);
+  await next.click();
+  await expect(next).toBeDisabled();
+  await expect(page.locator('.quote-date')).toContainText(finalDate);
+  await page.getByRole('button', { name: 'Restart', exact: true }).click();
+  await expect(page.locator('.quote-date')).toContainText(startDate);
+  await page.getByRole('button', { name: 'Exit replay', exact: true }).click();
+  await expect(latest(page)).toContainText('63 sessions');
+});
+
+test('CSV contains the raw OHLCV rows for the displayed range', async ({ page }) => {
+  await page.goto('/');
+  const response = page.waitForResponse('**/prices?range=1mo');
+  await page.getByRole('button', { name: '1M', exact: true }).click();
+  const { bars } = await (await response).json();
+  const download = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Download price CSV' }).click();
+  const file = await download;
+  expect(file.suggestedFilename()).toBe('AAPL-historical-prices-1mo.csv');
+  const contents = await readFile(await file.path(), 'utf8');
+  expect(contents.split('\r\n')).toEqual([
+    'Date,Open (USD),High (USD),Low (USD),Close (USD),Volume',
+    ...bars.map(bar => [bar.date, bar.open, bar.high, bar.low, bar.close, bar.volume].join(',')),
+  ]);
 });
