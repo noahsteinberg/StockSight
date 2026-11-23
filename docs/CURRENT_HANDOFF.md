@@ -9,11 +9,10 @@ context. At widths of 740 px and below, the masthead hamburger opens the
 navigation panel. Escape returns focus to the toggle, and selecting a route or
 interacting outside the panel dismisses it.
 
-The active item uses a shared Framer Motion highlight with a spring at
-stiffness 400 and damping 35. MotionConfig respects the system preference, and
-the sidebar skips shared layout projection whenever reduced motion is on.
-The local preview was tested with both preferences, including changing the
-preference while the app was open.
+One Framer Motion highlight stretches between active items. Its leading edge
+moves first and its trailing edge starts 80 ms later. Each edge uses a 300 ms
+ease-out tween. MotionConfig respects the system preference, and the highlight
+switches instantly when reduced motion is on.
 
 Lint, build, 36 public browser tests and 21 isolated account tests passed.
 The running sidebar preview was checked at 1440 px and 320 px.

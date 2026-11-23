@@ -48,11 +48,12 @@ input { min-width: 0; }
 .account-name { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .menu-toggle { display: none; }
 .site-sidebar { position: fixed; z-index: 9; inset-block: var(--masthead-height) 0; inset-inline-start: 0; width: var(--rail-size); padding: 16px 9px; overflow: hidden auto; background: var(--surface); border-inline-end: 1px solid var(--line); transition: width .18s ease-out; }
-.site-sidebar a { position: relative; display: flex; align-items: center; gap: 12px; min-height: 48px; margin-bottom: 5px; padding-inline: 13px; border-radius: 7px; color: #43526a; text-decoration: none; font-size: 14px; font-weight: 500; white-space: nowrap; transition: color .16s, font-weight .16s; }
+.sidebar-items { position: relative; display: flex; flex-direction: column; gap: var(--sidebar-item-gap); --sidebar-item-radius: 7px; }
+.site-sidebar a { position: relative; display: flex; align-items: center; gap: 12px; height: var(--sidebar-item-height); padding-inline: 13px; border-radius: var(--sidebar-item-radius); color: #43526a; text-decoration: none; font-size: 14px; font-weight: 500; white-space: nowrap; transition: color .16s, font-weight .16s; }
 .site-sidebar a:hover, .site-sidebar a:focus-visible { color: var(--navy); background: #f0f4fa; }
 .site-sidebar a:focus-visible { outline-offset: -3px; }
 .site-sidebar a[aria-current=page] { color: #164f91; font-weight: 600; }
-.sidebar-active-pill { position: absolute; inset: 0; z-index: 0; border-radius: inherit; border-inline-start: 3px solid #2467ad; background: #eaf1fb; pointer-events: none; }
+.sidebar-active-pill { position: absolute; inset-inline: 0; z-index: 0; border-radius: var(--sidebar-item-radius); border-inline-start: 3px solid #2467ad; background: #eaf1fb; pointer-events: none; }
 .site-sidebar a > svg, .site-sidebar a > span { position: relative; z-index: 10; }
 .site-sidebar svg, .menu-toggle svg { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .site-sidebar a > svg { transition: stroke-width .16s; }

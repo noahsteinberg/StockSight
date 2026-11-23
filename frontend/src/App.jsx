@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import { motion } from 'framer-motion';
 import Analysis from './Analysis.jsx';
 import AuthPage from './AuthPage.jsx';
 import AccountControls from './AccountControls.jsx';
+import SidebarHighlight from './SidebarHighlight.jsx';
 import Watchlist from './Watchlist.jsx';
 import { Dashboard, Methodology, ModelPerformance, Predictions } from './Pages.jsx';
 import { useAccount } from './auth-context.js';
@@ -17,7 +17,8 @@ const pages = [
   ['methodology', 'Methodology', 'M6 4h9l3 3v13H6zM14 4v4h4M9 12h6m-6 4h6'],
 ];
 const selectedSymbolKey = 'stocksight:selected-symbol';
-const sidebarSpring = { type: 'spring', stiffness: 400, damping: 35 };
+const sidebarItemHeight = 48;
+const sidebarItemGap = 5;
 const reducedMotionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 function subscribeToMotionPreference(listener) {
@@ -32,6 +33,7 @@ function getSavedSymbol() {
 
 export default function App() {
   const route = usePageRoute();
+  const activeIndex = pages.findIndex(([page]) => page === route.page);
   const reduceMotion = useSyncExternalStore(subscribeToMotionPreference, () => reducedMotionPreference.matches);
   const main = useRef(null);
   const navigation = useRef(null);
@@ -45,10 +47,10 @@ export default function App() {
   const account = useAccount();
   const watchlist = useWatchlist();
   useEffect(() => {
-    document.title = `${({ login: 'Log in', signup: 'Create an account', 'reset-password': 'Reset password' })[route.page] || pages.find(([page]) => page === route.page)?.[1] || 'Page not found'} | StockSight`;
+    document.title = `${({ login: 'Log in', signup: 'Create an account', 'reset-password': 'Reset password' })[route.page] || pages[activeIndex]?.[1] || 'Page not found'} | StockSight`;
     main.current?.focus({ preventScroll: true });
     window.scrollTo(0, 0);
-  }, [route.hash, route.page]);
+  }, [route.hash, route.page, activeIndex]);
   useEffect(() => {
     if (!menuOpen) return;
     const nav = navigation.current;
@@ -105,26 +107,27 @@ export default function App() {
         <AccountControls />
       </div>
     </header>
-    <motion.nav layoutRoot layoutScroll id="site-navigation" ref={navigation} className="site-sidebar" aria-label="Main navigation" data-open={menuOpen}
+    <nav id="site-navigation" ref={navigation} className="site-sidebar" aria-label="Main navigation" data-open={menuOpen}
       onBlur={event => {
         if (menuOpen && !event.currentTarget.contains(event.relatedTarget) && event.relatedTarget !== menuButton.current) setMenuOpen(false);
       }}>
-      {pages.map(([page, label, icon]) => {
-        const active = route.page === page;
-        const href = `#/${page}${page === 'analysis' || page === 'predictions' ? `?symbol=${encodeURIComponent(symbol)}` : ''}`;
-        return <a key={page} href={href} aria-label={label} aria-current={active ? 'page' : undefined} onClick={() => {
-          rememberStock(symbol);
-          if (menuOpen) {
-            setMenuOpen(false);
-            if (href === route.hash) main.current?.focus({ preventScroll: true });
-          }
-        }}>
-          {active && <motion.div className="sidebar-active-pill" layoutId={reduceMotion ? undefined : 'sidebar-active-pill'} transition={sidebarSpring} aria-hidden="true" />}
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon} /></svg>
-          <span aria-hidden="true">{label}</span>
-        </a>;
-      })}
-    </motion.nav>
+      <div className="sidebar-items" style={{ '--sidebar-item-height': `${sidebarItemHeight}px`, '--sidebar-item-gap': `${sidebarItemGap}px` }}>
+        {pages.map(([page, label, icon], index) => {
+          const href = `#/${page}${page === 'analysis' || page === 'predictions' ? `?symbol=${encodeURIComponent(symbol)}` : ''}`;
+          return <a key={page} href={href} aria-label={label} aria-current={activeIndex === index ? 'page' : undefined} onClick={() => {
+            rememberStock(symbol);
+            if (menuOpen) {
+              setMenuOpen(false);
+              if (href === route.hash) main.current?.focus({ preventScroll: true });
+            }
+          }}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon} /></svg>
+            <span aria-hidden="true">{label}</span>
+          </a>;
+        })}
+        {activeIndex >= 0 && <SidebarHighlight activeIndex={activeIndex} itemHeight={sidebarItemHeight} itemGap={sidebarItemGap} reduceMotion={reduceMotion} />}
+      </div>
+    </nav>
     <div className="app-content">
     <main ref={main} id="main" className="wrap" tabIndex="-1">
       {account.error && <div role="alert" className="account-error">{account.error}</div>}

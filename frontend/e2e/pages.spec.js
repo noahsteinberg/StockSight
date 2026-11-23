@@ -108,46 +108,71 @@ test('the desktop rail expands from icons, resizes the content, and stays fixed 
   await expect(label).toHaveCSS('opacity', '1');
 });
 
-for (const preference of ['no-preference', 'reduce']) {
-  test(`the sidebar highlight follows the active link with reduced motion set to ${preference}`, async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: 'no-preference' });
-    await page.goto('/#/analysis?symbol=AAPL');
-    const nav = page.getByRole('navigation', { name: 'Main navigation' });
-    await expect(nav.getByRole('link', { name: 'Analysis', exact: true }).locator('.sidebar-active-pill')).toBeVisible();
-    await page.emulateMedia({ reducedMotion: preference });
-    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
-
-    const { start, end, frames } = await nav.evaluate(async element => {
-      const from = element.querySelector('.sidebar-active-pill');
-      const target = element.querySelector('a[href="#/methodology"]');
-      const start = from.getBoundingClientRect().top;
-      const end = target.getBoundingClientRect().top;
-      const frames = [];
-      const deadline = performance.now() + 800;
-      window.location.hash = target.hash;
-      await new Promise(resolve => {
-        function sample() {
-          const pill = target.querySelector('.sidebar-active-pill');
-          if (pill) frames.push(pill.getBoundingClientRect().top);
-          if (performance.now() < deadline) requestAnimationFrame(sample);
-          else resolve();
+async function sampleSidebarMove(nav, href) {
+  return nav.evaluate(async (element, destination) => {
+    const pill = element.querySelector('.sidebar-active-pill');
+    const target = element.querySelector(`a[href="${destination}"]`);
+    const start = pill.getBoundingClientRect().toJSON();
+    const end = target.getBoundingClientRect().toJSON();
+    const frames = [];
+    const startTime = performance.now();
+    window.location.hash = target.hash;
+    await new Promise(resolve => {
+      function sample() {
+        const time = performance.now() - startTime;
+        if (target.getAttribute('aria-current') === 'page') {
+          const { top, bottom } = pill.getBoundingClientRect();
+          frames.push({ time, top, bottom });
         }
-        requestAnimationFrame(sample);
-      });
-      return { start, end, frames };
+        if (time < 650) requestAnimationFrame(sample);
+        else resolve();
+      }
+      requestAnimationFrame(sample);
     });
-
-    await expect(nav.getByRole('link', { name: 'Methodology', exact: true })).toHaveAttribute('aria-current', 'page');
-    await expect(nav.locator('.sidebar-active-pill')).toHaveCount(1);
-    expect(frames.length).toBeGreaterThan(0);
-    expect(Math.abs(frames.at(-1) - end)).toBeLessThan(1);
-    if (preference === 'reduce') {
-      expect(frames.every(y => Math.abs(y - end) < 1)).toBe(true);
-    } else {
-      expect(frames.some(y => y > start + 1 && y < end - 1)).toBe(true);
-    }
-  });
+    return { start, end, frames, samePill: pill === element.querySelector('.sidebar-active-pill') };
+  }, href);
 }
+
+function expectPillSettled({ end, frames, samePill }) {
+  expect(samePill).toBe(true);
+  expect(frames.length).toBeGreaterThan(0);
+  expect(Math.abs(frames.at(-1).top - end.top)).toBeLessThan(1);
+  expect(Math.abs(frames.at(-1).bottom - end.bottom)).toBeLessThan(1);
+}
+
+test('the sidebar pill stretches with the bottom leading down and the top leading up', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/#/analysis?symbol=AAPL');
+  const nav = page.getByRole('navigation', { name: 'Main navigation' });
+  await expect(nav.locator('.sidebar-active-pill')).toBeVisible();
+  for (const [href, leading, trailing] of [
+    ['#/methodology', 'bottom', 'top'],
+    ['#/analysis?symbol=AAPL', 'top', 'bottom'],
+  ]) {
+    const move = await sampleSidebarMove(nav, href);
+    expectPillSettled(move);
+    const { start, frames } = move;
+    const firstLeading = frames.find(frame => Math.abs(frame[leading] - start[leading]) > 1);
+    const firstTrailing = frames.find(frame => Math.abs(frame[trailing] - start[trailing]) > 1);
+    expect(firstTrailing.time - firstLeading.time).toBeGreaterThan(35);
+    expect(frames.some(frame => frame.bottom - frame.top > start.height + 10)).toBe(true);
+    await expect(nav.locator('.sidebar-active-pill')).toHaveCount(1);
+  }
+});
+
+test('the sidebar pill switches instantly when reduced motion is enabled', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/#/analysis?symbol=AAPL');
+  const nav = page.getByRole('navigation', { name: 'Main navigation' });
+  await expect(nav.locator('.sidebar-active-pill')).toBeVisible();
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+  const move = await sampleSidebarMove(nav, '#/methodology');
+  expectPillSettled(move);
+  const { end, frames } = move;
+  expect(frames.every(frame => Math.abs(frame.top - end.top) < 1 && Math.abs(frame.bottom - end.bottom) < 1)).toBe(true);
+  await expect(nav.getByRole('link', { name: 'Methodology', exact: true })).toHaveAttribute('aria-current', 'page');
+});
 
 test('the mobile hamburger reveals the current page, supports Escape, and closes on navigation', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
