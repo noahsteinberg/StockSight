@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import HistoricalChart from './HistoricalChart.jsx';
 import StockSearchInput from './StockSearchInput.jsx';
-import { useAccount } from './auth-context.js';
+import AnalysisWatchlist, { WatchlistStar } from './AnalysisWatchlist.jsx';
 import useIndicators from './use-indicators.js';
 
 const ranges = [['1mo', '1M'], ['3mo', '3M'], ['1y', '1Y'], ['all', 'Max']];
@@ -14,7 +14,6 @@ function responseError(status, searching = false) {
 }
 
 export default function Analysis({ symbol, onSelectSymbol, watchlist }) {
-  const account = useAccount();
   const tickerInput = useRef(null);
   const [inputError, setInputError] = useState('');
   const [draft, setDraft] = useState({ symbol, value: symbol });
@@ -117,6 +116,7 @@ export default function Analysis({ symbol, onSelectSymbol, watchlist }) {
           onChange={value => { setInput(value); setInputError(''); }} onClear={clearSearch} onSelect={openStock} />
         <button type="submit">Search</button>
       </form>
+      <AnalysisWatchlist symbol={symbol} watchlist={watchlist} onOpen={openStock} />
       {inputError && <p id="ticker-error" role="alert" className="validation-error">{inputError}</p>}
       {search && <div className="stock-search" aria-label="Stock search results" aria-live="polite" aria-busy={Boolean(search.loading)}>
         <div className="search-results-heading">
@@ -138,14 +138,10 @@ export default function Analysis({ symbol, onSelectSymbol, watchlist }) {
       </div>
       {data?.bars.length > 0 && <HistoricalChart
         key={requestKey} data={data} range={range} showSma={showSma} showRsi={showRsi}
+        titleAction={<WatchlistStar symbol={data.symbol} watchlist={watchlist} />}
         onToggleSma={() => setShowSma(value => !value)} onToggleRsi={() => setShowRsi(value => !value)}
         indicators={indicators} onReload={() => { reload(); setRetry(value => value + 1); indicators.retry(); }}>
         <div className="chart-actions">
-          {account.configured && <button type="button"
-            disabled={account.isLoading || watchlist.mutation.busy || (account.isAuthenticated && (watchlist.loading || Boolean(watchlist.error) || watchlist.items.some(stock => stock.symbol === data.symbol)))}
-            onClick={() => account.isAuthenticated ? watchlist.save(data.symbol) : account.login()}>
-            {!account.isAuthenticated ? 'Sign in to save' : watchlist.items.some(stock => stock.symbol === data.symbol) ? 'Saved to watchlist' : 'Save to watchlist'}
-          </button>}
           <a href={`#/predictions?symbol=${encodeURIComponent(symbol)}`}>Predictions for {symbol} <span aria-hidden="true">↗</span></a>
         </div>
       </HistoricalChart>}

@@ -15,14 +15,15 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from fastapi import HTTPException
 from fastapi.testclient import TestClient
 from jwt import PyJWKClientConnectionError
-from sqlalchemy import insert
+from sqlalchemy import delete, insert
 from sqlalchemy.engine import make_url
 
 from app.auth import TokenVerifier
 from app.config import Settings
-from app.db import PriceSeries, StockRecord, database_engine
+from app.db import DailyBar, PriceSeries, StockRecord, database_engine
 from app.factory import create_app
-from app.seed import seed_fixture
+from app.market import load_bars
+from app.seed import SERIES_ID, seed_fixture
 
 ISSUER = "https://tenant.auth0.test/"
 AUDIENCE = "https://stocksight-api"
@@ -99,6 +100,30 @@ def account_app(accounts_database, keys, monkeypatch):
 
 def headers(value):
     return {"Authorization": f"Bearer {value}"}
+
+
+def test_watchlist_daily_change_uses_the_latest_two_stored_sessions(
+    account_app, accounts_database, token
+):
+    _, engine = accounts_database
+    alice = headers(token())
+    latest, previous = load_bars()[-1], load_bars()[-2]
+    with TestClient(account_app) as client:
+        saved = client.post("/api/watchlist", headers=alice, json={"symbol": "AAPL"})
+        assert saved.status_code == 201
+        assert saved.json()["daily_change_pct"] == pytest.approx(
+            (latest.close / previous.close - 1) * 100
+        )
+        with engine.begin() as connection:
+            connection.execute(
+                delete(DailyBar).where(
+                    DailyBar.series_id == SERIES_ID, DailyBar.session_date < latest.date
+                )
+            )
+        result = client.get("/api/watchlist", headers=alice).json()["items"]
+        assert len(result) == 1
+        assert result[0]["symbol"] == "AAPL"
+        assert result[0]["daily_change_pct"] is None
 
 
 def test_watchlist_persistence_identity_and_two_user_isolation(account_app, token):

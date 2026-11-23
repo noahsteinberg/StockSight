@@ -3,7 +3,6 @@ import Analysis from './Analysis.jsx';
 import AuthPage from './AuthPage.jsx';
 import AccountControls from './AccountControls.jsx';
 import SidebarHighlight from './SidebarHighlight.jsx';
-import Watchlist from './Watchlist.jsx';
 import { Dashboard, Methodology, ModelPerformance, Predictions } from './Pages.jsx';
 import { useAccount } from './auth-context.js';
 import useWatchlist from './use-watchlist.js';
@@ -131,11 +130,8 @@ export default function App() {
     <div className="app-content">
     <main ref={main} id="main" className="wrap" tabIndex="-1">
       {account.error && <div role="alert" className="account-error">{account.error}</div>}
-      {route.page === 'analysis' && <div className="workspace">
-        <Analysis symbol={symbol} onSelectSymbol={selectStock} watchlist={watchlist} />
-        <aside className="workspace-sidebar"><Watchlist watchlist={watchlist} onOpen={selectStock} selectedSymbol={symbol} /></aside>
-      </div>}
-      {route.page === 'dashboard' && <Dashboard watchlist={watchlist} onOpen={selectStock} symbol={symbol} />}
+      {route.page === 'analysis' && <Analysis symbol={symbol} onSelectSymbol={selectStock} watchlist={watchlist} />}
+      {route.page === 'dashboard' && <Dashboard watchlist={watchlist} onOpen={selectStock} />}
       {route.page === 'predictions' && <Predictions symbol={symbol} />}
       {route.page === 'performance' && <ModelPerformance />}
       {route.page === 'methodology' && <Methodology />}

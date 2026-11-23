@@ -6,13 +6,13 @@ from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
-from sqlalchemy import delete, func, select
+from sqlalchemy import Float, cast, delete, func, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.auth import Principal, current_principal
-from app.db import PriceSeries, StockRecord, UserIdentity, WatchlistEntry
+from app.db import DailyBar, PriceSeries, StockRecord, UserIdentity, WatchlistEntry
 
 router = APIRouter(tags=["accounts"])
 WATCHLIST_LIMIT = 100
@@ -43,6 +43,7 @@ class SavedStock(BaseModel):
     symbol: str
     name: str
     added_at: datetime
+    daily_change_pct: float | None = None
 
     @field_validator("added_at")
     @classmethod
@@ -97,9 +98,21 @@ def current_user(
 
 
 def saved_query(user_id):
+    # These two index-backed lookups read only the newest stored closes per symbol.
+    recent_close = (
+        select(DailyBar.close)
+        .where(DailyBar.series_id == PriceSeries.id)
+        .order_by(DailyBar.session_date.desc())
+        .limit(1)
+        .correlate(PriceSeries)
+    )
+    latest = cast(recent_close.scalar_subquery(), Float)
+    previous = cast(recent_close.offset(1).scalar_subquery(), Float)
+    change = ((latest / func.nullif(previous, 0) - 1) * 100).label("daily_change_pct")
     return (
-        select(WatchlistEntry.symbol, StockRecord.name, WatchlistEntry.added_at)
+        select(WatchlistEntry.symbol, StockRecord.name, WatchlistEntry.added_at, change)
         .join(StockRecord, WatchlistEntry.symbol == StockRecord.symbol)
+        .outerjoin(PriceSeries, WatchlistEntry.symbol == PriceSeries.symbol)
         .where(WatchlistEntry.user_id == user_id)
     )
 

@@ -1,9 +1,9 @@
 import Watchlist from './Watchlist.jsx';
 
-export function Dashboard({ watchlist, onOpen, symbol }) {
+export function Dashboard({ watchlist, onOpen }) {
   return <section className="app-page" aria-labelledby="dashboard-title">
     <div className="page-heading"><h1 id="dashboard-title">My dashboard</h1><a className="button-link primary-link" href="#/analysis">Find a stock <span aria-hidden="true">↗</span></a></div>
-    <Watchlist watchlist={watchlist} onOpen={onOpen} selectedSymbol={symbol} expanded />
+    <Watchlist watchlist={watchlist} onOpen={onOpen} />
     <div className="dashboard-links"><a href="#/predictions"><span>Predictions</span><span className="muted">Currently unavailable</span><span aria-hidden="true">↗</span></a><a href="#/performance"><span>Model performance</span><span className="muted">Currently unavailable</span><span aria-hidden="true">↗</span></a></div>
   </section>;
 }

@@ -14,7 +14,7 @@ function downloadPrices(symbol, range, bars, replaying) {
   link.click();
 }
 
-export default function HistoricalChart({ data, range, showSma, showRsi, onToggleSma, onToggleRsi, indicators, onReload, children }) {
+export default function HistoricalChart({ data, range, showSma, showRsi, onToggleSma, onToggleRsi, indicators, onReload, titleAction, children }) {
   const [choosingStart, setChoosingStart] = useState(false);
   const [replay, setReplay] = useState(null);
   const replayId = useId();
@@ -42,7 +42,10 @@ export default function HistoricalChart({ data, range, showSma, showRsi, onToggl
   return <>
     <div className="quote">
       <div>
-        <h2>{data.symbol} <span>{data.name}</span></h2>
+        <div className="quote-title">
+          <h2>{data.symbol} <span>{data.name}</span></h2>
+          {titleAction}
+        </div>
         <div className="price-value">
           <strong>{money.format(latest.close)}</strong>
           <span className="quote-date">{latest.date}<br />{replaying ? 'Replay close' : 'Latest stored close'}</span>

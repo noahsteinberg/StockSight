@@ -1,5 +1,22 @@
 # StockSight — continuation handoff for Gavin and the next agent
 
+## November 22 Analysis watchlist
+
+The Analysis chart fills the content width. Watchlist chips sit beneath the
+search field and scroll horizontally as one row. The star beside the stock
+title adds or removes that symbol through the owner's existing app session.
+The Dashboard retains its filterable watchlist table.
+
+The private watchlist API includes `daily_change_pct` for each saved stock.
+It is the percentage change between the latest two stored closing prices,
+with `null` when there are fewer than two closes. The API uses two bounded
+close lookups for each saved symbol. The chart history and replay selection
+do not change the chip values.
+
+Lint, build, 95 backend tests, 40 public browser tests and 22 isolated account
+browser tests passed. Two disposable PostgreSQL cases were skipped. The
+localhost fixture preview was checked at 1440 px and 320 px.
+
 ## November 22 stock search autocomplete
 
 The existing Analysis search field shows up to eight local suggestions after a

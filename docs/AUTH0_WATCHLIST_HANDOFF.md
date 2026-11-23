@@ -115,9 +115,13 @@ SESSION_HANDOFF.md owns session creation/restoration/logout details.
 | Method and path | Request | Success |
 | --- | --- | --- |
 | GET /api/me | App session or bearer token | 200 `{ "id": "local-user-uuid" }` |
-| GET /api/watchlist | App session or bearer token | 200 `{ "items": [{ "symbol": "AAPL", "name": "Apple Inc.", "added_at": "ISO-UTC" }], "limit": 100 }` |
+| GET /api/watchlist | App session or bearer token | 200 `{ "items": [{ "symbol": "AAPL", "name": "Apple Inc.", "added_at": "ISO-UTC", "daily_change_pct": -0.12 }], "limit": 100 }` |
 | POST /api/watchlist | App session or bearer token; JSON `{ "symbol": "AAPL" }` | 201 saved item; 200 same item on repeat |
 | DELETE /api/watchlist/{symbol} | App session or bearer token | 204; repeated removal also 204 |
+
+Saved items include `daily_change_pct`, calculated from the two most recent
+stored closes. A value of `-0.12` means `-0.12%`. The value is `null` when
+there is insufficient history.
 
 Symbols are trimmed/uppercased and validated. A saved symbol must have a
 canonical series in storage. Lists are bounded to 100 entries per account,
