@@ -2,6 +2,13 @@
 
 ## Daily refresh implementation — November 23
 
+Implementation commit `3d836c6` is published on `feature/daily-price-refresh`.
+GitHub Actions backend, frontend and browser jobs passed for that commit.
+The working tree was clean after publication. Draft PR creation through the
+connector returned 403; no PR was created. Open the branch comparison to create
+a draft manually: https://github.com/noahsteinberg/StockSight/compare/main...feature/daily-price-refresh?expand=1
+Do not merge/deploy before reviewing the coordinated migration and hosted pilot.
+
 Implemented on feature/daily-price-refresh, based on main 2c955a0. See
 [the daily refresh guide](DAILY_REFRESH.md) for commands, data rules and rollout.
 The separate preview-first Yahoo updater reuses validation, records provenance
