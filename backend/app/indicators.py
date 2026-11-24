@@ -1,6 +1,6 @@
 """Versioned, close-based indicators; calculate before trimming the display window."""
 
-from datetime import date
+from datetime import date, datetime
 from math import fsum
 from typing import Literal
 
@@ -24,7 +24,8 @@ class IndicatorHistory(BaseModel):
     name: str
     source: str
     source_url: str
-    mode: Literal["historical_fixture", "historical_snapshot"]
+    mode: Literal["historical_fixture", "historical_snapshot", "daily_history"]
+    last_refreshed_at: datetime | None = None
     adjustment: str
     snapshot_id: str
     as_of: date
@@ -82,6 +83,7 @@ def calculate_indicators(
         source=history.source,
         source_url=history.source_url,
         mode=history.mode,
+        last_refreshed_at=history.last_refreshed_at,
         adjustment=history.adjustment,
         snapshot_id=history.snapshot_id,
         as_of=history.as_of,

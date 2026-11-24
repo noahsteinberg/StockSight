@@ -1,5 +1,10 @@
 # Import the team historical dataset
 
+For incremental daily updates, use the separate [daily refresh guide](DAILY_REFRESH.md).
+This command still replaces complete snapshots. Do not pass a short refresh
+window to it. Audited refreshed series require a separately reviewed provenance-
+preserving replacement rather than deleting their audit history.
+
 The local team snapshot has already been imported successfully. This guide is
 for deliberate initial imports or authorized replacements, not routine startup.
 Use [CURRENT_HANDOFF.md](CURRENT_HANDOFF.md) and LOCAL_START.md to resume existing

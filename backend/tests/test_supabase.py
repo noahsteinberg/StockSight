@@ -128,7 +128,17 @@ def test_browser_roles_cannot_read_or_change_backend_tables():
                     "WHERE relnamespace = 'public'::regnamespace AND relkind = 'r'"
                 )
             ).all()
-            assert len(tables) == 7
+            assert {name for name, _ in tables} == {
+                "stocks",
+                "price_series",
+                "daily_bars",
+                "user_identities",
+                "watchlist_entries",
+                "auth_sessions",
+                "alembic_version",
+                "market_refresh_runs",
+                "market_bar_changes",
+            }
             assert all(enabled for _, enabled in tables)
             assert connection.scalar(text("SELECT count(*) FROM daily_bars")) == 506
         for role in ("anon", "authenticated"):

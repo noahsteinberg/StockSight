@@ -1,5 +1,40 @@
 # StockSight current handoff
 
+## Daily refresh implementation — November 23
+
+Implementation commit `3d836c6` is published on `feature/daily-price-refresh`.
+GitHub Actions backend, frontend and browser jobs passed for that commit.
+The working tree was clean after publication. After Noah reauthenticated GitHub,
+the connector successfully created draft PR #18:
+https://github.com/noahsteinberg/StockSight/pull/18
+The earlier connector 403 is resolved; no credential-based fallback was used.
+Do not merge/deploy before reviewing the coordinated migration and hosted pilot.
+
+Implemented on feature/daily-price-refresh, based on main 2c955a0. See
+[the daily refresh guide](DAILY_REFRESH.md) for commands, data rules and rollout.
+The separate preview-first Yahoo updater reuses validation, records provenance
+and corrections, preserves 2,500 sessions, and supports guarded restoration.
+Migration 0006_market_refresh adds two backend-only audit tables and a nullable
+series updated_at timestamp. Existing prices/indicators also accept daily_history
+and return optional last_refreshed_at. Analysis can refetch stored data without
+calling a provider. Watchlist summaries refresh on revisit/explicit refresh.
+
+Verification: 161 backend tests passed, 2 skipped, including disposable PostgreSQL;
+41 public browser cases passed. The real seven-stock local rehearsal previewed
+42 inserts, committed 79 changes including trimming/correction, repeated with
+zero changes, checked 56 regular localhost HTTP responses, and restored original
+histories. All 24 isolated account browser cases passed, including login,
+logout, watchlist persistence/isolation and retry recovery. Backend Ruff,
+frontend lint/build and pip check passed. Yahoo/calendar dependencies are isolated
+from the API runtime and included in development/test requirements.
+
+No hosted migration, hosted data update, scheduled workflow, TradingView merge
+or ML run was performed. Production remains on the existing deployed contract
+until coordinated migration/release and the hosted pilot are accepted. Do not
+deploy the new API without migration 0006; readiness fails closed on missing
+schema. Main/PR status must be checked before continuing. Raw pilot evidence
+and downloaded prices remain outside Git.
+
 Update this file when implementation, delivery state or acceptance changes.
 Use Git history for earlier checkpoints and the linked guides for setup and
 contracts.

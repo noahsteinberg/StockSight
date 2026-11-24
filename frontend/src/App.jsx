@@ -45,6 +45,14 @@ export default function App() {
   const symbol = route.symbol || selectedSymbol;
   const account = useAccount();
   const watchlist = useWatchlist();
+  const refreshWatchlist = watchlist.retry;
+  const watchlistError = watchlist.error;
+  const lastWatchlistPage = useRef(route.page);
+  useEffect(() => {
+    const previousPage = lastWatchlistPage.current;
+    lastWatchlistPage.current = route.page;
+    if (previousPage !== route.page && account.isAuthenticated && !watchlistError && ['dashboard', 'analysis'].includes(route.page)) refreshWatchlist();
+  }, [route.page, account.isAuthenticated, refreshWatchlist, watchlistError]);
   useEffect(() => {
     document.title = `${({ login: 'Log in', signup: 'Create an account', 'reset-password': 'Reset password' })[route.page] || pages[activeIndex]?.[1] || 'Page not found'} | StockSight`;
     main.current?.focus({ preventScroll: true });

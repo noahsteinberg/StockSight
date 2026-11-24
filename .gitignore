@@ -2,6 +2,7 @@ node_modules/
 dist/
 build/
 .venv/
+.venv-refresh/
 venv/
 __pycache__/
 *.py[cod]

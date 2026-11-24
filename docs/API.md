@@ -1,5 +1,15 @@
 # Current API
 
+## Incremental daily-history extension
+
+After migration 0006 and an explicit refresh, prices and indicators may return
+mode daily_history and optional last_refreshed_at (null for original fixtures).
+Existing modes and routes remain supported. This date describes the last stored
+data change, not a live quote or the most recent no-op check. as_of remains the
+latest stored session. Snapshot IDs advance atomically with data corrections;
+unchanged refresh runs leave them stable. Public HTTP requests never ingest
+provider data. See [daily refresh](DAILY_REFRESH.md).
+
 Continuation context: [CURRENT_HANDOFF.md](CURRENT_HANDOFF.md). Public stock
 contracts below are implemented; prediction/evaluation routes do not exist.
 
