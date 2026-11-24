@@ -26,6 +26,10 @@ the selected stock, and a successful Auth0 callback returns to Dashboard.
   the observations table. Local autocomplete is supplied by stock-suggestions.js.
   Price and indicator requests have independent retry states. The client
   compares snapshot IDs and dates before combining the responses.
+- MarketQuote.jsx embeds TradingView’s free Single Ticker widget above Analysis.
+  Its exchange-qualified symbol follows the selected stock using a static listing
+  map. The widget owns its prices and freshness indicators; they do not enter PostgreSQL,
+  chart snapshots, indicators, exports or model inputs. See [widget setup](TRADINGVIEW.md).
 - FastAPI mounts public and private API routes under /api. app/config.py reads
   typed settings. app/api/stocks.py selects fixture or PostgreSQL storage.
   app/import_prices.py validates and imports histories per symbol. Alembic owns

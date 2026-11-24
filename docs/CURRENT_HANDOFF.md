@@ -4,6 +4,33 @@ Update this file when implementation, delivery state or acceptance changes.
 Use Git history for earlier checkpoints and the linked guides for setup and
 contracts.
 
+## November 23 market-price widget
+
+- Parth approved a free TradingView widget after Alpaca's automated support reply
+  did not grant permission to publicly display/cache Basic/Paper market data.
+  Alpaca remains private testing only; no Alpaca data was written to Supabase.
+- Analysis now includes a separate latest-market-price panel with TradingView
+  attribution and a delay notice. The selected ticker controls its listing.
+  The static listing map covers all 494 imported tickers, including share classes;
+  a mapped listing does not guarantee the vendor permits that widget's display.
+- The historical database still ends November 12, 2026. The widget supplies no
+  raw API data for storage, indicators, watchlists, CSV or models. Incremental
+  refresh remains unfinished. See [integration notes](TRADINGVIEW.md).
+- This change is on `feature/tradingview-prices`, based on current main `afe8051`.
+  It is independent of migration PR #15, which was open/unmerged when work began.
+  No public deployment or merge has been performed by this task.
+- Verification: frontend lint/build and backend Ruff lint/format pass; **95 backend
+  tests passed, 2 PostgreSQL cases skipped** on this main-based branch. The four
+  new widget browser tests use a mocked provider. The local Playwright run was
+  blocked before tests could execute: its bundled Chromium is unavailable for
+  macOS 13, and the installed Chrome launch exited with SIGABRT. CI must run the
+  browser suite; do not count these launch failures as application assertions.
+- Separate real-browser checks loaded TradingView prices for AAPL and MSFT,
+  switched stocks, and confirmed a 320px page with no horizontal overflow. The
+  compact Single Ticker widget replaced Symbol Info after that larger widget
+  clipped its content on narrow screens. Historical AAPL/MSFT reads used the
+  existing hosted snapshot through November 12; no data was imported or changed.
+
 ## Frontend release
 
 - Analysis has a full-width chart, a horizontal row of saved tickers, and a star
