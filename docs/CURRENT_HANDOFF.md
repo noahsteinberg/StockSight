@@ -2,6 +2,24 @@
 
 ## Daily refresh implementation — November 23
 
+### GitHub automation prepared — November 23
+
+Daily price refresh now has a workflow with manual preview/update modes and a
+gated 01:17/06:17 America/New_York Tuesday-Saturday schedule. The job uses the
+existing CLI, prevents overlapping writers, records selected per-stock results,
+and smoke-checks production after successful writes. Ruff, the summary regression
+test, YAML parsing, schedule/default checks and Bash syntax validation passed.
+
+Activation still needs Noah's GitHub UI: add Actions secret
+STOCKSIGHT_REFRESH_DATABASE_URL, run preview then update on main and review both
+results, then set repository variable STOCKSIGHT_REFRESH_SCHEDULE_ENABLED=true.
+The connector cannot set repository secrets or dispatch this workflow; no gh CLI
+is installed. Noah requested exact browser instructions instead of automation of
+his browser. No hosted Actions refresh run or automatic schedule is claimed yet.
+See DAILY_REFRESH.md for exact setup and pause/recovery instructions. Do not
+enable the variable before manual acceptance. Failure email preferences also
+need user verification; per-stock workflow summaries are implemented.
+
 ### Full hosted data update completed — November 23
 
 All 494 supported stocks now end 2026-11-23, with 1,214,290 daily bars retained.
@@ -29,9 +47,8 @@ counts still match the pre-expansion baseline. The full report is ignored at
 backend/.local-data/hosted-universe-verification.json; keep the full backup
 manifest, hosted-universe-write.json and hosted-pool-retry-write.json for recovery.
 
-Next: configure and verify the manual GitHub Actions runner before enabling
-nightly scheduling. No scheduled
-workflow has been installed or enabled. Hosted authenticated account acceptance
+Next: complete the manual GitHub Actions acceptance described above, then enable
+the gated schedule. Hosted authenticated account acceptance
 remains separate. PR #16, frontend discovery/comparison and ML are subsequent work.
 The release and pilot checkpoints below describe the earlier staged rollout.
 

@@ -10,7 +10,9 @@ requests. Migration 0006 adds backend-only refresh-run/bar-change tables plus a
 series update timestamp. See [daily refresh](DAILY_REFRESH.md); production
 scheduled execution remains pending. The additive migration, compatible API,
 seven-stock pilot and full 494-stock refresh passed November 23. History is still
-updated only by deliberate offline commands, with no provider call in public APIs.
+updated by the offline command, with no provider call in public APIs. A GitHub
+Actions workflow now exposes that command through manual preview/update runs;
+its schedule is gated pending manual Actions acceptance (see DAILY_REFRESH.md).
 
 ## Application views
 

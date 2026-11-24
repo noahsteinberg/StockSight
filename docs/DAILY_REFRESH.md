@@ -182,11 +182,45 @@ seed/reimport the database.
 The first full-universe preview and manual expansion are complete. For future
 updates, report blocked stocks explicitly; never force incompatible prices.
 
-After hosted acceptance, run this same command via GitHub Actions, first manually
-and then at 01:17 America/New_York with a 06:17 retry. Store the connection only in
-Actions secrets, use one concurrency group without cancelling an active writer,
-and configure failure notifications and summaries. Schedule activation is
-deliberately deferred. No scheduled workflow has been installed by this increment.
+The Daily price refresh workflow is in .github/workflows/daily-price-refresh.yml.
+It supports manual preview/update runs on main. Scheduled updates are gated by
+the repository variable STOCKSIGHT_REFRESH_SCHEDULE_ENABLED being exactly true;
+leave it absent until manual preview and update runs both pass. The workflow
+uses the same tested CLI, a non-cancelling concurrency group, a 30-minute timeout,
+pinned checkout/setup actions and a per-stock job summary. A failed/partial run
+stays failed; valid committed stocks remain usable and later runs retry gaps.
+Successful update runs also execute the read-only production smoke check.
+
+### One-time GitHub setup
+
+1. Open repository Settings > Secrets and variables > Actions > Secrets.
+   Add repository secret STOCKSIGHT_REFRESH_DATABASE_URL. Its value is only the
+   full private PostgreSQL URL (including password), without the environment
+   variable name or surrounding quotes. Do not paste it in chat or documentation.
+2. Open Actions > Daily price refresh > Run workflow. Select main and mode preview.
+   Run it, wait for green, and review the per-stock summary for missing/blocked data.
+3. Run the workflow again on main with mode update. Wait for green, including the
+   deployed API check. Manual dispatch from the browser remains a user action
+   when the connector cannot dispatch workflows. No hosted Actions run is claimed
+   until its result has actually been observed.
+4. Only after both pass, open Settings > Secrets and variables > Actions > Variables.
+   Add repository variable STOCKSIGHT_REFRESH_SCHEDULE_ENABLED with value true.
+   Delete it or set false to pause scheduled writes. Manual runs still work.
+5. Enable GitHub Actions failure notifications in your personal notification
+   settings, and inspect red runs under Actions. Email delivery depends on those
+   preferences; the workflow summary alone does not establish email acceptance.
+
+The schedule is 01:17 and 06:17 America/New_York, Tuesday through Saturday:
+these mornings follow Monday-Friday trading sessions. Native timezone scheduling
+handles daylight-saving changes. The second run retries incomplete provider data;
+it is safe when the first run already succeeded. Exchange holidays do not create
+synthetic sessions. GitHub can delay schedules, and inactive public repositories
+can have schedules disabled after 60 days. The laptop does not need to stay on.
+
+This automates completed daily history, not streaming quotes or browser polling.
+An open page needs Refresh data/reload; opening it normally reads current storage.
+Schedule and manual-run acceptance remain pending until the GitHub setup above
+is completed. No secret was copied into Git, workflow source or artifacts.
 
 ## References
 
