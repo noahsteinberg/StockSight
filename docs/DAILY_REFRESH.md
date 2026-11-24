@@ -219,8 +219,14 @@ can have schedules disabled after 60 days. The laptop does not need to stay on.
 
 This automates completed daily history, not streaming quotes or browser polling.
 An open page needs Refresh data/reload; opening it normally reads current storage.
-Schedule and manual-run acceptance remain pending until the GitHub setup above
-is completed. No secret was copied into Git, workflow source or artifacts.
+Manual Actions acceptance passed November 23: preview run 45328253600 checked
+all 494 stocks with writes disabled; update run 45328799719 succeeded for all
+494 with writes enabled and passed the production smoke check. Both found zero
+pending inserts/corrections, missing sessions or blockers. Preview took about
+three minutes; update about seven. The repository enable variable is Noah's
+remaining activation step and was not changed by the agent. The scheduled event
+itself still needs observation after activation. No secret was copied into Git,
+workflow source or artifacts.
 
 ## References
 

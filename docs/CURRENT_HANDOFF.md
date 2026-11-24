@@ -4,6 +4,16 @@
 
 ### GitHub automation prepared — November 23
 
+Manual hosted Actions acceptance is now verified from job logs: preview run
+45328253600 reported 494 preview results with writes disabled; update run
+45328799719 reported 494 successes with writes enabled and passed the deployed
+API smoke check (AAPL through November 23). Both had zero inserts/corrections,
+missing sessions or blockers because the full universe was already current.
+Preview took about three minutes; update about seven. The Actions secret is
+therefore working. Noah's remaining activation step is the repository variable
+STOCKSIGHT_REFRESH_SCHEDULE_ENABLED=true. The agent did not change that variable.
+The setup notes below describe the earlier prepared state, before these runs.
+
 Daily price refresh now has a workflow with manual preview/update modes and a
 gated 01:17/06:17 America/New_York Tuesday-Saturday schedule. The job uses the
 existing CLI, prevents overlapping writers, records selected per-stock results,
