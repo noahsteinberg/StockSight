@@ -4,9 +4,10 @@
 
 Implementation commit `3d836c6` is published on `feature/daily-price-refresh`.
 GitHub Actions backend, frontend and browser jobs passed for that commit.
-The working tree was clean after publication. Draft PR creation through the
-connector returned 403; no PR was created. Open the branch comparison to create
-a draft manually: https://github.com/noahsteinberg/StockSight/compare/main...feature/daily-price-refresh?expand=1
+The working tree was clean after publication. After Noah reauthenticated GitHub,
+the connector successfully created draft PR #18:
+https://github.com/noahsteinberg/StockSight/pull/18
+The earlier connector 403 is resolved; no credential-based fallback was used.
 Do not merge/deploy before reviewing the coordinated migration and hosted pilot.
 
 Implemented on feature/daily-price-refresh, based on main 2c955a0. See
