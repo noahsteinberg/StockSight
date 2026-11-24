@@ -29,8 +29,13 @@ integrated separately for display without a new backend streaming service.
 
 Fresh checks for issue triage: CI run 45328102380 and both manual refresh runs
 passed; frontend npm audit reported zero vulnerabilities. Frozen ML research
-remains paused. Legacy issues are being consolidated without claiming deferred
-prediction persistence, saved-ranking research or model serving is completed.
+remains paused. Issue #19 was created and assigned to @Hab1yer. Issues #1/#2/#7/#11
+were closed as completed with evidence; #5/#6/#8/#9 were closed as superseded
+(not planned under their old standalone scope), with unfinished work preserved
+in #19 and the new plan. Original issue bodies remain intact. PR #16 remains open.
+No deferred prediction persistence, saved-ranking research or model serving was
+claimed completed. The plan was published in commit 4e13e71; this checkpoint
+records the subsequent issue cleanup. No application code or hosted data changed.
 
 ## Daily refresh implementation — November 23
 

@@ -438,7 +438,7 @@ and honest states first. Preferences/ML must not block a usable research app.
 
 ## 12. Issue consolidation and remaining operational follow-up
 
-The master issue is the execution tracker for this plan. Proposed consolidation:
+The master issue #19 is the execution tracker for this plan. Consolidation completed:
 
 | Older issue | Disposition and preserved responsibility |
 | --- | --- |
@@ -451,9 +451,10 @@ The master issue is the execution tracker for this plan. Proposed consolidation:
 | #8 paused ranking follow-up | Preserved in ml/README.md and section 9; remains paused, not completed |
 | #9 artifact/inference/outcomes | Consolidated into later approved ML work, not claimed implemented |
 
-Close superseded issues as not planned under their old standalone scope, with a
-link to the master tracker; do not mark unfinished features completed. Leave
-PR #16 open for focused review/integration. Preserve older issue bodies/evidence.
+The four superseded issues were closed as not planned under their old standalone
+scope, with a link to #19; unfinished features were not marked completed. The
+four completed baseline issues were closed with evidence. PR #16 remains open
+for focused review/integration. Older issue bodies/evidence were preserved.
 
 Daily-history configuration is finished: manual Actions acceptance passed and
 Noah reports the enable variable set. Remaining verification is the first actual
