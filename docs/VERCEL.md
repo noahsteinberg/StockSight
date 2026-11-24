@@ -51,7 +51,8 @@ Use the exact HTTPS origin in Auth0 and preserve local entries. Set the dedicate
 verification fallback URL using the [account guide](ACCOUNTS.md#auth0-tenant-setup).
 
 Migrations use a separate direct/session pooler URL on port 5432, as documented
-in [Supabase setup](SUPABASE.md). Confirm hosted head `0005_backend_only_access` and existing data;
+in [Supabase setup](SUPABASE.md). Hosted head is `0006_market_refresh` after the
+November 23 coordinated release; verify the current version and existing data;
 do not run seeds, imports or destructive tests against the hosted database.
 
 ## Automatic deployment and GitHub Actions

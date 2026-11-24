@@ -26,7 +26,8 @@ requires instruction.
 - React/Vite JavaScript and plain CSS; native SVG price/volume chart, ticker/company
   search, ranges, keyboard date inspection, accessible table and watchlist UI.
 - FastAPI, SQLAlchemy/Alembic and PostgreSQL; migration head `0006_market_refresh`.
-  Production remains at its prior schema until coordinated migration/release.
+  Production schema and compatible API were released November 23; hosted price
+  refresh and scheduling still await the pilot.
   See docs/DAILY_REFRESH.md before activating incremental updates.
   Explicit fixture mode is available. No provider request runs inside chart APIs.
   Supabase setup and connection/security behavior are in docs/SUPABASE.md;

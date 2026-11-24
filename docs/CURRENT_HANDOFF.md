@@ -2,13 +2,38 @@
 
 ## Daily refresh implementation — November 23
 
+### Hosted release checkpoint — November 23
+
+PR #18 is merged at main d65544a9dc004b879d936c8e37f7670fac9ef26a.
+Its latest PR CI passed. The additive 0006_market_refresh migration was applied
+through Supabase with a guarded Alembic version update. Production Vercel
+deployment dpl_7q8qFZqaMRDjR8enV7W8hNcju9MT is READY and assigned to
+https://stocksight-rose.vercel.app. All 1,214,087 existing bars remain unchanged;
+the two audit tables are empty and backend-only (RLS, browser privileges revoked).
+The deployment smoke check passed, as did 56 production HTTPS price/indicator
+checks across AAPL/MSFT/NVDA/ABNB/BRK-B/HUBB/ZTS and all four ranges. Their dates,
+snapshots and null refresh timestamps agree. Error/fatal runtime-log scan found
+no matching records for the new deployment. Security advisor reports only the
+expected informational RLS-without-policy notices for nine backend-only tables.
+Raw read-only release evidence is outside Git under Noah's
+tmp/stocksight-feed-audit-20261123/hosted-release-check.json.
+
+Next: provide the tested updater's private database connection in backend/.env
+or its process environment, back up the seven pilot histories, preview fresh
+downloads, apply only compatible data and verify the hosted result. No configured
+connection was found in this worktree; the Supabase plugin's authorization does
+not automatically configure the Python updater. Do not bypass its tested writer.
+No hosted price update or nightly scheduling has occurred. All histories still
+end November 12. PR #16 and ML remain separate. Do not rerun the completed
+migration. The implementation/publication notes below are dated earlier evidence.
+
 Implementation commit `3d836c6` is published on `feature/daily-price-refresh`.
 GitHub Actions backend, frontend and browser jobs passed for that commit.
 The working tree was clean after publication. After Noah reauthenticated GitHub,
 the connector successfully created draft PR #18:
 https://github.com/noahsteinberg/StockSight/pull/18
 The earlier connector 403 is resolved; no credential-based fallback was used.
-Do not merge/deploy before reviewing the coordinated migration and hosted pilot.
+This earlier draft/publication checkpoint is superseded by the release above.
 
 Implemented on feature/daily-price-refresh, based on main 2c955a0. See
 [the daily refresh guide](DAILY_REFRESH.md) for commands, data rules and rollout.
@@ -28,12 +53,10 @@ logout, watchlist persistence/isolation and retry recovery. Backend Ruff,
 frontend lint/build and pip check passed. Yahoo/calendar dependencies are isolated
 from the API runtime and included in development/test requirements.
 
-No hosted migration, hosted data update, scheduled workflow, TradingView merge
-or ML run was performed. Production remains on the existing deployed contract
-until coordinated migration/release and the hosted pilot are accepted. Do not
-deploy the new API without migration 0006; readiness fails closed on missing
-schema. Main/PR status must be checked before continuing. Raw pilot evidence
-and downloaded prices remain outside Git.
+At implementation completion, no hosted migration or release had occurred.
+The release checkpoint above records their subsequent completion. Hosted price
+updates, scheduling, TradingView and ML remain pending. Readiness fails closed
+on a missing schema. Raw pilot evidence and downloads remain outside Git.
 
 Update this file when implementation, delivery state or acceptance changes.
 Use Git history for earlier checkpoints and the linked guides for setup and
@@ -79,7 +102,7 @@ contracts.
 - The dashboard confirmed the Free plan's 500 MB database allowance. Observed
   PostgreSQL size after import was **326,137,523 bytes**. Every ticker's stored
   count, date bounds and original source SHA256 matched the retained import plan.
-  Migration head remains `0005_backend_only_access`; all seven public app/version
+  At this pre-refresh checkpoint migration head was `0005_backend_only_access`; all seven public app/version
   tables retain RLS, `anon`/`authenticated` lack SELECT/INSERT/UPDATE/DELETE
   privileges, and private account/session/watchlist table counts are unchanged.
   AAPL's old fixture was backed up before its authorized replacement.

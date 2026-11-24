@@ -2,8 +2,21 @@
 
 ## Delivery state
 
-Implemented on an isolated branch from main 2c955a0. No hosted migration, data
-write, schedule, TradingView merge or ML run has been performed.
+PR #18 merged into main at d65544a on November 23. Hosted migration
+0006_market_refresh is applied and the compatible Vercel deployment is READY.
+The migration used the Supabase migration tool with SQL generated from the
+committed Alembic migration, a prior-version guard and short lock timeout; the
+application Alembic version was advanced in the same transaction.
+All 1,214,087 existing bars remain unchanged. Both new audit tables have RLS and
+no anon/authenticated table privileges. Production smoke checks and 56 HTTPS
+price/indicator responses across seven stocks and four ranges passed.
+
+No hosted price refresh, schedule, TradingView merge or ML run has occurred.
+The tested Python updater still needs the private STOCKSIGHT_DATABASE_URL in
+backend/.env or its process environment. The Supabase plugin connection does not
+automatically configure SQLAlchemy. Do not replace the tested writer with ad hoc
+SQL. Back up pilot histories before the first write, then preview and apply the
+seven-stock pilot. All stored histories still end November 12.
 
 The updater extends existing imported US-stock daily history through a separate
 command. It never runs inside public chart requests. The full-snapshot importer
@@ -131,8 +144,10 @@ implementation-local-pilot.json. Existing research environments were not modifie
 
 ## Hosted pilot and scheduling still to do
 
-Back up AAPL/MSFT/NVDA/ABNB/BRK-B/HUBB/ZTS, review the hosted migration/preview,
-apply the pilot and verify deployed ranges, indicators, dates, CSV and accounts.
+The hosted migration and compatible code deployment are complete. Configure the
+private updater connection, back up AAPL/MSFT/NVDA/ABNB/BRK-B/HUBB/ZTS, review a
+fresh preview, apply the pilot and verify deployed ranges, indicators, dates,
+CSV and accounts. Do not rerun migration 0006 or seed/reimport the database.
 Run a universe-wide preview before expanding; report blocked stocks explicitly.
 
 After hosted acceptance, run this same command via GitHub Actions, first manually
