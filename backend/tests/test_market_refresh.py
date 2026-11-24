@@ -1,15 +1,19 @@
 """Incremental persistence contracts; no real provider or hosted database writes."""
 
+import json
 import os
+import time
 from copy import deepcopy
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 from alembic import command
 from alembic.config import Config
 from fastapi.testclient import TestClient
-from sqlalchemy import func, select
+from pydantic import SecretStr
+from sqlalchemy import create_engine, func, select
 from sqlalchemy.engine import make_url
 
 from app.config import Settings
@@ -39,6 +43,40 @@ BACKEND = Path(__file__).resolve().parents[1]
 DATABASES = ["sqlite"] + (
     ["postgresql"] if os.getenv("STOCKSIGHT_TEST_DATABASE_URL") else []
 )
+
+
+def test_cli_does_not_starve_a_single_connection_pool(tmp_path, monkeypatch):
+    from app import refresh_prices
+
+    eng = create_engine(
+        f"sqlite:///{tmp_path / 'single-pool.sqlite'}",
+        pool_size=1,
+        max_overflow=0,
+        pool_timeout=0.01,
+    )
+    report = tmp_path / "preview.json"
+    monkeypatch.setattr(refresh_prices, "database_engine", lambda url: eng)
+    monkeypatch.setattr(
+        refresh_prices,
+        "Settings",
+        lambda: SimpleNamespace(database_url=SecretStr("sqlite://")),
+    )
+    monkeypatch.setattr(
+        "sys.argv",
+        ["refresh_prices", "--symbols", "AAPL,MSFT,NVDA", "--report", str(report)],
+    )
+
+    def slow_read(engine, symbol, write):
+        with engine.connect():
+            time.sleep(0.04)
+        return {"symbol": symbol, "status": "preview"}
+
+    monkeypatch.setattr(refresh_prices, "run_symbol", slow_read)
+    refresh_prices.main()
+    result = json.loads(report.read_text())
+    assert result["status"] == "complete"
+    assert [r["symbol"] for r in result["results"]] == ["AAPL", "MSFT", "NVDA"]
+    assert all(r["status"] == "preview" for r in result["results"])
 
 
 @pytest.fixture(params=DATABASES)

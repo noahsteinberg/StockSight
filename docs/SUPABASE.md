@@ -55,9 +55,15 @@ From `backend` on macOS/Linux (Windows uses `.venv\Scripts\python.exe`):
 .venv/bin/python -m alembic current
 ```
 
-The expected head is `0005_backend_only_access`. Alembic owns the six application
+The expected head is `0006_market_refresh`. Alembic owns the eight application
 tables plus its version table; do not create separate, incompatible stock tables
 manually. API startup does not run migrations.
+
+Migration 0006 adds the nullable series update timestamp and two backend-only
+refresh audit tables. It was applied to the existing hosted project on November
+23 through reviewed Alembic-generated SQL, with the application version advanced
+in the same transaction. Never rerun the initial bootstrap on this database.
+See [daily refresh](DAILY_REFRESH.md) for data updates and recovery.
 
 For a new empty project, the equivalent Alembic-generated bootstrap SQL can be
 reviewed and run once in the project's SQL Editor. It includes the migration
@@ -65,6 +71,9 @@ version record, so subsequent Alembic upgrades recognize the schema. Use either
 that full bootstrap or `alembic upgrade head` for initial creation; the bootstrap
 is not a rerunnable script for an existing database. Later changes still belong
 in Alembic migrations.
+
+An older saved bootstrap may stop at 0005. After using it on an empty project,
+run `alembic upgrade head` and verify 0006 before starting the current API.
 
 Migration 0005 enables PostgreSQL RLS and revokes table privileges from PUBLIC and
 Supabase's `anon`/`authenticated` roles when present. No browser policies are

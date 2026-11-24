@@ -11,6 +11,7 @@ from pathlib import Path
 from pydantic import ValidationError
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.pool import QueuePool
 
 from app.config import Settings
 from app.db import PriceSeries, database_engine
@@ -129,7 +130,14 @@ def main():
                         else "Database operation failed; check private configuration",
                     }
 
-            with concurrent.futures.ThreadPoolExecutor(max_workers=3) as workers:
+            # The transaction-pooler engine deliberately allows one connection
+            # for web requests. Avoid starving CLI workers on that shared pool.
+            worker_count = (
+                min(3, engine.pool.size()) if isinstance(engine.pool, QueuePool) else 3
+            )
+            with concurrent.futures.ThreadPoolExecutor(
+                max_workers=worker_count
+            ) as workers:
                 results = list(workers.map(work, symbols))
             failed = any(
                 item["status"] in ("blocked", "partial", "error") for item in results

@@ -7,16 +7,42 @@ PR #18 merged into main at d65544a on November 23. Hosted migration
 The migration used the Supabase migration tool with SQL generated from the
 committed Alembic migration, a prior-version guard and short lock timeout; the
 application Alembic version was advanced in the same transaction.
-All 1,214,087 existing bars remain unchanged. Both new audit tables have RLS and
+The migration preserved all 1,214,087 existing bars. Both new audit tables have RLS and
 no anon/authenticated table privileges. Production smoke checks and 56 HTTPS
 price/indicator responses across seven stocks and four ranges passed.
 
-No hosted price refresh, schedule, TradingView merge or ML run has occurred.
-The tested Python updater still needs the private STOCKSIGHT_DATABASE_URL in
-backend/.env or its process environment. The Supabase plugin connection does not
-automatically configure SQLAlchemy. Do not replace the tested writer with ad hoc
-SQL. Back up pilot histories before the first write, then preview and apply the
-seven-stock pilot. All stored histories still end November 12.
+The hosted seven-stock pilot subsequently completed successfully. Full histories
+and metadata were backed up locally before the tested writer inserted 49 records,
+audited one HUBB volume correction and retained the configured latest 2,500 sessions
+(42 oldest bars removed and recoverable through the audit). AAPL/MSFT/NVDA/ABNB/
+BRK-B/HUBB/ZTS now end November 23. ABNB grew by seven; total bars are 1,214,094.
+Seven identical reruns changed no bars. All 56 production price/indicator checks,
+the deployment smoke and the real production browser refresh/indicator/CSV checks
+passed. The other 487 series' metadata/coverage and account table counts are
+unchanged. Authenticated hosted account acceptance was not rerun.
+
+The private connection now exists in ignored backend/.env in Noah's updater
+worktree. It does not travel with Git; never print or commit it. The Supabase
+plugin connection does not automatically configure SQLAlchemy.
+
+The subsequent full-universe preview passed for all 494 stocks. Full histories
+were backed up before expansion. All 494 now end November 23, with 1,214,290
+stored bars. Across pilot and expansion there were 3,458 inserts, one audited
+HUBB volume correction and 3,255 audited retention removals. The original Parquet
+remains unchanged. Database size after refresh was 331,454,131 bytes.
+
+Seven pool timeouts in the first full write were resolved: CLI worker concurrency
+now respects the database pool size, and all seven fresh previews/retries passed.
+API connection settings remain unchanged. Targeted regression checks passed
+(28 tests, 2 PostgreSQL-only skips in this local run); Ruff and frontend lint/build
+passed. No schedule, TradingView merge or ML run has occurred.
+
+Final full-universe acceptance: 988 production HTTPS responses (prices and
+indicators for every stock) matched stored OHLCV, dates, revisions and update
+timestamps. All histories end November 23; account/session/watchlist counts match
+the pre-expansion baseline. Evidence, full backups and per-stock recovery run IDs
+are under ignored backend/.local-data/hosted-universe-*.json,
+universe-before-refresh/ and hosted-pool-retry-write.json.
 
 The updater extends existing imported US-stock daily history through a separate
 command. It never runs inside public chart requests. The full-snapshot importer
@@ -78,9 +104,13 @@ a separate provenance-preserving migration because audit foreign keys protect th
 
 - Daily OHLCV and auxiliary values are fetched with yfinance 1.8.0; auto_adjust,
   back_adjust and repair are false, actions/keepna true.
-- The command uses three workers, 20-second request timeouts and three attempts
+- The command uses up to three workers, capped by the database queue-pool size,
+  with 20-second request timeouts and three attempts
   with bounded backoff. Optional Yahoo/calendar packages do not enter the API's
   runtime requirements.
+- The Supabase transaction-pooler engine on port 6543 intentionally has one
+  connection; the CLI uses one worker there to prevent pool starvation. A private
+  direct/session URL can use the normal pool and up to three workers for bulk work.
 - It uses the XNYS session calendar for the supported US-equity universe, including
   early closes, and a 30-minute finalization buffer. Unsupported provider
   timezone/symbol/date responses fail; holidays do not create synthetic bars.
@@ -142,13 +172,15 @@ Raw reports, downloaded data and test connection information stay outside Git.
 The seven-stock report is in Noah's local tmp/stocksight-feed-audit-20261123/
 implementation-local-pilot.json. Existing research environments were not modified.
 
-## Hosted pilot and scheduling still to do
+## Hosted verification and scheduling
 
-The hosted migration and compatible code deployment are complete. Configure the
-private updater connection, back up AAPL/MSFT/NVDA/ABNB/BRK-B/HUBB/ZTS, review a
-fresh preview, apply the pilot and verify deployed ranges, indicators, dates,
-CSV and accounts. Do not rerun migration 0006 or seed/reimport the database.
-Run a universe-wide preview before expanding; report blocked stocks explicitly.
+The hosted migration, compatible code deployment and seven-stock price pilot are
+complete. Stored data, refresh, indicators and CSV passed production checks.
+Hosted authenticated account acceptance remains a separate manual check. Keep
+the ignored pilot backups and audit run IDs. Do not rerun migration 0006 or
+seed/reimport the database.
+The first full-universe preview and manual expansion are complete. For future
+updates, report blocked stocks explicitly; never force incompatible prices.
 
 After hosted acceptance, run this same command via GitHub Actions, first manually
 and then at 01:17 America/New_York with a 06:17 retry. Store the connection only in

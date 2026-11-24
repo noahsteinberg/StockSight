@@ -1,9 +1,10 @@
 # Yahoo Finance investigation for Parth
 
 November 23 implementation follow-up: [DAILY_REFRESH.md](DAILY_REFRESH.md)
-documents the separate updater, isolated evidence and pending hosted rollout.
+documents the separate updater, isolated evidence and hosted rollout status.
 The historical investigation below records earlier findings and proposed rules;
-it does not mean a schedule or production refresh has been activated.
+it is not the current delivery checklist. Hosted refresh verification is recorded
+in the daily guide and current handoff; nightly scheduling remains disabled.
 
 Prepared November 16, 2026. The meeting assigned research into fresh Yahoo Finance
 data, with the existing stored snapshot kept for the current presentation.

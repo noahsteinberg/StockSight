@@ -8,9 +8,9 @@ changes and revision together. It reuses the same market tables and numerical
 validation as snapshot import. No provider dependency is required by public API
 requests. Migration 0006 adds backend-only refresh-run/bar-change tables plus a
 series update timestamp. See [daily refresh](DAILY_REFRESH.md); production
-price-update acceptance and scheduled execution remain pending. The additive
-migration and compatible API were deployed November 23; existing histories
-remain unchanged until the hosted pilot runs.
+scheduled execution remains pending. The additive migration, compatible API,
+seven-stock pilot and full 494-stock refresh passed November 23. History is still
+updated only by deliberate offline commands, with no provider call in public APIs.
 
 ## Application views
 

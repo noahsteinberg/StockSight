@@ -2,14 +2,48 @@
 
 ## Daily refresh implementation — November 23
 
+### Full hosted data update completed — November 23
+
+All 494 supported stocks now end 2026-11-23, with 1,214,290 daily bars retained.
+The read-only universe preview passed for all 494. Full histories, series metadata
+and a manifest were saved under ignored backend/.local-data/universe-before-refresh/
+before expansion. Including the pilot, the update added 3,458 daily records,
+audited one HUBB volume correction and retained the agreed latest 2,500 sessions
+per stock (3,255 oldest records removed and preserved in the change audit).
+The research Parquet was not edited. Database size after refresh: 331,454,131 bytes.
+
+The first expansion completed 480 new stocks and left seven unchanged after
+connection-pool timeouts. The shared web engine deliberately has one connection
+on transaction-pooler port 6543; three CLI workers could starve that pool. The
+CLI now caps its workers at the engine's queue-pool size (maximum three), without
+changing API connection settings. A regression test uses a real one-connection
+pool and short timeout. Targeted updater/Supabase tests: 28 passed, 2 skipped;
+Ruff lint/format and frontend lint/build passed. A fresh preview and write retry
+of CBOE/CRH/DVN/IBM/MAR/PCG/SWK all succeeded. Preserve the original failed-run
+report as evidence; those errors are resolved, not outstanding data gaps.
+
+Final universe verification passed: 988 production HTTPS responses (prices and
+indicators for every stock) matched stored OHLCV, dates, revisions and refresh
+timestamps. All 494 latest sessions are November 23. Account/session/watchlist
+counts still match the pre-expansion baseline. The full report is ignored at
+backend/.local-data/hosted-universe-verification.json; keep the full backup
+manifest, hosted-universe-write.json and hosted-pool-retry-write.json for recovery.
+
+Next: configure and verify the manual GitHub Actions runner before enabling
+nightly scheduling. No scheduled
+workflow has been installed or enabled. Hosted authenticated account acceptance
+remains separate. PR #16, frontend discovery/comparison and ML are subsequent work.
+The release and pilot checkpoints below describe the earlier staged rollout.
+
 ### Hosted release checkpoint — November 23
 
 PR #18 is merged at main d65544a9dc004b879d936c8e37f7670fac9ef26a.
 Its latest PR CI passed. The additive 0006_market_refresh migration was applied
 through Supabase with a guarded Alembic version update. Production Vercel
 deployment dpl_7q8qFZqaMRDjR8enV7W8hNcju9MT is READY and assigned to
-https://stocksight-rose.vercel.app. All 1,214,087 existing bars remain unchanged;
-the two audit tables are empty and backend-only (RLS, browser privileges revoked).
+https://stocksight-rose.vercel.app. At this pre-data-update checkpoint all 1,214,087
+existing bars were unchanged and the two audit tables were empty and backend-only
+(RLS, browser privileges revoked).
 The deployment smoke check passed, as did 56 production HTTPS price/indicator
 checks across AAPL/MSFT/NVDA/ABNB/BRK-B/HUBB/ZTS and all four ranges. Their dates,
 snapshots and null refresh timestamps agree. Error/fatal runtime-log scan found
@@ -18,14 +52,37 @@ expected informational RLS-without-policy notices for nine backend-only tables.
 Raw read-only release evidence is outside Git under Noah's
 tmp/stocksight-feed-audit-20261123/hosted-release-check.json.
 
-Next: provide the tested updater's private database connection in backend/.env
-or its process environment, back up the seven pilot histories, preview fresh
-downloads, apply only compatible data and verify the hosted result. No configured
-connection was found in this worktree; the Supabase plugin's authorization does
-not automatically configure the Python updater. Do not bypass its tested writer.
-No hosted price update or nightly scheduling has occurred. All histories still
-end November 12. PR #16 and ML remain separate. Do not rerun the completed
-migration. The implementation/publication notes below are dated earlier evidence.
+### Hosted seven-stock pilot completed — November 23
+
+Noah saved the private connection in this worktree's ignored backend/.env. A typo
+in the project username was corrected; the password was preserved and not printed.
+The connection independently confirmed the intended schema and data counts.
+Full pilot histories/metadata were backed up before writes. Fresh downloads
+passed all seven overlap checks with no missing completed sessions or OHLC
+conflicts. The tested apply_refresh writer committed 49 new sessions, one HUBB
+volume correction and 42 audited retention removals. AAPL/MSFT/NVDA/ABNB/BRK-B/
+HUBB/ZTS now end 2026-11-23. Total stored bars: 1,214,094 across 494 stocks.
+
+Verification after writing: 56 production HTTPS price/indicator responses matched
+stored OHLCV, dates, revisions and refresh timestamps; production smoke passed.
+Seven identical captured-download reruns changed zero bars and preserved revisions.
+The other 487 series' metadata/counts/date bounds were unchanged, and private
+account/session/watchlist counts matched the pre-write baseline. A real headless
+production browser verified AAPL's November 23 date, stored-update label, Refresh
+data, both indicator toggles, latest-date CSV export and the mobile refresh control,
+with zero page errors. No error/fatal production runtime logs matched the check.
+Hosted account save/logout/two-user acceptance was not rerun; count preservation
+and guest-route checks do not replace that acceptance.
+
+Local backups, normalized downloads, per-stock audit run IDs and reports are
+ignored under backend/.local-data/hosted-pilot-*.json, hosted-download-*.json,
+hosted-write-*.json, hosted-repeat-*.json and hosted-browser-verification.json.
+Do not delete these recovery records. Recovery remains the guarded restore-run
+procedure; no production rollback was exercised or needed.
+
+The subsequent full-universe checkpoint above supersedes the pilot-only coverage.
+PR #16 and ML remain separate. Do not rerun the completed migration. The
+implementation/publication notes below are dated earlier evidence.
 
 Implementation commit `3d836c6` is published on `feature/daily-price-refresh`.
 GitHub Actions backend, frontend and browser jobs passed for that commit.
