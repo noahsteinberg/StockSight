@@ -14,6 +14,19 @@ in their guides. Inspect the actual branch and working tree before making
 changes. Ignored configuration, local data and unpublished commits vary by
 checkout.
 
+## Product implementation requires human review first
+
+For the next product/frontend work, read
+[Vlad's product plan](docs/FRONTEND_PRODUCT_HANDOFF.md) before changing application
+code, contracts, schema, dependencies or UX. Vlad (@Hab1yer) coordinates it.
+Present concrete proposed changes and a small wireframe, ask the supervising
+user concise multiple-choice questions about unresolved UX decisions, and wait
+for explicit approval of the increment before coding. Record answers; do not
+re-ask decisions already approved. Return the tested result for human review
+before merge/deployment unless that specific action was already authorized.
+Planning/documentation/issue consolidation can proceed when requested; they
+do not automatically authorize a future agent's feature implementation.
+
 Gavin's standing preference: commit completed changes after appropriate
 verification at the end of each task. Include intended source/docs changes, keep
 local data/credentials/evidence ignored, inspect the diff and preserve unrelated
@@ -27,8 +40,8 @@ requires instruction.
   search, ranges, keyboard date inspection, accessible table and watchlist UI.
 - FastAPI, SQLAlchemy/Alembic and PostgreSQL; migration head `0006_market_refresh`.
   Production schema/API and the full 494-stock hosted refresh were verified
-  November 23. The Actions refresh workflow is prepared; nightly writes remain
-  gated off until manual Actions acceptance and the repository enable variable.
+  November 23. Both manual Actions modes passed; Noah reports enabling the
+  schedule variable. The first actual scheduled event remains unobserved.
   See docs/DAILY_REFRESH.md before activating incremental updates.
   Explicit fixture mode is available. No provider request runs inside chart APIs.
   Supabase setup and connection/security behavior are in docs/SUPABASE.md;
@@ -39,8 +52,8 @@ requires instruction.
 - SMA20/Wilder RSI14 backend API and frontend toggles/plots are implemented and
   locally verified. See INDICATORS.md for null
   warm-up values, fixed calculation history and versioned numerical conventions.
-- Product ML inference, stored forecasts/outcomes, evaluation and hosted
-  refresh activation remain unfinished. Do not add fake
+- Product ML inference, stored forecasts/outcomes, evaluation and the new Explore/
+  Compare/preferences features remain unfinished. Do not add fake
   scores, prices, forecasts or claims that the full MVP is complete.
 
 Read the [application view contracts](docs/ARCHITECTURE.md) before wiring ML.

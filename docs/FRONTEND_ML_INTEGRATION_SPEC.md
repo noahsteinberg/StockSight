@@ -1,5 +1,13 @@
 # StockSight frontend and ML integration specification
 
+Current reading notice: [the frontend product handoff](FRONTEND_PRODUCT_HANDOFF.md)
+now owns page priorities, Explore/Compare/preferences proposals and human approval
+before implementation. [CURRENT_HANDOFF.md](CURRENT_HANDOFF.md) owns actual state:
+494 stocks and validated daily refresh/Actions acceptance are delivered. PR #16's
+quote widget is separate and unmerged. This November 17 document preserves
+proposed ML response semantics and evaluation safeguards; its old ingestion
+status and AAPL-first priority are historical, not the next product backlog.
+
 Prepared November 17, 2026 for the next implementing AI and team reviewers.
 Status: proposed implementation specification, not implemented ML functionality.
 Read [the current handoff](CURRENT_HANDOFF.md) first. ML research is paused at Noah's request.
@@ -16,8 +24,10 @@ Working today: existing React/Vite pages, hash navigation, sourced daily price/
 volume charts, SMA20/RSI14, FastAPI, SQLAlchemy/Alembic, Supabase storage, Auth0
 and app-session/private-watchlist code. Production is stocksight-rose.vercel.app.
 Current hosted coverage is recorded in CURRENT_HANDOFF.md. Predictions and
-performance intentionally show unavailable states. No current quote feed,
-automated refresh, approved model artifact, prediction persistence or ML API exists.
+performance intentionally show unavailable states. At the original November 17
+checkpoint there was no refresh or quote integration. Daily refresh is now
+implemented; an approved model artifact, prediction persistence and ML API are
+still absent. Quote-widget delivery status is recorded in the current handoff.
 Noah reports Auth0 settings were fixed; complete hosted account acceptance still
 needs evidence. Do not confuse implemented auth code with freshly verified login.
 

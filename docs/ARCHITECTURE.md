@@ -1,5 +1,10 @@
 # Architecture
 
+For proposed discovery/comparison/preferences views and their approval gates,
+read [the frontend product handoff](FRONTEND_PRODUCT_HANDOFF.md). Its proposed
+routes/tables are not implemented by this documentation change; existing view
+contracts below remain the running application until an approved increment ships.
+
 ## Incremental daily refresh
 
 An offline Python command fetches and validates completed Yahoo daily sessions,

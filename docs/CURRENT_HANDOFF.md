@@ -1,5 +1,37 @@
 # StockSight current handoff
 
+## Next product work: Vlad / @Hab1yer
+
+Read [FRONTEND_PRODUCT_HANDOFF.md](FRONTEND_PRODUCT_HANDOFF.md) for the proposed
+stock-exploration product: Explore, preserved Analysis, 2–4-stock Compare, private
+Watchlist, optional research preferences and honest future signal integration.
+It gives exact user flows/questions, data gaps, proposed APIs/persistence,
+incremental acceptance and PR #16 integration precautions. **Before coding,
+the next AI must ask its supervising human to review the concrete plan, answer
+unresolved UX questions and explicitly approve the increment.** Application code,
+schema and PR #16 were not changed by this planning task.
+
+The master implementation tracker is
+[issue #19](https://github.com/noahsteinberg/StockSight/issues/19), assigned to
+@Hab1yer. It contains the human-approval requirement and copyable agent prompt.
+
+Reviewed main at e9a4620. PR #16 is unmerged and reports merge conflicts; port/rebase
+it against current main only after review, preserving daily-refresh changes.
+The catalog lacks sectors and imported names/exchanges may be placeholders.
+Profiles, discovery, comparison and ML APIs do not exist yet. Do not fabricate
+metadata, predictions or recommendation confidence while adding the views.
+
+Noah reports setting STOCKSIGHT_REFRESH_SCHEDULE_ENABLED=true after both manual
+Actions modes passed. Daily-history configuration is complete; first scheduled
+event observation and failure-email preferences remain follow-ups. No live-price
+values should be extracted from TradingView into daily_bars. A widget can be
+integrated separately for display without a new backend streaming service.
+
+Fresh checks for issue triage: CI run 45328102380 and both manual refresh runs
+passed; frontend npm audit reported zero vulnerabilities. Frozen ML research
+remains paused. Legacy issues are being consolidated without claiming deferred
+prediction persistence, saved-ranking research or model serving is completed.
+
 ## Daily refresh implementation — November 23
 
 ### GitHub automation prepared — November 23

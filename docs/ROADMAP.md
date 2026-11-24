@@ -1,5 +1,12 @@
 # Proposed StockSight team roadmap
 
+Historical team proposal: completed milestones below are not the current backlog.
+Noah's newer [frontend product plan](FRONTEND_PRODUCT_HANDOFF.md) defines the
+proposed Explore/Compare/preferences sequence and human approval gates, with Vlad
+(@Hab1yer) coordinating. Read CURRENT_HANDOFF.md for delivered infrastructure and
+paused ML; preserve this roadmap as team/project context rather than restarting
+old ingestion, deployment or model work from its milestones.
+
 See the [current handoff](CURRENT_HANDOFF.md) for implementation, release and
 verification status. This roadmap defines team responsibilities and the full
 MVP's acceptance gates.

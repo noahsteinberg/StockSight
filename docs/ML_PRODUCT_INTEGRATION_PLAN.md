@@ -1,5 +1,14 @@
 # ML product integration plan
 
+Current reading notice: this is the earlier scientific integration proposal.
+[FRONTEND_PRODUCT_HANDOFF.md](FRONTEND_PRODUCT_HANDOFF.md) supersedes its product
+page priorities and requires supervising-human approval before feature coding.
+Daily refresh and the 494-stock hosted universe are now delivered; see
+[CURRENT_HANDOFF.md](CURRENT_HANDOFF.md). Research/promotion, immutable forecasts,
+trusted-artifact parity and publication-timing gates below remain applicable.
+The old ingestion status, deployment ordering and example values are dated
+proposals, not implemented ML or evidence of accurate recommendations.
+
 Status: proposed for team review; ML integration not implemented; research paused November 17
 
 Date: 2026-11-16
@@ -219,7 +228,7 @@ version and retains the prior record for audit; it does not overwrite history.
 ## Candidate database entities
 
 Latest `main` already uses PostgreSQL, SQLAlchemy and Alembic through migration
-`0005_backend_only_access`. ML persistence should be added in a reviewed next
+`0006_market_refresh` at the current checkpoint. ML persistence should be added in a reviewed next
 migration without replacing the existing stock/bar/account/watchlist schema.
 New tables inherit the backend-only/RLS posture: no direct browser-role access.
 The design needs these responsibilities:

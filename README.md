@@ -4,12 +4,18 @@ A University of Connecticut CSE 4095 team project for historical stock analysis
 and measurable machine-learning predictions. Educational use, not financial advice.
 
 StockSight supports historical stock search and charts, SMA20/RSI14, chart
-inspection and replay, Auth0 accounts, and private watchlists. Predictions,
-model evaluation and incremental market-data refresh remain future work.
+inspection and replay, Auth0 accounts, private watchlists and validated offline
+daily-data refresh with a GitHub Actions runner. Predictions, model evaluation
+and the proposed Explore/Compare/preferences features remain future work.
 
 Start with the [current handoff](docs/CURRENT_HANDOFF.md) for the latest checkout,
 release and verification status. Use [local startup](docs/LOCAL_START.md) to run
 the app.
+
+For the next product work, Vlad (@Hab1yer) and his AI should read the
+[frontend product handoff](docs/FRONTEND_PRODUCT_HANDOFF.md). It proposes stock
+discovery, comparison, optional preferences and future ML connectors, with
+mandatory human review/approval before feature coding. It is not implemented UI.
 
 ## Stack and source map
 
@@ -23,7 +29,7 @@ offline, separately from inference. The chart uses native SVG and navigation use
 | `frontend/src` | Analysis/chart, account context, private watchlist and existing styles |
 | `frontend/e2e` | Chart and account/session browser tests |
 | `backend/app` | API, authentication/sessions, repositories, indicators and imports |
-| `backend/migrations` | Schema/access controls through `0005_backend_only_access` |
+| `backend/migrations` | Schema/access controls through `0006_market_refresh` |
 | `backend/tests` | Numerical, HTTP-contract, migration, persistence and security tests |
 | `docs` | Current handoff, contracts, setup and product plans |
 | `ml` | Offline research evidence and evaluation protocols |
@@ -65,7 +71,8 @@ database settings and serves 506 historical AAPL observations. Its public price
 and indicator APIs work; it does not verify accounts or PostgreSQL.
 For the imported database and Auth0 setup, follow [LOCAL_START.md](docs/LOCAL_START.md).
 Do not run `app.seed` over the existing team snapshot. API startup never imports,
-migrates or silently falls back. No recurring live data feed is implemented.
+migrates or silently falls back. [Daily refresh](docs/DAILY_REFRESH.md) runs
+separately from web requests; it updates completed sessions, not streaming quotes.
 
 ## Configuration and verification
 
@@ -85,6 +92,8 @@ See [contributing](CONTRIBUTING.md) for review workflow,
 for team responsibilities and MVP gates.
 
 ## Documentation
+
+- [Current frontend/product plan for Vlad](docs/FRONTEND_PRODUCT_HANDOFF.md): proposed pages, workflows, data contracts and approval gates
 
 - [Parth's November 23 data migration: work summary and evidence](docs/PARTH_DATA_UPDATE_2026-11-23.md)
 - [Current handoff](docs/CURRENT_HANDOFF.md) and [local startup](docs/LOCAL_START.md)
