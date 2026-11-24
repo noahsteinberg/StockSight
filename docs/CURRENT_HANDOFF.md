@@ -30,10 +30,24 @@ contracts.
 ## Last observed hosted state
 
 - [Production](https://stocksight-rose.vercel.app) served main at `9672b12`
-  during the last release check. Read-only smoke passed for database readiness,
-  public prices and indicators with matching snapshot IDs, and private-route
-  protection. Supabase has the approved 506-bar AAPL sample ending 2017-02-16.
-  Local PostgreSQL holds the separate 494-symbol team snapshot.
+  during the earlier release check. The November 23 data migration updated the
+  existing Supabase database without deploying application code. Production's
+  AAPL response matches the new hosted snapshot and ends 2026-11-12. The existing
+  read-only deployment smoke passed again for frontend delivery, database
+  readiness, prices/indicators and guest/private-route protection.
+- Supabase now holds all **494 source tickers and 1,214,087 daily bars**, retaining
+  up to **2,500 latest accepted sessions per ticker** by Parth's explicit choice.
+  All 494 histories end 2026-11-12; 29 have fewer than 2,500 accepted sessions.
+  Earliest retained coverage across the universe is 2016-11-08; AAPL/MSFT/NVDA
+  each start 2016-12-02. The original full Parquet and local research dataset
+  remain unchanged. This is historical data, with no automated refresh.
+- The dashboard confirmed the Free plan's 500 MB database allowance. Observed
+  PostgreSQL size after import was **326,137,523 bytes**. Every ticker's stored
+  count, date bounds and original source SHA256 matched the retained import plan.
+  Migration head remains `0005_backend_only_access`; all seven public app/version
+  tables retain RLS, `anon`/`authenticated` lack SELECT/INSERT/UPDATE/DELETE
+  privileges, and private account/session/watchlist table counts are unchanged.
+  AAPL's old fixture was backed up before its authorized replacement.
 - The production bundle and dedicated cross-origin verifier were checked. The
   login form offers **Trouble signing in?** for hosted Auth0 password login with
   PKCE if a browser blocks cross-site cookies or an interactive challenge is
@@ -52,6 +66,35 @@ contracts.
   for the validated source hash, quarantines and known coverage limits. Leave
   the existing dataset in place during routine startup. Accurate company and
   exchange metadata still need a verified source.
+- November 23 source validation independently matched the recorded hash:
+  2,947,701 accepted bars and 252 quarantines across 494 tickers. The hosted
+  retention option selects the latest accepted sessions without editing the
+  file, changing the full-history default, or reusing a short-window refresh as
+  a snapshot. `app.migration_plan` provides a read-only source/target preview.
+  Evidence is ignored under `.local-data/hosted-retained-import-result.json`,
+  with original-AAPL backup and full source validation/quarantine reports there.
+- Verification on November 23: **107 backend tests passed, 2 disposable-PostgreSQL
+  cases skipped**; Ruff lint and format passed. Frontend lint and production
+  build also passed before publishing the branch for review. Real Uvicorn HTTP and deployed
+  HTTPS checks covered AAPL/MSFT/NVDA/ABNB/BRK-B/HUBB/ZTS in all four ranges:
+  56 price/indicator pairs matched source values, stored snapshots and retained
+  calculation history. All 252 quarantined ticker/date keys were absent from
+  storage. Evidence is `.local-data/hosted-retained-http-verification.json`.
+  The temporary local API used for these checks was stopped afterward.
+- Import code, tests and documentation are on branch
+  `feature/hosted-market-data`, based on main `afe8051`, for pull-request review.
+  [Parth's dated work summary](PARTH_DATA_UPDATE_2026-11-23.md) explains the
+  contribution and verification evidence in plain language. Check GitHub for
+  the current branch/PR delivery status before continuing.
+  The hosted data itself is already updated and visible to the deployed API.
+  Preserve the ignored private connection in this checkout; do not seed or rerun
+  an import during routine startup. Use the guides for a deliberate later change.
+- API research is updated in [YAHOO_FINANCE.md](YAHOO_FINANCE.md). Alpaca is a
+  technical candidate for a private daily-history/quote pilot; no account, keys,
+  provider adapter or schedule has been configured. Public-display rights,
+  feed/adjustment compatibility, an incremental writer and timestamped quote
+  provenance must be settled before activating refresh. Keep the historical
+  snapshot's actual date visible.
 - Predictions and Model performance are visible unavailable views. Offline
   research produced no approved serving model. Noah paused further research.
   The [ML research guide](../ml/README.md) records frozen evidence and protected

@@ -110,6 +110,44 @@ report until all selected accepted counts and the final input hash agree. Rerun
 the unchanged file to resume safely. Keep the input unchanged for the operation.
 No refresh scheduler or live Yahoo download is introduced.
 
+### Limit retained history for a hosted database
+
+The optional `--max-bars-per-symbol N` keeps the latest N **accepted** sessions
+for every selected ticker. Validation still scans the complete selected source
+and quarantines invalid bars before selecting the retained window. The default
+remains the complete accepted history. This is an explicit snapshot-retention
+choice, not an incremental refresh operation.
+
+For example, after reviewing the target and backing up histories being replaced:
+
+```sh
+.venv/bin/python -m app.migration_plan /PRIVATE/PATH/prices_clean.parquet --symbols AAPL,MSFT,NVDA --inspect-target --max-bars-per-symbol 2500
+.venv/bin/python -m app.import_prices /PRIVATE/PATH/prices_clean.parquet --max-bars-per-symbol 2500
+.venv/bin/python -m app.import_prices /PRIVATE/PATH/prices_clean.parquet --max-bars-per-symbol 2500 --write --replace-existing-series
+```
+
+The first command inventories the configured target and previews create/replace
+actions without writing to the database. Its storage estimate is conservative;
+measure an actual pilot and inspect the project's plan before a full import.
+An offline preview explicitly leaves the target uninspected. The second command
+validates all file symbols and reports the retained count without connecting.
+The last command replaces the selected histories and requires deliberate approval
+for that dataset transition. Never run it merely to start the application.
+
+The original file stays unchanged. Its full SHA256 remains attached to each
+series, while the adjustment/provenance label records the retained-session limit.
+Reports distinguish accepted source rows from imported or planned retained rows.
+Symbols with fewer accepted sessions retain all of them. Rejects do not consume
+the retention allowance. Repeating the import replaces the retained window
+atomically per symbol, including removal of dates outside that window.
+
+The UI's Max view still returns at most 2,000 observations. Retaining 2,500
+provides up to 500 preceding sessions for indicator warm-up at the start of that
+view. Wilder RSI starts at the beginning of the available retained history; it
+can differ slightly from calculations using the complete original history.
+No model retraining or change to the local full-history research dataset follows
+from this hosted retention choice.
+
 ## API and browser
 
 Start the regular app.main:app API and npm run dev as in LOCAL_START.md.

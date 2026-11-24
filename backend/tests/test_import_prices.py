@@ -6,8 +6,14 @@ import pytest
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 
-from app.db import Base, DailyBar, database_engine
-from app.import_prices import import_snapshot, scan, validated_row, write_symbol
+from app.db import Base, DailyBar, PriceSeries, database_engine
+from app.import_prices import (
+    import_snapshot,
+    retained_counts,
+    scan,
+    validated_row,
+    write_symbol,
+)
 from app.repository import database_history, search_database
 from app.seed import seed_fixture
 
@@ -154,3 +160,52 @@ def test_subset_and_rounding_validation(tmp_path):
         row(low=0.00000001, open=0.00000002, close=0.00000003)
     )
     assert "rounded_bounds" in reasons
+
+
+def test_retention_keeps_latest_accepted_sessions_and_source_provenance(
+    engine, tmp_path
+):
+    path = tmp_path / "prices.parquet"
+    parquet(
+        path,
+        [row(day=day, bad_bar=day == 4) for day in range(1, 6)] + [row("MSFT")],
+    )
+    report = scan(path)
+    assert report["accepted_by_symbol"] == {"AAPL": 4, "MSFT": 1}
+    expected = {"AAPL": 2, "MSFT": 1}
+    assert retained_counts(report, 2) == expected
+    for _ in range(2):
+        assert import_snapshot(engine, path, report, max_bars_per_symbol=2) == expected
+    history = database_history(engine, "AAPL", "all")
+    assert [bar.date.day for bar in history.bars] == [3, 5]
+    with engine.connect() as connection:
+        assert (
+            connection.scalar(
+                select(PriceSeries.fixture_sha256).where(PriceSeries.symbol == "AAPL")
+            )
+            == report["sha256"]
+        )
+    assert "Latest 2 accepted sessions retained" in history.adjustment
+    assert len(history.adjustment) <= 200
+    assert history.mode == "historical_snapshot"
+    assert database_history(engine, "MSFT", "all").bars[0].date.day == 1
+    # The optional cap never changes the source scan or the full-history default.
+    assert scan(path) == report
+    import_snapshot(engine, path, report)
+    assert len(database_history(engine, "AAPL", "all").bars) == 4
+
+
+@pytest.mark.parametrize("limit", [0, -1, True, 2.5])
+def test_invalid_retention_limit_fails_before_source_or_database_access(limit):
+    with pytest.raises(ValueError, match="positive integer"):
+        import_snapshot(
+            None, None, {"accepted_by_symbol": {}}, max_bars_per_symbol=limit
+        )
+
+
+def test_import_selection_must_match_validated_report(engine, tmp_path):
+    path = tmp_path / "prices.parquet"
+    parquet(path, [row(), row("MSFT")])
+    with pytest.raises(ValueError, match="selection"):
+        import_snapshot(engine, path, scan(path), symbols={"AAPL"})
+    assert search_database(engine, "") == []

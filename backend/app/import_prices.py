@@ -6,11 +6,12 @@ import json
 import math
 import re
 import sys
-from collections import Counter
+from collections import Counter, deque
 from datetime import UTC, datetime
 from decimal import ROUND_HALF_EVEN, Decimal
 from pathlib import Path
 
+from pydantic import ValidationError
 from sqlalchemy import delete, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
@@ -204,7 +205,9 @@ def scan(path, symbols=None, quarantine=None):
     }
 
 
-def write_symbol(engine, symbol, bars, fingerprint, replace_existing=False):
+def write_symbol(
+    engine, symbol, bars, fingerprint, replace_existing=False, max_bars_per_symbol=None
+):
     """Replace one complete symbol snapshot atomically, never mix sources."""
     if not bars:
         raise ValueError(f"No accepted bars for {symbol}")
@@ -236,7 +239,16 @@ def write_symbol(engine, symbol, bars, fingerprint, replace_existing=False):
                 source=SOURCE,
                 source_url=SOURCE_URL,
                 mode="historical_snapshot",
-                adjustment=ADJUSTMENT,
+                adjustment=(
+                    ADJUSTMENT
+                    if max_bars_per_symbol is None
+                    else "Team OHLC; adjustment unverified; USD assumed. Adjusted "
+                    "close/actions retained separately. "
+                    f"Latest {max_bars_per_symbol} accepted sessions retained "
+                    "from snapshot."
+                ),
+                # The hash identifies the full, unchanged input file. The label
+                # above records whether we retained only its latest sessions.
                 fixture_sha256=fingerprint,
                 imported_at=datetime.now(UTC),
             )
@@ -250,7 +262,26 @@ def write_symbol(engine, symbol, bars, fingerprint, replace_existing=False):
     return len(bars)
 
 
-def import_snapshot(engine, path, report, symbols=None, replace_existing=False):
+def retained_counts(report, max_bars_per_symbol=None):
+    """Count stored rows separately from the full source's validation totals."""
+    if max_bars_per_symbol is not None and (
+        type(max_bars_per_symbol) is not int or max_bars_per_symbol < 1
+    ):
+        raise ValueError("max_bars_per_symbol must be a positive integer")
+    return {
+        symbol: min(count, max_bars_per_symbol)
+        if max_bars_per_symbol is not None
+        else count
+        for symbol, count in report["accepted_by_symbol"].items()
+    }
+
+
+def import_snapshot(
+    engine, path, report, symbols=None, replace_existing=False, max_bars_per_symbol=None
+):
+    expected = retained_counts(report, max_bars_per_symbol)
+    if symbols is not None and set(expected) != symbols:
+        raise ValueError("Validated symbol selection must match the import selection")
     if input_hash(path) != report["sha256"]:
         raise ValueError("Input does not match the validated hash")
     allowed = set(report["accepted_by_symbol"])
@@ -262,28 +293,31 @@ def import_snapshot(engine, path, report, symbols=None, replace_existing=False):
                 raise ValueError(
                     f"{symbol} canonical-series conflict; nothing was imported"
                 )
-    # Validate before writing. Each complete symbol is one transaction.
-    current, bars = None, []
+    # Validation has already checked the full source. Retain only accepted bars,
+    # so rejected dates never consume the history allowance. None keeps all bars.
+    # Each selected symbol is still replaced in one transaction.
+    current, bars = None, deque(maxlen=max_bars_per_symbol)
     completed = {}
     for row in parquet_rows(path):
         symbol = row["ticker"]
-        if symbols is not None and symbol not in symbols:
+        if symbol not in allowed:
             continue
         if current is not None and symbol != current:
             if bars:
                 completed[current] = write_symbol(
                     engine,
                     current,
-                    bars,
+                    list(bars),
                     report["sha256"],
                     replace_existing,
+                    max_bars_per_symbol,
                 )
                 print(
                     f"Imported {current}: {completed[current]} rows",
                     file=sys.stderr,
                     flush=True,
                 )
-            bars = []
+            bars.clear()
         current = symbol
         _, bar, _ = validated_row(row)
         if bar is not None:
@@ -292,19 +326,17 @@ def import_snapshot(engine, path, report, symbols=None, replace_existing=False):
         completed[current] = write_symbol(
             engine,
             current,
-            bars,
+            list(bars),
             report["sha256"],
             replace_existing,
+            max_bars_per_symbol,
         )
         print(
             f"Imported {current}: {completed[current]} rows",
             file=sys.stderr,
             flush=True,
         )
-    if (
-        input_hash(path) != report["sha256"]
-        or completed != report["accepted_by_symbol"]
-    ):
+    if input_hash(path) != report["sha256"] or completed != expected:
         raise ValueError(
             "Import did not complete consistently; rerun the unchanged snapshot"
         )
@@ -321,6 +353,11 @@ def main():
     parser.add_argument("--quarantine", type=Path)
     parser.add_argument("--write", action="store_true")
     parser.add_argument("--replace-existing-series", action="store_true")
+    parser.add_argument(
+        "--max-bars-per-symbol",
+        type=int,
+        help="Keep the latest N accepted sessions per ticker; default full history",
+    )
     args = parser.parse_args()
     symbols = (
         {part.strip().upper() for part in args.symbols.split(",")}
@@ -329,6 +366,7 @@ def main():
     )
     engine = None
     try:
+        retained_counts({"accepted_by_symbol": {}}, args.max_bars_per_symbol)
         # Never let a report path overwrite the input or the other output.
         outputs = [p.resolve() for p in (args.report, args.quarantine) if p is not None]
         if args.path.resolve() in outputs or len(outputs) != len(set(outputs)):
@@ -347,14 +385,31 @@ def main():
             if settings.database_url is None:
                 raise ValueError("Set STOCKSIGHT_DATABASE_URL before explicit import")
             engine = database_engine(settings.database_url.get_secret_value())
-            import_snapshot(
-                engine, args.path, report, symbols, args.replace_existing_series
+            completed = import_snapshot(
+                engine,
+                args.path,
+                report,
+                symbols,
+                args.replace_existing_series,
+                args.max_bars_per_symbol,
             )
             report["status"] = "imported"
+            report["imported"] = {
+                "bars": sum(completed.values()),
+                "by_symbol": completed,
+                "max_bars_per_symbol": args.max_bars_per_symbol,
+            }
+        else:
+            report["planned_import"] = {
+                "bars": sum(retained_counts(report, args.max_bars_per_symbol).values()),
+                "max_bars_per_symbol": args.max_bars_per_symbol,
+            }
         if args.report:
             with args.report.open("x", encoding="utf-8") as target:
                 json.dump(report, target, indent=2)
         print(json.dumps(report, indent=2))
+    except ValidationError:
+        raise SystemExit("Invalid private configuration; check backend/.env") from None
     except SQLAlchemyError:
         raise SystemExit(
             "Import failed; check migrations/storage. No global completion claimed."

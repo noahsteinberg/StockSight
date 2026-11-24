@@ -41,9 +41,11 @@ In the Vercel project's Environment Variables, set these for **Production**:
 
 No database password or Auth0 client secret belongs in `VITE_*`, Git, workflow
 artifacts or frontend code. Existing private local settings do not travel with
-Git. The local database currently contains the large team snapshot; Parth's
-Supabase acceptance used only 506 AAPL bars ending 2017-02-16. Connecting Supabase
-does not transfer the larger dataset or implement market-data refresh.
+Git. The local database contains the complete accepted team snapshot; hosted
+coverage and its explicit retention limit are recorded in the
+[current handoff](CURRENT_HANDOFF.md). Connecting Supabase alone does not transfer
+data or implement market-data refresh. The hosted import is a separate,
+deliberately authorized operation.
 
 Use the exact HTTPS origin in Auth0 and preserve local entries. Set the dedicated
 verification fallback URL using the [account guide](ACCOUNTS.md#auth0-tenant-setup).

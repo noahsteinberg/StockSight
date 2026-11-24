@@ -131,12 +131,12 @@ For an educational demo, the first backend adapter can reuse that source after
 the team reviews provider terms, delays, rate limits, and attribution. It is not
 a reason to couple application code directly to `yfinance`.
 
-Latest `main` documents a successful small Yahoo feasibility check but does not
-implement recurring ingestion. Its hosted Supabase database contains only the
-selected 506-bar historical AAPL fixture ending 2017-02-16; the larger local
-snapshot is not automatically present in production. A public recommendation
-service therefore requires a deliberate hosted dataset/refresh decision in
-addition to model integration.
+The repository documents a successful small Yahoo feasibility check but does not
+implement recurring ingestion. See [the current handoff](CURRENT_HANDOFF.md) for
+the separately verified hosted dataset and retention limit. The complete local
+research snapshot and hosted coverage remain distinct. A public recommendation
+service requires an approved refresh/provenance policy in addition to model
+integration.
 
 Define a backend-owned provider interface with operations such as:
 
