@@ -1,7 +1,7 @@
 """Historical fixture contract shared by offline and database adapters."""
 
 import csv
-from datetime import date
+from datetime import date, datetime
 from functools import lru_cache
 from hashlib import sha256
 from pathlib import Path
@@ -36,7 +36,10 @@ class History(BaseModel):
     name: str
     source: str
     source_url: str
-    mode: Literal["historical_fixture", "historical_snapshot"] = "historical_fixture"
+    mode: Literal["historical_fixture", "historical_snapshot", "daily_history"] = (
+        "historical_fixture"
+    )
+    last_refreshed_at: datetime | None = None
     adjustment: str = "Unadjusted OHLC; historical values are not current quotes"
     snapshot_id: str
     as_of: date

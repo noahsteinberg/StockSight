@@ -94,6 +94,7 @@ export default function HistoricalChart({ data, range, showSma, showRsi, onToggl
         {replaying ? 'Replay through' : 'As of'} {replaying ? latest.date : data.as_of} · {bars.length} sessions · {bars[0].date} to {latest.date} · <a href={data.source_url}>Source: {data.source}</a><br />
         {data.adjustment}
       </p>
+      {data.last_refreshed_at && <p className="data-note">Stored data updated <time dateTime={data.last_refreshed_at}>{new Date(data.last_refreshed_at).toLocaleString()}</time>. Prices show completed daily sessions, not live quotes.</p>}
       {data.has_earlier && !replaying && <p className="data-note">Earlier stored sessions are outside this view. Showing the latest {data.session_limit} sessions.{range === 'all' ? ' Max is capped at 2,000 sessions.' : ' Choose a longer range to see more.'}</p>}
       <button className="csv-button" type="button" onClick={() => downloadPrices(data.symbol, range, bars, replaying)}>Download price CSV</button>
     </div>

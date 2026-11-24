@@ -53,12 +53,14 @@ export default function useWatchlist() {
     } finally { clearTimeout(timeout); }
   }, [owner, authorizedFetch]);
 
+  const retry = useCallback(() => setRevision(value => value + 1), []);
+
   return {
     items: owner && resource.owner === owner ? resource.items : [],
     loading: Boolean(owner && (resource.owner !== owner || resource.revision !== revision)),
     error: owner && resource.owner === owner ? resource.error : null,
     mutation: owner && mutation.owner === owner ? mutation : {},
     save: symbol => update(symbol), remove: symbol => update(symbol, true),
-    retry: () => setRevision(value => value + 1),
+    retry,
   };
 }

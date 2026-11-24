@@ -1,5 +1,15 @@
 # Architecture
 
+## Incremental daily refresh
+
+An offline Python command fetches and validates completed Yahoo daily sessions,
+then commits each symbol's incremental updates, correction history, retention
+changes and revision together. It reuses the same market tables and numerical
+validation as snapshot import. No provider dependency is required by public API
+requests. Migration 0006 adds backend-only refresh-run/bar-change tables plus a
+series update timestamp. See [daily refresh](DAILY_REFRESH.md); production
+activation and scheduled execution remain pending.
+
 ## Application views
 
 | URL fragment | View | Behavior |
@@ -43,4 +53,4 @@ Browser → FastAPI → PostgreSQL / selected market-data provider.
 
 Offline ML pipeline → validated, versioned artifact → backend inference.
 
-Browser-to-FastAPI fixture and imported PostgreSQL paths are implemented, including snapshot import, accounts/sessions and the indicator API. Live incremental provider ingestion and ML connections do not exist yet. Training should not run inside an HTTP request. Begin with one frontend and one backend; add modules only when real features require them. Backend schemas should define stable contracts before frontend integration. Use separate tests for deterministic calculations, provider adapters, persistence, and HTTP behavior as each is introduced.
+Browser-to-FastAPI fixture and imported PostgreSQL paths are implemented, including snapshot import, accounts/sessions and the indicator API. The separate incremental updater is implemented and locally verified; hosted activation and scheduling remain pending. ML serving is not implemented. Training and provider downloads do not run inside public chart requests. Keep one frontend and one backend and use the existing bounded API contracts.

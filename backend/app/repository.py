@@ -1,12 +1,10 @@
 """Bounded reads of a canonical daily series; no provider calls in HTTP requests."""
 
-from hashlib import sha256
-
 from sqlalchemy import case, select
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
 
-from app.db import DailyBar, PriceSeries, StockRecord
+from app.db import DailyBar, PriceSeries, StockRecord, series_revision
 from app.market import SESSION_LIMITS, Bar, History, Stock
 
 
@@ -52,9 +50,7 @@ def database_history(
         if not rows:
             return None
         series, name, _ = rows[0]
-        revision = (
-            f"{series.id}:{series.fixture_sha256}:{series.imported_at.isoformat()}"
-        )
+        revision = series_revision(series)
         has_earlier = len(rows) > limit
         bars = [
             Bar(
@@ -73,8 +69,9 @@ def database_history(
             source=series.source,
             source_url=series.source_url,
             mode=series.mode,
+            last_refreshed_at=series.updated_at,
             adjustment=series.adjustment,
-            snapshot_id=sha256(revision.encode()).hexdigest(),
+            snapshot_id=revision,
             as_of=bars[-1].date,
             range=range_value,
             bars=bars,

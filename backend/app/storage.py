@@ -7,13 +7,24 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.db import (
     AuthSession,
     DailyBar,
+    MarketBarChange,
+    MarketRefreshRun,
     PriceSeries,
     StockRecord,
     UserIdentity,
     WatchlistEntry,
 )
 
-MODELS = (StockRecord, PriceSeries, DailyBar, UserIdentity, WatchlistEntry, AuthSession)
+MODELS = (
+    StockRecord,
+    PriceSeries,
+    DailyBar,
+    UserIdentity,
+    WatchlistEntry,
+    AuthSession,
+    MarketRefreshRun,
+    MarketBarChange,
+)
 
 
 def storage_problem(engine: Engine | None) -> dict[str, str] | None:

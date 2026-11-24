@@ -1,5 +1,10 @@
 # Yahoo Finance investigation for Parth
 
+November 23 implementation follow-up: [DAILY_REFRESH.md](DAILY_REFRESH.md)
+documents the separate updater, isolated evidence and pending hosted rollout.
+The historical investigation below records earlier findings and proposed rules;
+it does not mean a schedule or production refresh has been activated.
+
 Prepared November 16, 2026. The meeting assigned research into fresh Yahoo Finance
 data, with the existing stored snapshot kept for the current presentation.
 This document is an integration proposal, not a running refresh service.

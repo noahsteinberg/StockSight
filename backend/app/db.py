@@ -1,7 +1,8 @@
 """Persistence models and engine construction; schema changes belong in Alembic."""
 
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from decimal import Decimal
+from hashlib import sha256
 
 from sqlalchemy import (
     JSON,
@@ -23,6 +24,15 @@ class Base(DeclarativeBase):
     pass
 
 
+def series_revision(series):
+    stamp = series.updated_at or series.imported_at
+    if stamp.tzinfo is None:
+        stamp = stamp.replace(tzinfo=UTC)
+    return sha256(
+        f"{series.id}:{series.fixture_sha256}:{stamp.isoformat()}".encode()
+    ).hexdigest()
+
+
 class StockRecord(Base):
     __tablename__ = "stocks"
     symbol: Mapped[str] = mapped_column(String(16), primary_key=True)
@@ -41,6 +51,29 @@ class PriceSeries(Base):
     adjustment: Mapped[str] = mapped_column(String(200))
     fixture_sha256: Mapped[str] = mapped_column(String(64))
     imported_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class MarketRefreshRun(Base):
+    __tablename__ = "market_refresh_runs"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    series_id: Mapped[str] = mapped_column(ForeignKey("price_series.id"), index=True)
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    status: Mapped[str] = mapped_column(String(32))
+    provider: Mapped[str] = mapped_column(String(80))
+    fingerprint: Mapped[str | None] = mapped_column(String(64))
+    applied_revision: Mapped[str | None] = mapped_column(String(64))
+    details: Mapped[dict] = mapped_column(JSON)
+
+
+class MarketBarChange(Base):
+    __tablename__ = "market_bar_changes"
+    run_id: Mapped[str] = mapped_column(
+        ForeignKey("market_refresh_runs.id"), primary_key=True
+    )
+    session_date: Mapped[date] = mapped_column(primary_key=True)
+    before: Mapped[dict | None] = mapped_column(JSON)
+    after: Mapped[dict | None] = mapped_column(JSON)
 
 
 class DailyBar(Base):

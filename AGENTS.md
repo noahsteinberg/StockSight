@@ -25,7 +25,9 @@ requires instruction.
 
 - React/Vite JavaScript and plain CSS; native SVG price/volume chart, ticker/company
   search, ranges, keyboard date inspection, accessible table and watchlist UI.
-- FastAPI, SQLAlchemy/Alembic and PostgreSQL; migration head `0005_backend_only_access`.
+- FastAPI, SQLAlchemy/Alembic and PostgreSQL; migration head `0006_market_refresh`.
+  Production remains at its prior schema until coordinated migration/release.
+  See docs/DAILY_REFRESH.md before activating incremental updates.
   Explicit fixture mode is available. No provider request runs inside chart APIs.
   Supabase setup and connection/security behavior are in docs/SUPABASE.md;
   docs/YAHOO_FINANCE.md records provider research without enabling refresh.
@@ -35,8 +37,8 @@ requires instruction.
 - SMA20/Wilder RSI14 backend API and frontend toggles/plots are implemented and
   locally verified. See INDICATORS.md for null
   warm-up values, fixed calculation history and versioned numerical conventions.
-- Product ML inference, stored forecasts/outcomes, evaluation and incremental
-  provider refresh remain unfinished. Do not add fake
+- Product ML inference, stored forecasts/outcomes, evaluation and hosted
+  refresh activation remain unfinished. Do not add fake
   scores, prices, forecasts or claims that the full MVP is complete.
 
 Read the [application view contracts](docs/ARCHITECTURE.md) before wiring ML.

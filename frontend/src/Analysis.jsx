@@ -108,7 +108,7 @@ export default function Analysis({ symbol, onSelectSymbol, watchlist }) {
 
   return (
     <section className="analysis" id="analysis" aria-labelledby="analysis-title">
-      <div className="section-heading"><h1 id="analysis-title">Stock analysis</h1><span className="historical-badge">Historical prices</span></div>
+      <div className="section-heading"><h1 id="analysis-title">Stock analysis</h1><span className="historical-badge">Stored daily history</span></div>
       <div className="analysis-search" onKeyDown={handleSearchKeys}>
       <form className="analysis-toolbar" onSubmit={startSearch} role="search" noValidate>
         <label className="sr-only" htmlFor="ticker">Ticker</label>
@@ -142,6 +142,7 @@ export default function Analysis({ symbol, onSelectSymbol, watchlist }) {
         onToggleSma={() => setShowSma(value => !value)} onToggleRsi={() => setShowRsi(value => !value)}
         indicators={indicators} onReload={() => { reload(); setRetry(value => value + 1); indicators.retry(); }}>
         <div className="chart-actions">
+          <button type="button" onClick={() => { reload(); setRetry(value => value + 1); indicators.retry(); watchlist.retry(); }}>Refresh data</button>
           <a href={`#/predictions?symbol=${encodeURIComponent(symbol)}`}>Predictions for {symbol} <span aria-hidden="true">↗</span></a>
         </div>
       </HistoricalChart>}
