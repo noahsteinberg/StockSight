@@ -4,6 +4,7 @@ import StockSearchInput from './StockSearchInput.jsx';
 import AnalysisWatchlist, { WatchlistStar } from './AnalysisWatchlist.jsx';
 import useIndicators from './use-indicators.js';
 import { compareHash } from './use-compare-selection.js';
+import MarketQuote from './MarketQuote.jsx';
 
 const ranges = [['1mo', '1M'], ['3mo', '3M'], ['1y', '1Y'], ['all', 'Max']];
 
@@ -131,6 +132,7 @@ export default function Analysis({ symbol, onSelectSymbol, watchlist, selection 
         {search.matches?.length > 0 && <ul>{search.matches.map(stock => <li key={stock.symbol}><button type="button" onClick={() => openStock(stock.symbol)}>{stock.symbol} <span>{stock.name}</span></button></li>)}</ul>}
       </div>}
       </div>
+      <MarketQuote key={symbol} symbol={symbol} asOf={data?.as_of} />
       <div className="chart-card">
       <div className="chart-toolbar"><span>Price & volume <span className="muted">· USD</span></span><fieldset><legend className="sr-only">Price history range</legend>{ranges.map(([value, label]) => <button key={value} type="button" aria-pressed={range === value} onClick={() => { if (range !== value) { reload(); setRange(value); } }}>{label}</button>)}</fieldset></div>
       <div aria-live="polite" aria-busy={Boolean(loadingPrices)}>
