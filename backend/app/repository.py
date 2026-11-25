@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.db import DailyBar, PriceSeries, StockRecord, series_revision
 from app.market import SESSION_LIMITS, Bar, History, Stock
+from app.stock_metadata import company_name, symbols_named
 
 
 def search_database(engine: Engine, query: str) -> list[Stock]:
@@ -18,6 +19,7 @@ def search_database(engine: Engine, query: str) -> list[Stock]:
             statement = statement.where(
                 StockRecord.symbol.icontains(query, autoescape=True)
                 | StockRecord.name.icontains(query, autoescape=True)
+                | StockRecord.symbol.in_(symbols_named(query))
             )
         ordering = (
             (case((StockRecord.symbol == query, 0), else_=1), StockRecord.symbol)
@@ -25,9 +27,19 @@ def search_database(engine: Engine, query: str) -> list[Stock]:
             else (StockRecord.symbol,)
         )
         return [
-            Stock(symbol=row.symbol, name=row.name)
+            Stock(
+                symbol=row.symbol, name=company_name(row.symbol, row.name) or row.name
+            )
             for row in session.scalars(statement.order_by(*ordering).limit(50))
         ]
+
+
+def supported_symbol(engine: Engine, symbol: str) -> bool:
+    with Session(engine) as session:
+        return (
+            session.scalar(select(PriceSeries.id).where(PriceSeries.symbol == symbol))
+            is not None
+        )
 
 
 def database_history(
@@ -65,7 +77,7 @@ def database_history(
         ]
         return History(
             symbol=symbol,
-            name=name,
+            name=company_name(symbol, name) or name,
             source=series.source,
             source_url=series.source_url,
             mode=series.mode,

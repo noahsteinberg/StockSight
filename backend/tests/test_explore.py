@@ -77,7 +77,8 @@ def explore_client(request, tmp_path):
         # Placeholder metadata as written by the team-snapshot importer.
         add_stock(connection, "ABBV", "ABBV", "UNKNOWN", [100.0, 102.0])
         add_stock(connection, "MSFT", "Microsoft Corporation", "NASDAQ", [50.0])
-        add_stock(connection, "BRK-B", "BRK-B", "UNKNOWN", [400.0, 380.0, 390.0])
+        # A share-class ticker absent from the reviewed metadata stays unknown.
+        add_stock(connection, "ZZ-B", "ZZ-B", "UNKNOWN", [400.0, 380.0, 390.0])
         # A catalog row without stored history is not a supported stock.
         add_stock(connection, "NOHIST", "No History Inc.", "NYSE", None)
     with TestClient(create_app(Settings(_env_file=None, database_url=url))) as client:
@@ -97,10 +98,10 @@ def test_explore_lists_supported_stocks_alphabetically_with_latest_closes(
     assert [item["symbol"] for item in body["items"]] == [
         "AAPL",
         "ABBV",
-        "BRK-B",
         "MSFT",
+        "ZZ-B",
     ]
-    aapl, abbv, brk, msft = body["items"]
+    aapl, abbv, msft, brk = body["items"]
     bars = load_bars()
     assert aapl["name"] == "Apple Inc."
     assert aapl["exchange"] == "NASDAQ"
@@ -109,9 +110,15 @@ def test_explore_lists_supported_stocks_alphabetically_with_latest_closes(
     assert aapl["daily_change_pct"] == pytest.approx(
         (bars[-1].close / bars[-2].close - 1) * 100
     )
+    assert aapl["sector"] == "Information Technology"
     assert len(aapl["series_revision"]) == 64
-    # Placeholder names/exchanges are reported as unknown, not as verified facts.
-    assert abbv["name"] is None and abbv["exchange"] is None
+    # The reviewed metadata replaces the importer's ticker placeholder name...
+    assert abbv["name"] == "AbbVie" and abbv["exchange"] is None
+    assert abbv["sector"] == "Health Care"
+    assert abbv["sub_industry"] == "Biotechnology"
+    # ...and a stock it doesn't cover stays unknown rather than guessed.
+    assert brk["name"] is None and brk["exchange"] is None
+    assert brk["sector"] is None and brk["sub_industry"] is None
     assert abbv["last_close"] == 102.0
     assert abbv["as_of"] == "2026-11-02"
     assert abbv["daily_change_pct"] == pytest.approx(2.0)
@@ -128,7 +135,7 @@ def test_explore_pages_are_bounded_and_deterministic(explore_client):
     second = explore_client.get("/api/explore?page_size=2&page=2").json()
     beyond = explore_client.get("/api/explore?page_size=2&page=3").json()
     assert [item["symbol"] for item in first["items"]] == ["AAPL", "ABBV"]
-    assert [item["symbol"] for item in second["items"]] == ["BRK-B", "MSFT"]
+    assert [item["symbol"] for item in second["items"]] == ["MSFT", "ZZ-B"]
     assert beyond["items"] == []
     assert beyond["total_matching"] == 4
 
@@ -148,6 +155,73 @@ def test_explore_query_matches_symbol_or_name_and_ranks_exact_symbol_first(
     assert explore_client.get("/api/explore?query=NOHIST").json()["items"] == []
 
 
+def test_explore_query_matches_reviewed_company_names(explore_client):
+    # The stored ABBV name is a placeholder; the reviewed name still matches.
+    body = explore_client.get("/api/explore?query=abbvie").json()
+    assert [item["symbol"] for item in body["items"]] == ["ABBV"]
+    search = explore_client.get("/api/stocks?query=abbvie").json()
+    assert search == [{"symbol": "ABBV", "name": "AbbVie"}]
+    history = explore_client.get("/api/stocks/ABBV/prices?range=1mo").json()
+    assert history["name"] == "AbbVie"
+
+
+def test_explore_filters_by_sector_and_combines_with_query(explore_client):
+    tech = explore_client.get(
+        "/api/explore", params={"sector": "Information Technology"}
+    ).json()
+    assert tech["sector"] == "Information Technology"
+    assert [item["symbol"] for item in tech["items"]] == ["AAPL", "MSFT"]
+    assert tech["total_matching"] == 2 and tech["total_supported"] == 4
+    both = explore_client.get(
+        "/api/explore", params={"sector": "Information Technology", "query": "MS"}
+    ).json()
+    assert [item["symbol"] for item in both["items"]] == ["MSFT"]
+    # A filter is never silently broadened to produce results.
+    energy = explore_client.get("/api/explore", params={"sector": "Energy"}).json()
+    assert energy["items"] == [] and energy["total_matching"] == 0
+
+
+def test_sectors_report_counts_unknown_coverage_and_source(explore_client):
+    body = explore_client.get("/api/sectors").json()
+    assert body["total_supported"] == 4
+    assert body["unknown"] == 1
+    counts = {sector["name"]: sector["count"] for sector in body["sectors"]}
+    assert len(counts) == 11
+    assert counts["Information Technology"] == 2
+    assert counts["Health Care"] == 1
+    assert counts["Energy"] == 0
+    assert "oldid=1384572480" in body["source"]["url"]
+    assert body["source"]["revision_date"] == "2026-11-08"
+
+
+def test_profile_returns_reviewed_metadata_or_unknown_fields(explore_client):
+    abbv = explore_client.get("/api/stocks/abbv/profile").json()
+    assert abbv["symbol"] == "ABBV"
+    assert abbv["company_name"] == "AbbVie"
+    assert abbv["sector"] == "Health Care"
+    assert abbv["source"]["license"] == "CC BY-SA 4.0"
+    unknown = explore_client.get("/api/stocks/ZZ-B/profile").json()
+    assert unknown["company_name"] is None and unknown["sector"] is None
+    for symbol in ["NOHIST", "NOPE"]:
+        response = explore_client.get(f"/api/stocks/{symbol}/profile")
+        assert response.status_code == 404
+        assert response.json()["detail"]["code"] == "UNSUPPORTED_SYMBOL"
+
+
+def test_profile_and_sectors_in_fixture_mode():
+    client = TestClient(create_app(Settings(_env_file=None, database_url=None)))
+    assert client.get("/api/stocks/AAPL/profile").json()["sector"] == (
+        "Information Technology"
+    )
+    assert client.get("/api/stocks/MSFT/profile").status_code == 404
+    sectors = client.get("/api/sectors").json()
+    assert sectors["total_supported"] == 1 and sectors["unknown"] == 0
+    tech = client.get("/api/explore", params={"sector": "Information Technology"})
+    assert tech.json()["total_matching"] == 1
+    energy = client.get("/api/explore", params={"sector": "Energy"}).json()
+    assert energy["items"] == [] and energy["total_matching"] == 0
+
+
 @pytest.mark.parametrize(
     "params",
     [
@@ -157,6 +231,8 @@ def test_explore_query_matches_symbol_or_name_and_ranks_exact_symbol_first(
         {"page_size": 51},
         {"query": "x" * 41},
         {"page": "two"},
+        {"sector": "Tech"},
+        {"sector": "unknown"},
     ],
 )
 def test_explore_rejects_invalid_parameters(params):

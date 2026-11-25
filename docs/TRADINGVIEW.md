@@ -9,9 +9,16 @@ with an additional attribution link and a clear notice that prices may be delaye
 There is no paid subscription, API key or account setup in this integration.
 
 The historical chart, indicators, watchlist changes and CSV still use StockSight's
-stored daily prices. The hosted file import ends **November 12, 2026**. Widget
-prices do not extend that history or become model-training data. This change
-adds a newer price display; it does not implement daily database refresh.
+stored daily prices. Their latest session is whatever the validated daily refresh
+last stored (see DAILY_REFRESH.md); the panel's footer shows the chart's actual
+`as_of` date from the current response. Widget prices never extend that history
+or become model-training data.
+
+*Integration update (issue #19 phase 3, Vlad):* the panel moved onto the current
+navigation (Analysis is at `#/analysis`; the root opens Explore) and is hidden
+while historical replay shows a past date, so a present-day quote never sits
+beside a replayed session. The embed stays mounted while hidden, so exiting
+replay needs no reload. Explore and Compare deliberately have no widgets.
 
 Alpaca's automated support response did not grant free public-display/caching
 permission for Basic/Paper data. We therefore kept its API checks private and
@@ -45,7 +52,8 @@ the required permission.
 
 The automated widget tests use an explicitly mocked vendor script to check
 stock changes, share classes, cleanup, history-range independence, failed-script
-recovery and a 320px layout. They do not establish actual vendor data coverage.
+recovery, replay hiding and a 320px layout. They do not establish actual vendor
+data coverage.
 Real-browser checks of the official widget are recorded in CURRENT_HANDOFF.md.
 
 ## Official references

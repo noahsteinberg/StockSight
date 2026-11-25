@@ -54,21 +54,28 @@ See [import policy](PRICES_IMPORT.md) for the separate team snapshot.
 
 ## Explore API
 
-GET /api/explore?query=&page=1&page_size=25 returns one public page of supported
-stocks (those with a stored price series), ordered by symbol. A query matches
-ticker or company name, case-insensitively, and an exact ticker ranks first.
+GET /api/explore?query=&sector=&page=1&page_size=25 returns one public page of
+supported stocks (those with a stored price series), ordered by symbol. A query
+matches ticker, stored name or reviewed company name, case-insensitively, and an
+exact ticker ranks first. `sector` is optional and must be one of the 11 GICS
+sector names (for example `Information Technology`); it combines with `query`.
 `query` is at most 40 characters; `page` is 1–1000; `page_size` is 1–50 (default 25).
-Invalid values return 422, and storage failure returns 503 DATA_UNAVAILABLE.
+Invalid values (including an unknown sector) return 422, and storage failure
+returns 503 DATA_UNAVAILABLE. A filter that matches nothing returns no items; it
+is never broadened.
 A page past the end returns an empty `items` array with the real totals.
 
-Response: `query` (normalized to uppercase), `page`, `page_size`, `total_supported`,
-`total_matching`, `latest_session` (newest stored session across all series) and
-`items[]`. Each item has `symbol`, `name`, `exchange`, `last_close`, `as_of`,
-`daily_change_pct` and `series_revision`.
+Response: `query` (normalized to uppercase), `sector` (echoed or null), `page`,
+`page_size`, `total_supported`, `total_matching`, `latest_session` (newest stored
+session across all series) and `items[]`. Each item has `symbol`, `name`,
+`exchange`, `sector`, `sub_industry`, `last_close`, `as_of`, `daily_change_pct`
+and `series_revision`.
 
-- `name` is null when the stored name only repeats the ticker (the importer's
-  placeholder), and `exchange` is null when it is `UNKNOWN`. Neither is a
-  verified fact, so the UI shows "Name not yet available" instead.
+- `name`, `sector` and `sub_industry` come from the reviewed metadata file
+  ([STOCK_METADATA.md](STOCK_METADATA.md)). Without a reviewed row, `name` falls
+  back to the stored name unless it only repeats the ticker (the importer's
+  placeholder), and `sector`/`sub_industry` are null. `exchange` is null when it
+  is `UNKNOWN`. The UI shows "Name not yet available"/"Sector unknown" for nulls.
 - `daily_change_pct` is `(latest close / previous stored close − 1) × 100`, or
   null with fewer than two stored sessions. It is price change only, not total
   return, and not a forecast.
@@ -77,7 +84,21 @@ Response: `query` (normalized to uppercase), `page`, `page_size`, `total_support
 
 Each row reads only its two newest bars; no full histories, indicators or provider
 requests run. Explicit fixture mode returns the single AAPL fixture.
-`GET /api/stocks` (search, capped at 50) is unchanged.
+`GET /api/stocks` (search, capped at 50) keeps its `{symbol, name}` shape; it now
+also matches reviewed company names and returns them instead of placeholders.
+Price/indicator histories and watchlist rows report the reviewed name the same way.
+
+## Sectors and stock profiles
+
+GET /api/sectors returns `total_supported`, `unknown` (supported stocks without a
+reviewed sector), `sectors[]` (all 11 GICS sectors with `name` and `count` over
+supported stocks) and `source` (`name`, `url` pinned to one revision,
+`revision_date`, `retrieved`, `taxonomy`, `license`). Storage failure returns 503.
+
+GET /api/stocks/{symbol}/profile returns `symbol`, `company_name`, `sector`,
+`sub_industry` (each nullable) and the same `source`. A symbol without stored
+history returns 404 UNSUPPORTED_SYMBOL. Explicit fixture mode serves AAPL only.
+No provider calls or schema changes are involved.
 
 ## Compare API
 

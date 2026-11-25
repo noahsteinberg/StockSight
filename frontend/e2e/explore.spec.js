@@ -11,13 +11,16 @@ function syntheticPage(url, total = 60) {
     symbol: `TST${String(index).padStart(3, '0')}`,
     name: index % 2 ? null : `Test Company ${index}`,
     exchange: null,
+    sector: index % 4 === 3 ? null : 'Industrials',
+    sub_industry: index % 4 === 3 ? null : 'Test Sub-Industry',
     last_close: 10 + index,
     as_of: index === 1 ? '2026-11-20' : '2026-11-23',
     daily_change_pct: index === 2 ? null : (index % 3 - 1) * 1.5,
     series_revision: 'f'.repeat(64),
   }));
-  const matching = all.filter(stock => !query || stock.symbol.includes(query));
-  return { query, page, page_size: size, total_supported: total, total_matching: matching.length, latest_session: '2026-11-23', items: matching.slice((page - 1) * size, page * size) };
+  const sector = params.get('sector');
+  const matching = all.filter(stock => (!query || stock.symbol.includes(query)) && (!sector || stock.sector === sector));
+  return { query, sector, page, page_size: size, total_supported: total, total_matching: matching.length, latest_session: '2026-11-23', items: matching.slice((page - 1) * size, page * size) };
 }
 
 async function mockExplore(page, total = 60) {
@@ -111,8 +114,8 @@ test('search is debounced, keeps focus and typed text, and syncs with the URL', 
 test('empty, failed and malformed responses show distinct recoverable states', async ({ page }) => {
   await mockExplore(page);
   await page.goto('/#/explore?q=zzz');
-  await expect(page.getByText('No supported stocks match “zzz”. Most company names aren’t stored yet, so try a ticker symbol, such as AAPL.')).toBeVisible();
-  await page.getByRole('button', { name: 'Clear search' }).click();
+  await expect(page.getByText('No supported stocks match “zzz”. Try another ticker or company name.')).toBeVisible();
+  await page.getByRole('button', { name: 'Reset filters' }).last().click();
   await expect(rows(page)).toHaveCount(25);
 
   await page.unroute('**/api/explore?*');
@@ -160,4 +163,37 @@ test('Explore fits phone and desktop widths without page overflow', async ({ pag
     expect(await page.locator('.explore-table').evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true);
     await page.screenshot({ path: `../.local-data/explore-${width}.png` });
   }
+});
+
+test('filters by sector with URL state, real counts, unknown sectors and a reset', async ({ page }) => {
+  const requests = await mockExplore(page, 12);
+  await page.goto('/#/explore');
+  const sector = page.getByLabel('Sector');
+  // Counts come from the real fixture API's GET /api/sectors.
+  await expect(sector.locator('option', { hasText: 'Information Technology (1)' })).toHaveCount(1);
+  await expect(rows(page).nth(3)).toContainText('Sector unknown');
+  await sector.selectOption('Industrials');
+  await expect(page).toHaveURL(/#\/explore\?sector=Industrials$/);
+  await expect(page.getByText('12 supported stocks · 9 matches in Industrials')).toBeVisible();
+  expect(requests.at(-1).get('sector')).toBe('Industrials');
+  await expect(rows(page)).toHaveCount(9);
+  await expect(rows(page).filter({ hasText: 'Sector unknown' })).toHaveCount(0);
+  await page.getByLabel('Search ticker or company').fill('TST00');
+  await expect(page).toHaveURL(/#\/explore\?q=TST00&sector=Industrials$/);
+  await page.getByRole('button', { name: 'Reset filters' }).click();
+  await expect(page).toHaveURL(/#\/explore$/);
+  await expect(sector).toHaveValue('');
+  await expect(page.getByLabel('Search ticker or company')).toHaveValue('');
+  await page.goBack();
+  await expect(sector).toHaveValue('Industrials');
+});
+
+test('an empty sector result is reported, not broadened', async ({ page }) => {
+  await page.goto('/#/explore?sector=Energy');
+  await expect(page.getByText('No supported stocks match in Energy. Try another ticker or company name, or choose All sectors.')).toBeVisible();
+  await expect(page.getByRole('table')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Reset filters' }).first().click();
+  await expect(rows(page)).toHaveCount(1);
+  await expect(rows(page).first()).toContainText('Information Technology');
+  await expect(page.getByRole('link', { name: 'List of S&P 500 companies' })).toHaveAttribute('href', /oldid=1384572480/);
 });

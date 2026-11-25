@@ -314,6 +314,15 @@ section { scroll-margin-top: 24px; }
 .explore-search { display: flex; gap: 8px; }
 .explore-search input { flex: 1; min-height: 46px; padding: 8px 14px; border: 1px solid #cbd4e0; border-radius: 8px; background: white; font-size: 15px; }
 .explore-search input:focus-visible { outline: 3px solid #357aca; outline-offset: 2px; }
+.explore-search { flex-wrap: wrap; align-items: center; }
+.explore-search input { min-width: 220px; }
+.explore-sector-filter { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.explore-sector-filter select { min-height: 46px; max-width: 100%; padding: 8px 10px; border: 1px solid #cbd4e0; border-radius: 8px; background: white; color: var(--ink); font: inherit; font-size: 14px; }
+.explore-sector-filter select:focus-visible { outline: 3px solid #357aca; outline-offset: 2px; }
+.explore-table .explore-sector { display: block; margin-top: 3px; font-size: 11px; font-weight: 400; color: #4d5f78; }
+.stock-context { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; margin: 0 0 12px; font-size: 13px; color: var(--muted); }
+.stock-context strong { font-weight: 600; color: var(--ink); }
+.stock-context a { font-size: 12px; }
 .explore-panel .analysis-message { min-height: 240px; }
 .explore-summary { padding: 14px 20px; font-size: 13px; color: var(--muted); border-bottom: 1px solid var(--line); }
 /* position: relative keeps absolutely positioned screen-reader text inside the scroll box. */
@@ -441,6 +450,9 @@ section { scroll-margin-top: 24px; }
   .compare-tray { bottom: 8px; padding: 10px 12px; }
   .compare-tray-actions { margin-left: 0; }
   .explore-summary, .explore-pages { padding-inline: 14px; }
+  .explore-search input { min-width: 0; flex-basis: 100%; }
+  .explore-sector-filter { flex: 1; }
+  .explore-sector-filter select { flex: 1; min-width: 0; }
 }
 @media (max-width: 360px) {
   .masthead-inner.wrap { width: calc(100% - 20px); }

@@ -1,9 +1,9 @@
 # Architecture
 
 For proposed discovery/comparison/preferences views and their approval gates,
-read [the frontend product handoff](FRONTEND_PRODUCT_HANDOFF.md). Increment 1
-(Explore) is implemented on branch `feature/explore-page`; Compare, preferences,
-sectors and signals remain proposals until their increments are approved.
+read [the frontend product handoff](FRONTEND_PRODUCT_HANDOFF.md). Explore
+(increment 1), Compare (2) and reviewed metadata plus the TradingView panel (3)
+are implemented on stacked branches; see CURRENT_HANDOFF.md for their delivery state.
 
 ## Incremental daily refresh
 
@@ -23,8 +23,8 @@ its schedule is gated pending manual Actions acceptance (see DAILY_REFRESH.md).
 
 | URL fragment | View | Behavior |
 | --- | --- | --- |
-| #/explore?q=app&page=2 | Explore stocks | Public paginated list of supported stocks (25 per page) with search, latest stored close/date, daily change, unknown-name state and save star |
-| #/analysis?symbol=AAPL | Stock analysis | Stock lookup, price and volume, SMA20/RSI14, inspection, historical replay, CSV, watchlist chips and Add to comparison |
+| #/explore?q=app&sector=Energy&page=2 | Explore stocks | Public paginated list of supported stocks (25 per page) with search, GICS sector filter, reviewed name/sector, latest stored close/date, daily change, save star and compare toggle |
+| #/analysis?symbol=AAPL | Stock analysis | Company/sector line, separate TradingView latest-quote panel (hidden during replay), price and volume, SMA20/RSI14, inspection, historical replay, CSV, watchlist chips and Add to comparison |
 | #/compare?symbols=AAPL,MSFT&range=1y | Compare stocks | 2–4 stocks indexed to 100 on common dates, keyboard/pointer readout, summary table and disclosures (shared cutoff, short overlap, splits, price-only change) |
 | #/dashboard (#/watchlist) | Watchlist | Private watchlist, filtering, saved dates, open/remove and account states |
 | #/predictions?symbol=AAPL | Predictions | Selected stock, unavailable generation/history and return to Analysis |
@@ -61,6 +61,13 @@ callback returns to the Watchlist (#/dashboard).
   use-compare.js cancels superseded requests. use-compare-selection.js and
   CompareTray.jsx manage the selection. app/compare.py reads at most
   N + 40 bars per stock, up to the shared cutoff.
+- app/stock_metadata.py loads the reviewed company/sector file once and
+  supplies names to search, histories, Explore, Compare and the watchlist; see
+  [STOCK_METADATA.md](STOCK_METADATA.md). use-stock-profile.js reads
+  /api/stocks/{symbol}/profile for the Analysis context line.
+- MarketQuote.jsx (Parth's PR #16) embeds TradingView's Single Ticker widget on
+  Analysis only; see [TRADINGVIEW.md](TRADINGVIEW.md). HistoricalChart reports
+  replay through onReplayChange so the quote is hidden beside past dates.
 - Analysis.jsx integrates stock search, the native SVG PricePlot.jsx chart and
   the observations table. Local autocomplete is supplied by stock-suggestions.js.
   Price and indicator requests have independent retry states. The client

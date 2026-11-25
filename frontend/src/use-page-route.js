@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react';
+import { sectorNames } from './explore-api.js';
 
 function subscribe(listener) {
   window.addEventListener('hashchange', listener);
@@ -24,6 +25,7 @@ export default function usePageRoute() {
     explore: {
       query: (params.get('q') || '').trim().slice(0, 40),
       page: Number.isInteger(requestedPage) && requestedPage >= 1 && requestedPage <= 1000 ? requestedPage : 1,
+      sector: sectorNames.includes(params.get('sector')) ? params.get('sector') : null,
     },
     // Up to 10 are parsed so the Compare page can say when a link held more than 4.
     compare: {
@@ -35,9 +37,10 @@ export default function usePageRoute() {
   };
 }
 
-export function exploreHash({ query = '', page = 1 }) {
+export function exploreHash({ query = '', page = 1, sector = null }) {
   const params = new URLSearchParams();
   if (query) params.set('q', query);
+  if (sector) params.set('sector', sector);
   if (page > 1) params.set('page', String(page));
   const search = params.toString();
   return `#/explore${search ? `?${search}` : ''}`;

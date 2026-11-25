@@ -37,6 +37,66 @@ No deferred prediction persistence, saved-ranking research or model serving was
 claimed completed. The plan was published in commit 4e13e71; this checkpoint
 records the subsequent issue cleanup. No application code or hosted data changed.
 
+## Metadata and quote increment (issue #19, Phase 3) — November 24
+
+Vlad asked to finish all remaining phases, accepting the plan's recommended
+options. Decisions recorded for Phase 3:
+- Company name, sector and sub-industry come from one reviewed static file,
+  pinned to a public source revision. There's no schema migration and no
+  rewrite of `stocks` rows; see STOCK_METADATA.md.
+- Explore gets a GICS sector filter. Sort stays A–Z, because no other sort is
+  approved.
+- PR #16's quote panel lives on Analysis only. It is hidden (not removed)
+  during historical replay. There are no widgets on Explore or Compare.
+
+Implemented on local branch `feature/metadata-quote`, stacked on
+`feature/compare-page`. Not pushed. PR #16's three commits were cherry-picked
+with Parth's authorship kept. The only conflicts were import and Methodology
+text conflicts in Analysis.jsx and Pages.jsx, resolved by keeping both sides.
+
+- Data: Wikipedia "List of S&P 500 companies", revision 1384572480 (Nov 8,
+  2026, CC BY-SA 4.0). All 494 supported tickers matched, including BRK-B,
+  BF-B and CBOE. Every sector is one of the 11 GICS sectors (Industrials 80 …
+  Communication Services 21). backend/app/build_stock_metadata.py reproduces
+  the committed CSV byte for byte.
+- API changes:
+  - `sector` filter and `sector`/`sub_industry` fields on GET /api/explore.
+  - New GET /api/sectors (counts, unknown coverage, source).
+  - New GET /api/stocks/{symbol}/profile.
+  - Search, price history, Compare and watchlist names now use the reviewed
+    name instead of the ticker placeholder. Response shapes are unchanged
+    apart from the new fields.
+- UI changes:
+  - Explore: a Sector select (with counts) kept in the URL, a sector line on
+    each row, Reset filters, and a source note with the pinned link.
+  - Analysis: a company/sector line, and the TradingView panel hidden during
+    replay.
+  - Methodology: a "Company names and sectors" section.
+  - The chart heading no longer repeats a placeholder name.
+- PR #16 checklist: stale Nov 12/"refresh unfinished" statements were fixed in
+  TRADINGVIEW.md (and noted in Parth's handoff section). Its tests moved to
+  #/analysis, and replay-hiding coverage was added.
+
+Verification on November 24:
+- Backend: 162 passed, 3 skipped. That includes the new sector, sectors,
+  profile and company-name search tests and the metadata-file checks. Ruff
+  lint/format pass.
+- Frontend: lint and build pass.
+- Browser suites: public 64/64 (new: sector filter/URL/reset, empty sector
+  not broadened, replay hides the quote without reloading it, Analysis
+  context line) and accounts 24/24.
+- Local full data (Docker snapshot through 2026-11-12):
+  - /api/sectors reports 494 supported, 0 unknown.
+  - The Energy filter gives 21 rows; "berkshire" finds BRK-B.
+  - Filtered Explore takes about 60 ms.
+- Real vendor in the in-app browser: the BRK-B Analysis page loaded TradingView
+  NYSE:BRK.B. Starting replay hid the embed and showed the notice; exiting
+  replay showed the same iframe again. Explore at 320 px with a sector filter
+  has no horizontal overflow.
+
+Review asks: Parth (metadata source choice, widget integration), Gavin (API/UI
+contracts). Next: Phase 4 preferences.
+
 ## Compare increment (issue #19, Phase 2) — November 24
 
 Vlad approved Phase 2 as recommended: 2–4 stocks, the same ranges as Analysis,
@@ -299,6 +359,13 @@ Use Git history for earlier checkpoints and the linked guides for setup and
 contracts.
 
 ## November 23 market-price widget
+
+*Phase 3 note (November 24):* the statements below about a November 12 history
+end, unfinished refresh and the `feature/tradingview-prices` branch were true when
+written. They are superseded: the hosted refresh is complete (see Daily refresh
+above), the widget now shows the chart's actual `as_of`, and these commits were
+integrated on `feature/metadata-quote` (see the Phase 3 section). Parth's
+evidence below is preserved unchanged.
 
 - Parth approved a free TradingView widget after Alpaca's automated support reply
   did not grant permission to publicly display/cache Basic/Paper market data.

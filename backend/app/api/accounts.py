@@ -13,6 +13,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app.auth import Principal, current_principal
 from app.db import DailyBar, PriceSeries, StockRecord, UserIdentity, WatchlistEntry
+from app.stock_metadata import company_name
 
 router = APIRouter(tags=["accounts"])
 WATCHLIST_LIMIT = 100
@@ -117,6 +118,13 @@ def saved_query(user_id):
     )
 
 
+def saved_stock(row) -> SavedStock:
+    # Prefer the reviewed company name over the importer's ticker placeholder.
+    return SavedStock(
+        **{**row, "name": company_name(row["symbol"], row["name"]) or row["name"]}
+    )
+
+
 @router.get("/me", response_model=CurrentUser)
 def me(user: Annotated[CurrentUser, Depends(current_user)]):
     return user
@@ -133,7 +141,7 @@ def list_watchlist(
                 .order_by(WatchlistEntry.added_at.desc(), WatchlistEntry.symbol)
                 .limit(WATCHLIST_LIMIT)
             ).mappings()
-            return Watchlist(items=[SavedStock(**row) for row in rows])
+            return Watchlist(items=[saved_stock(row) for row in rows])
     except SQLAlchemyError:
         raise storage_unavailable() from None
 
@@ -163,7 +171,7 @@ def add_stock(
             )
             if existing:
                 response.status_code = 200
-                return SavedStock(**existing)
+                return saved_stock(existing)
             available = connection.scalar(
                 select(PriceSeries.symbol).where(PriceSeries.symbol == payload.symbol)
             )
@@ -200,7 +208,7 @@ def add_stock(
                 .mappings()
                 .one()
             )
-            return SavedStock(**row)
+            return saved_stock(row)
     except SQLAlchemyError:
         raise storage_unavailable() from None
 

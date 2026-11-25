@@ -3,6 +3,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, Query, Request
+from pydantic import BaseModel
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.compare import ComparePage, compare_database, compare_fixture, parse_symbols
@@ -10,8 +11,11 @@ from app.explore import (
     PAGE_SIZE_DEFAULT,
     PAGE_SIZE_MAX,
     ExplorePage,
+    SectorList,
     explore_database,
     explore_fixture,
+    sectors_database,
+    sectors_fixture,
 )
 from app.indicators import CALCULATION_LIMIT, IndicatorHistory, calculate_indicators
 from app.market import (
@@ -25,7 +29,9 @@ from app.market import (
     fixture_snapshot_id,
     load_bars,
 )
-from app.repository import database_history, search_database
+from app.repository import database_history, search_database, supported_symbol
+from app.stock_metadata import SOURCE as METADATA_SOURCE
+from app.stock_metadata import MetadataSource, Sector, profile_for
 
 router = APIRouter(tags=["stocks"])
 
@@ -63,14 +69,57 @@ def explore(
     query: Annotated[str, Query(max_length=40)] = "",
     page: Annotated[int, Query(ge=1, le=1000)] = 1,
     page_size: Annotated[int, Query(ge=1, le=PAGE_SIZE_MAX)] = PAGE_SIZE_DEFAULT,
+    sector: Sector | None = None,
 ) -> ExplorePage:
     query = query.strip().upper()
     if request.app.state.engine is None:
-        return explore_fixture(query, page, page_size)
+        return explore_fixture(query, page, page_size, sector)
     try:
-        return explore_database(request.app.state.engine, query, page, page_size)
+        return explore_database(
+            request.app.state.engine, query, page, page_size, sector
+        )
     except SQLAlchemyError:
         raise unavailable() from None
+
+
+@router.get("/sectors", response_model=SectorList)
+def sectors(request: Request) -> SectorList:
+    if request.app.state.engine is None:
+        return sectors_fixture()
+    try:
+        return sectors_database(request.app.state.engine)
+    except SQLAlchemyError:
+        raise unavailable() from None
+
+
+class StockProfileResponse(BaseModel):
+    symbol: str
+    company_name: str | None
+    sector: str | None
+    sub_industry: str | None
+    source: MetadataSource
+
+
+@router.get("/stocks/{symbol}/profile", response_model=StockProfileResponse)
+def stock_profile(request: Request, symbol: str) -> StockProfileResponse:
+    symbol = symbol.strip().upper()
+    if request.app.state.engine is None:
+        supported = symbol == "AAPL"
+    else:
+        try:
+            supported = supported_symbol(request.app.state.engine, symbol)
+        except SQLAlchemyError:
+            raise unavailable() from None
+    if not supported:
+        raise unsupported()
+    profile = profile_for(symbol)
+    return StockProfileResponse(
+        symbol=symbol,
+        company_name=profile.company_name if profile else None,
+        sector=profile.sector if profile else None,
+        sub_industry=profile.sub_industry if profile else None,
+        source=METADATA_SOURCE,
+    )
 
 
 @router.get("/compare", response_model=ComparePage)
@@ -134,7 +183,11 @@ def read_history(
             session_limit=count,
             has_earlier=len(bars) > count,
         )
-    raise HTTPException(
+    raise unsupported()
+
+
+def unsupported() -> HTTPException:
+    return HTTPException(
         404,
         detail={
             "code": "UNSUPPORTED_SYMBOL",

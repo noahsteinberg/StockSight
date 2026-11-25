@@ -153,7 +153,7 @@ export default function App() {
     <div className="app-content">
     <main ref={main} id="main" className="wrap" tabIndex="-1">
       {account.error && <div role="alert" className="account-error">{account.error}</div>}
-      {route.page === 'explore' && <Explore query={route.explore.query} page={route.explore.page} watchlist={watchlist} selection={compareSelection} onOpen={selectStock} />}
+      {route.page === 'explore' && <Explore query={route.explore.query} page={route.explore.page} sector={route.explore.sector} watchlist={watchlist} selection={compareSelection} onOpen={selectStock} />}
       {route.page === 'analysis' && <Analysis symbol={symbol} onSelectSymbol={selectStock} watchlist={watchlist} selection={compareSelection} />}
       {route.page === 'compare' && <Compare symbols={route.compare.symbols} range={route.compare.range} selection={compareSelection} onOpen={selectStock} />}
       {route.page === 'dashboard' && <Dashboard watchlist={watchlist} selection={compareSelection} onOpen={selectStock} />}

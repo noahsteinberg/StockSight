@@ -1,17 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
 import { WatchlistStar } from './AnalysisWatchlist.jsx';
 import CompareTray, { CompareToggle } from './CompareTray.jsx';
-import { explorePageSize } from './explore-api.js';
-import useExplore from './use-explore.js';
+import { explorePageSize, sectorNames } from './explore-api.js';
+import useExplore, { useSectors } from './use-explore.js';
 import { exploreHash } from './use-page-route.js';
 
 const price = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const percent = new Intl.NumberFormat('en-US', { style: 'percent', signDisplay: 'exceptZero', minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const count = new Intl.NumberFormat('en-US');
 
-function summary(data, query, page) {
+function summary(data, query, page, sector) {
   const parts = [`${count.format(data.total_supported)} supported ${data.total_supported === 1 ? 'stock' : 'stocks'}`];
-  if (query) parts.push(`${count.format(data.total_matching)} ${data.total_matching === 1 ? 'match' : 'matches'} for “${query}”`);
+  if (query || sector) {
+    parts.push(`${count.format(data.total_matching)} ${data.total_matching === 1 ? 'match' : 'matches'}${query ? ` for “${query}”` : ''}${sector ? ` in ${sector}` : ''}`);
+  }
   if (data.items.length > 0) {
     const first = (page - 1) * explorePageSize + 1;
     parts.push(`showing ${count.format(first)}–${count.format(first + data.items.length - 1)}`);
@@ -35,6 +37,7 @@ function StockRow({ stock, latestSession, watchlist, selection, onOpen }) {
         <strong>{stock.symbol}</strong>
         <span className={stock.name ? undefined : 'unknown-name'}>{stock.name || 'Name not yet available'}</span>
       </a>
+      <span className="explore-sector">{stock.sector || 'Sector unknown'}</span>
     </th>
     <td>
       {stock.last_close == null ? <span className="muted">Unavailable</span> : price.format(stock.last_close)}
@@ -47,13 +50,15 @@ function StockRow({ stock, latestSession, watchlist, selection, onOpen }) {
   </tr>;
 }
 
-export default function Explore({ query, page, watchlist, selection, onOpen }) {
+export default function Explore({ query, page, sector, watchlist, selection, onOpen }) {
   const searchInput = useRef(null);
   const listTop = useRef(null);
   // The URL owns the applied search; the draft keeps exactly what is being typed.
   const [draft, setDraft] = useState({ source: query, value: query });
   const input = draft.source === query ? draft.value : query;
-  const explore = useExplore(query, page);
+  const explore = useExplore(query, page, sector);
+  const sectors = useSectors();
+  const sectorCounts = new Map(sectors.data?.sectors.map(item => [item.name, item.count]));
   const data = explore.data;
   const totalPages = data ? Math.max(1, Math.ceil(data.total_matching / explorePageSize)) : 1;
 
@@ -64,22 +69,30 @@ export default function Explore({ query, page, watchlist, selection, onOpen }) {
     // without recording one entry per keystroke.
     const timer = setTimeout(() => {
       setDraft(current => ({ ...current, source: next }));
-      window.location.hash = exploreHash({ query: next });
+      window.location.hash = exploreHash({ query: next, sector });
     }, 300);
     return () => clearTimeout(timer);
-  }, [draft, query]);
+  }, [draft, query, sector]);
 
   function applySearch(value) {
     const next = value.trim();
     setDraft({ source: next, value });
-    if (next !== query || page !== 1) window.location.hash = exploreHash({ query: next });
+    if (next !== query || page !== 1) window.location.hash = exploreHash({ query: next, sector });
+  }
+  function chooseSector(next) {
+    window.location.hash = exploreHash({ query, sector: next || null });
+  }
+  function clearFilters() {
+    setDraft({ source: '', value: '' });
+    window.location.hash = exploreHash({});
+    searchInput.current?.focus();
   }
   function clearSearch() {
     applySearch('');
     searchInput.current?.focus();
   }
   function goToPage(next) {
-    window.location.hash = exploreHash({ query, page: next });
+    window.location.hash = exploreHash({ query, page: next, sector });
     listTop.current?.scrollIntoView({ block: 'start' });
   }
 
@@ -90,10 +103,18 @@ export default function Explore({ query, page, watchlist, selection, onOpen }) {
       <input ref={searchInput} id="explore-query" type="search" value={input} maxLength={40} autoComplete="off" spellCheck="false"
         placeholder="Search ticker or company" onChange={event => setDraft({ source: query, value: event.target.value })} />
       {input && <button type="button" onClick={clearSearch}>Clear</button>}
+      <label className="explore-sector-filter">
+        <span>Sector</span>
+        <select value={sector || ''} onChange={event => chooseSector(event.target.value)}>
+          <option value="">All sectors</option>
+          {sectorNames.map(name => <option key={name} value={name}>{name}{sectorCounts.has(name) ? ` (${sectorCounts.get(name)})` : ''}</option>)}
+        </select>
+      </label>
+      {(query || sector) && <button type="button" className="explore-reset" onClick={clearFilters}>Reset filters</button>}
     </form>
     <div ref={listTop} className="page-panel explore-panel">
       <p className="explore-summary" role="status">
-        {data ? summary(data, query, page) : explore.error ? 'Stock list unavailable' : 'Loading stocks…'}
+        {data ? summary(data, query, page, sector) : explore.error ? 'Stock list unavailable' : 'Loading stocks…'}
         {data && explore.loading && <span className="muted"> · Updating…</span>}
       </p>
       {explore.error && <div className="analysis-message error-state" role="alert">
@@ -104,8 +125,10 @@ export default function Explore({ query, page, watchlist, selection, onOpen }) {
         <span className="loading-spinner" /><div className="chart-skeleton" />
       </div>}
       {data && data.total_matching === 0 && <div className="analysis-message">
-        <p>{query ? <>No supported stocks match “{query}”. Most company names aren’t stored yet, so try a ticker symbol, such as AAPL.</> : 'No supported stocks are stored yet.'}</p>
-        {query && <button type="button" onClick={clearSearch}>Clear search</button>}
+        <p>{query || sector
+          ? <>No supported stocks match{query && <> “{query}”</>}{sector && <> in {sector}</>}. Try another ticker or company name{sector ? ', or choose All sectors' : ''}.</>
+          : 'No supported stocks are stored yet.'}</p>
+        {(query || sector) && <button type="button" onClick={clearFilters}>Reset filters</button>}
       </div>}
       {data && data.total_matching > 0 && data.items.length === 0 && <div className="analysis-message">
         <p>Page {page} is past the end of these results.</p>
@@ -130,6 +153,11 @@ export default function Explore({ query, page, watchlist, selection, onOpen }) {
       </nav>}
     </div>
     <CompareTray selection={selection} />
-    {data?.items.some(stock => !stock.name) && <p className="explore-note">Company names appear only when verified. Daily change compares the latest two stored closes; it is not a forecast.</p>}
+    <p className="explore-note">
+      {sectors.data
+        ? <>Company names and GICS sectors come from a reviewed copy of <a href={sectors.data.source.url}>{sectors.data.source.name}</a> (revision of {sectors.data.source.revision_date}, {sectors.data.source.license}).{sectors.data.unknown > 0 && ` ${count.format(sectors.data.unknown)} supported ${sectors.data.unknown === 1 ? 'stock has' : 'stocks have'} no reviewed sector yet.`} </>
+        : 'Company names and sectors appear only when reviewed. '}
+      Daily change compares the latest two stored closes; it is not a forecast. <a href="#/methodology">Methodology</a>
+    </p>
   </section>;
 }

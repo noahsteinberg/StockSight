@@ -3,7 +3,7 @@ import { tradingViewSymbol } from './tradingview-symbols.js';
 
 const embedScript = 'https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js';
 
-export default function MarketQuote({ symbol, asOf }) {
+export default function MarketQuote({ symbol, asOf, replaying = false }) {
   const host = useRef(null);
   const [attempt, setAttempt] = useState(0);
   const [failedAttempt, setFailedAttempt] = useState(null);
@@ -55,8 +55,11 @@ export default function MarketQuote({ symbol, asOf }) {
         <h2 id="market-quote-title">Latest market price</h2>
         <span>TradingView · prices may be delayed</span>
       </div>
-      <div ref={host} className="market-quote-embed" hidden={unavailable} />
-      {unavailable && <div className="market-quote-fallback" role="status">
+      {/* During replay the embed stays mounted but hidden, so a present-day quote
+          never sits beside a past date and exiting replay needs no reload. */}
+      <div ref={host} className="market-quote-embed" hidden={unavailable || replaying} />
+      {replaying && <p className="market-quote-fallback" role="status">The latest quote is hidden while you replay past sessions. Exit replay to see it.</p>}
+      {unavailable && !replaying && <div className="market-quote-fallback" role="status">
         <p>Market widget unavailable for {symbol}.</p>
         {listing && <button type="button" onClick={() => setAttempt(value => value + 1)}>Retry market widget</button>}
       </div>}

@@ -24,8 +24,8 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
 
 from app.db import DailyBar, PriceSeries, StockRecord, series_revision
-from app.explore import verified_name
 from app.market import SESSION_LIMITS
+from app.stock_metadata import company_name
 
 MIN_SYMBOLS = 2
 MAX_SYMBOLS = 4
@@ -183,7 +183,7 @@ def compare_database(
         stocks.append(
             CompareStock(
                 symbol=symbol,
-                name=verified_name(symbol, stock.name),
+                name=company_name(symbol, stock.name),
                 as_of=latest[symbol],
                 last_close=float(newest[symbol]),
                 series_revision=series_revision(series),
