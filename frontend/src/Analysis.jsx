@@ -3,6 +3,7 @@ import HistoricalChart from './HistoricalChart.jsx';
 import StockSearchInput from './StockSearchInput.jsx';
 import AnalysisWatchlist, { WatchlistStar } from './AnalysisWatchlist.jsx';
 import useIndicators from './use-indicators.js';
+import { compareHash } from './use-compare-selection.js';
 
 const ranges = [['1mo', '1M'], ['3mo', '3M'], ['1y', '1Y'], ['all', 'Max']];
 
@@ -13,7 +14,8 @@ function responseError(status, searching = false) {
   return searching ? 'Could not search stocks. Check that the API is running.' : 'Could not load prices. Check that the API is running.';
 }
 
-export default function Analysis({ symbol, onSelectSymbol, watchlist }) {
+export default function Analysis({ symbol, onSelectSymbol, watchlist, selection }) {
+  const comparing = selection?.symbols.includes(symbol);
   const tickerInput = useRef(null);
   const [inputError, setInputError] = useState('');
   const [draft, setDraft] = useState({ symbol, value: symbol });
@@ -143,6 +145,10 @@ export default function Analysis({ symbol, onSelectSymbol, watchlist }) {
         indicators={indicators} onReload={() => { reload(); setRetry(value => value + 1); indicators.retry(); }}>
         <div className="chart-actions">
           <button type="button" onClick={() => { reload(); setRetry(value => value + 1); indicators.retry(); watchlist.retry(); }}>Refresh data</button>
+          {selection && <button type="button" aria-pressed={comparing} disabled={!comparing && selection.full}
+            title={!comparing && selection.full ? 'Comparison holds up to 4 stocks' : undefined}
+            onClick={() => selection.toggle(symbol)}>{comparing ? 'In comparison' : 'Add to comparison'}</button>}
+          {selection?.symbols.length >= 2 && <a href={compareHash(selection.symbols)}>Compare {selection.symbols.length} stocks <span aria-hidden="true">↗</span></a>}
           <a href={`#/predictions?symbol=${encodeURIComponent(symbol)}`}>Predictions for {symbol} <span aria-hidden="true">↗</span></a>
         </div>
       </HistoricalChart>}

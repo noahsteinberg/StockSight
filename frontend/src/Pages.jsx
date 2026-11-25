@@ -1,9 +1,11 @@
+import CompareTray from './CompareTray.jsx';
 import Watchlist from './Watchlist.jsx';
 
-export function Dashboard({ watchlist, onOpen }) {
+export function Dashboard({ watchlist, selection, onOpen }) {
   return <section className="app-page" aria-labelledby="dashboard-title">
     <div className="page-heading"><h1 id="dashboard-title">Watchlist</h1><a className="button-link primary-link" href="#/explore">Explore stocks <span aria-hidden="true">↗</span></a></div>
-    <Watchlist watchlist={watchlist} onOpen={onOpen} />
+    <Watchlist watchlist={watchlist} selection={selection} onOpen={onOpen} />
+    <CompareTray selection={selection} />
     <div className="dashboard-links"><a href="#/predictions"><span>Predictions</span><span className="muted">Currently unavailable</span><span aria-hidden="true">↗</span></a><a href="#/performance"><span>Model performance</span><span className="muted">Currently unavailable</span><span aria-hidden="true">↗</span></a></div>
   </section>;
 }

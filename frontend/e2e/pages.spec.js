@@ -90,7 +90,7 @@ test('the desktop rail expands from icons, resizes the content, and stays fixed 
   const active = nav.getByRole('link', { name: 'Analysis', exact: true });
   const label = active.locator('span');
   await expect(active).toHaveAttribute('aria-current', 'page');
-  await expect(nav.locator('a svg')).toHaveCount(4);
+  await expect(nav.locator('a svg')).toHaveCount(5);
   await expect(label).toHaveCSS('opacity', '0');
   const before = await page.locator('main').boundingBox();
   const rail = await nav.boundingBox();

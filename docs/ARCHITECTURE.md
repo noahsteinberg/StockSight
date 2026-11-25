@@ -24,14 +24,18 @@ its schedule is gated pending manual Actions acceptance (see DAILY_REFRESH.md).
 | URL fragment | View | Behavior |
 | --- | --- | --- |
 | #/explore?q=app&page=2 | Explore stocks | Public paginated list of supported stocks (25 per page) with search, latest stored close/date, daily change, unknown-name state and save star |
-| #/analysis?symbol=AAPL | Stock analysis | Stock lookup, price and volume, SMA20/RSI14, inspection, historical replay, CSV and watchlist chips |
+| #/analysis?symbol=AAPL | Stock analysis | Stock lookup, price and volume, SMA20/RSI14, inspection, historical replay, CSV, watchlist chips and Add to comparison |
+| #/compare?symbols=AAPL,MSFT&range=1y | Compare stocks | 2–4 stocks indexed to 100 on common dates, keyboard/pointer readout, summary table and disclosures (shared cutoff, short overlap, splits, price-only change) |
 | #/dashboard (#/watchlist) | Watchlist | Private watchlist, filtering, saved dates, open/remove and account states |
 | #/predictions?symbol=AAPL | Predictions | Selected stock, unavailable generation/history and return to Analysis |
 | #/performance | Model performance | Unavailable evaluation |
 | #/methodology | Data & methodology | Source, coverage, adjustment, indicator and project information |
 
 Root / opens Explore, and so does the brand. The sidebar lists Explore, Analysis,
-Watchlist and Methodology. Predictions and Model performance are no longer in the
+Compare, Watchlist and Methodology. The Compare link carries the current selection.
+Stocks are picked with the + button on Explore and Watchlist rows, or with Add
+to comparison on Analysis. The tray (up to 4) is kept in this tab's
+sessionStorage; it holds public tickers only, never private data. Predictions and Model performance are no longer in the
 sidebar; they stay reachable from Analysis ("Predictions for X"), the Watchlist
 page and each other. Legacy #analysis, #watchlist and #project resolve to their
 corresponding views. Unknown pages provide recovery to Analysis. Browser
@@ -51,6 +55,12 @@ callback returns to the Watchlist (#/dashboard).
   GET /api/explore response before rendering, and use-explore.js cancels
   superseded requests, so a slow older search cannot replace newer rows.
   app/explore.py reads only the newest two stored closes per series.
+- Compare.jsx owns the comparison URL state. CompareChart.jsx draws the native
+  SVG lines; each line has its own colour and dash pattern, so the legend
+  doesn't rely on colour alone. compare-api.js validates responses, and
+  use-compare.js cancels superseded requests. use-compare-selection.js and
+  CompareTray.jsx manage the selection. app/compare.py reads at most
+  N + 40 bars per stock, up to the shared cutoff.
 - Analysis.jsx integrates stock search, the native SVG PricePlot.jsx chart and
   the observations table. Local autocomplete is supplied by stock-suggestions.js.
   Price and indicator requests have independent retry states. The client

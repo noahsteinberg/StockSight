@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { WatchlistStar } from './AnalysisWatchlist.jsx';
+import CompareTray, { CompareToggle } from './CompareTray.jsx';
 import { explorePageSize } from './explore-api.js';
 import useExplore from './use-explore.js';
 import { exploreHash } from './use-page-route.js';
@@ -19,7 +20,7 @@ function summary(data, query, page) {
   return parts.join(' · ');
 }
 
-function StockRow({ stock, latestSession, watchlist, onOpen }) {
+function StockRow({ stock, latestSession, watchlist, selection, onOpen }) {
   const change = stock.daily_change_pct;
   const direction = change > 0 ? 'positive' : change < 0 ? 'negative' : 'muted';
   const olderSession = stock.as_of && latestSession && stock.as_of < latestSession;
@@ -42,11 +43,11 @@ function StockRow({ stock, latestSession, watchlist, onOpen }) {
     <td className={direction}>
       {change == null ? <><span aria-hidden="true">—</span><span className="sr-only">Unavailable</span></> : percent.format(change / 100)}
     </td>
-    <td><WatchlistStar symbol={stock.symbol} watchlist={watchlist} /></td>
+    <td><div className="row-actions"><WatchlistStar symbol={stock.symbol} watchlist={watchlist} /><CompareToggle symbol={stock.symbol} selection={selection} /></div></td>
   </tr>;
 }
 
-export default function Explore({ query, page, watchlist, onOpen }) {
+export default function Explore({ query, page, watchlist, selection, onOpen }) {
   const searchInput = useRef(null);
   const listTop = useRef(null);
   // The URL owns the applied search; the draft keeps exactly what is being typed.
@@ -117,9 +118,9 @@ export default function Explore({ query, page, watchlist, onOpen }) {
             <th scope="col">Stock</th>
             <th scope="col">Last stored close</th>
             <th scope="col" title="Change between the latest two stored closes">Daily change</th>
-            <th scope="col">Save</th>
+            <th scope="col">Save · Compare</th>
           </tr></thead>
-          <tbody>{data.items.map(stock => <StockRow key={stock.symbol} stock={stock} latestSession={data.latest_session} watchlist={watchlist} onOpen={onOpen} />)}</tbody>
+          <tbody>{data.items.map(stock => <StockRow key={stock.symbol} stock={stock} latestSession={data.latest_session} watchlist={watchlist} selection={selection} onOpen={onOpen} />)}</tbody>
         </table>
       </div>}
       {data && totalPages > 1 && data.items.length > 0 && <nav className="explore-pages" aria-label="Stock list pages">
@@ -128,6 +129,7 @@ export default function Explore({ query, page, watchlist, onOpen }) {
         <button type="button" disabled={page >= totalPages || explore.loading} onClick={() => goToPage(page + 1)}>Next</button>
       </nav>}
     </div>
+    <CompareTray selection={selection} />
     {data?.items.some(stock => !stock.name) && <p className="explore-note">Company names appear only when verified. Daily change compares the latest two stored closes; it is not a forecast.</p>}
   </section>;
 }

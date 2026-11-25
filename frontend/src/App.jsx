@@ -2,10 +2,12 @@ import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import Analysis from './Analysis.jsx';
 import AuthPage from './AuthPage.jsx';
 import AccountControls from './AccountControls.jsx';
+import Compare from './Compare.jsx';
 import Explore from './Explore.jsx';
 import SidebarHighlight from './SidebarHighlight.jsx';
 import { Dashboard, Methodology, ModelPerformance, Predictions } from './Pages.jsx';
 import { useAccount } from './auth-context.js';
+import useCompareSelection, { compareHash } from './use-compare-selection.js';
 import useWatchlist from './use-watchlist.js';
 import usePageRoute from './use-page-route.js';
 
@@ -14,6 +16,7 @@ import usePageRoute from './use-page-route.js';
 const pages = [
   ['explore', 'Explore', 'M17 10.5a6.5 6.5 0 1 1-13 0a6.5 6.5 0 0 1 13 0M20 20l-4.9-4.9'],
   ['analysis', 'Analysis', 'M4 4v16h16M7 15l4-5 4 2 5-6'],
+  ['compare', 'Compare', 'M4 20V10M10 20V4M16 20v-7M22 20H2'],
   ['dashboard', 'Watchlist', 'm12 3 2.76 5.59 6.17.9-4.47 4.35 1.06 6.15L12 17.09l-5.52 2.9 1.06-6.15-4.47-4.35 6.17-.9L12 3Z'],
   ['methodology', 'Methodology', 'M6 4h9l3 3v13H6zM14 4v4h4M9 12h6m-6 4h6'],
 ];
@@ -52,6 +55,7 @@ export default function App() {
   const symbol = route.symbol || selectedSymbol;
   const account = useAccount();
   const watchlist = useWatchlist();
+  const compareSelection = useCompareSelection();
   const refreshWatchlist = watchlist.retry;
   const watchlistError = watchlist.error;
   const lastWatchlistPage = useRef(route.page);
@@ -62,7 +66,7 @@ export default function App() {
   }, [route.page, account.isAuthenticated, refreshWatchlist, watchlistError]);
   // Explore keeps its search/page in the URL; typing must not move focus away
   // from the search field, so only entering Explore counts as a navigation.
-  const focusKey = route.page === 'explore' ? 'explore' : route.hash;
+  const focusKey = ['explore', 'compare'].includes(route.page) ? route.page : route.hash;
   useEffect(() => {
     document.title = `${pageTitles[route.page] || 'Page not found'} | StockSight`;
     main.current?.focus({ preventScroll: true });
@@ -130,7 +134,8 @@ export default function App() {
       }}>
       <div className="sidebar-items" style={{ '--sidebar-item-height': `${sidebarItemHeight}px`, '--sidebar-item-gap': `${sidebarItemGap}px` }}>
         {pages.map(([page, label, icon], index) => {
-          const href = `#/${page}${page === 'analysis' || page === 'predictions' ? `?symbol=${encodeURIComponent(symbol)}` : ''}`;
+          const href = page === 'compare' ? compareHash(compareSelection.symbols)
+            : `#/${page}${page === 'analysis' || page === 'predictions' ? `?symbol=${encodeURIComponent(symbol)}` : ''}`;
           return <a key={page} href={href} aria-label={label} aria-current={activeIndex === index ? 'page' : undefined} onClick={() => {
             rememberStock(symbol);
             if (menuOpen) {
@@ -148,9 +153,10 @@ export default function App() {
     <div className="app-content">
     <main ref={main} id="main" className="wrap" tabIndex="-1">
       {account.error && <div role="alert" className="account-error">{account.error}</div>}
-      {route.page === 'explore' && <Explore query={route.explore.query} page={route.explore.page} watchlist={watchlist} onOpen={selectStock} />}
-      {route.page === 'analysis' && <Analysis symbol={symbol} onSelectSymbol={selectStock} watchlist={watchlist} />}
-      {route.page === 'dashboard' && <Dashboard watchlist={watchlist} onOpen={selectStock} />}
+      {route.page === 'explore' && <Explore query={route.explore.query} page={route.explore.page} watchlist={watchlist} selection={compareSelection} onOpen={selectStock} />}
+      {route.page === 'analysis' && <Analysis symbol={symbol} onSelectSymbol={selectStock} watchlist={watchlist} selection={compareSelection} />}
+      {route.page === 'compare' && <Compare symbols={route.compare.symbols} range={route.compare.range} selection={compareSelection} onOpen={selectStock} />}
+      {route.page === 'dashboard' && <Dashboard watchlist={watchlist} selection={compareSelection} onOpen={selectStock} />}
       {route.page === 'predictions' && <Predictions symbol={symbol} />}
       {route.page === 'performance' && <ModelPerformance />}
       {route.page === 'methodology' && <Methodology />}

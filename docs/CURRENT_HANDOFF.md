@@ -37,6 +37,54 @@ No deferred prediction persistence, saved-ranking research or model serving was
 claimed completed. The plan was published in commit 4e13e71; this checkpoint
 records the subsequent issue cleanup. No application code or hosted data changed.
 
+## Compare increment (issue #19, Phase 2) — November 24
+
+Vlad approved Phase 2 as recommended: 2–4 stocks, the same ranges as Analysis,
+a common-date chart indexed to 100, price change only (no volatility or
+drawdown until Parth reviews the numerics), honest split, short-history and
+cutoff states, a compare tray on Explore, and compare from the Watchlist.
+Implemented on local branch `feature/compare-page`, stacked on
+`feature/explore-page` (Phase 1 PR pending). Not pushed.
+
+- Public GET /api/compare (rules in API.md): shared cutoff, common dates only,
+  close/first × 100, and a check for each split inside the window. No schema
+  change, data writes, provider calls or ML.
+- Compare page (#/compare?symbols=&range=):
+  - Edit by chip, by "Add ticker", or by range.
+  - Native SVG chart with a dash pattern per line, a 100 baseline and a
+    keyboard/pointer readout.
+  - Summary table and disclosure notes.
+  - Separate states for under-2 symbols, links with more than 4, unknown
+    symbols (each removable), 503/retry, malformed data and no overlap.
+- Sidebar adds Compare. A + toggle on Explore and Watchlist rows and "Add to
+  comparison" on Analysis feed a tray (max 4, kept in this tab's
+  sessionStorage, public tickers only).
+- Data finding: the snapshot's closes are split-adjusted (NVDA is continuous
+  across its 2024-06-10 10:1 split), but dividends aren't included, so the
+  page labels results as price change, not total return.
+
+Verification on November 24:
+- Backend: 151 passed, 3 skipped, including 13 new compare tests (common
+  dates, cutoff, adjusted/unadjusted splits, range trimming, overlap, 422/404/503,
+  fixture mode). Ruff lint/format pass.
+- Frontend: lint and build pass.
+- Browser suites: public 56/56 (9 new compare cases, with synthetic TST
+  responses plus the real fixture 404) and accounts 24/24.
+- Local full-data check (Docker snapshot):
+  - AAPL/MSFT/NVDA 1y gives 252 common sessions (AAPL +29.77%, MSFT +2.32%,
+    NVDA −14.25%).
+  - NVDA/AAPL/TSLA/BRK-B Max gives 2000; all five recorded splits are
+    detected as adjusted.
+  - ABNB/MSFT Max gives 1,488 (ABNB's history starts 2020-12-10).
+  - Queries take 70–190 ms. MSFT's chart low (index ≈69) matches the stored
+    min close ($352.83 vs a $511.14 start).
+  - Phone layouts: at 320/390 px there is no overflow; the chart shows only
+    start/end dates and the table hides the start→end column.
+
+Next: review/merge Phase 1, then open a PR for this branch. Parth should
+review the compare numerics (API.md). Phase 3 (metadata and PR #16) needs its
+own approval.
+
 ## Explore increment (issue #19, Phase 1) — November 24
 
 Vlad approved the Phase 0 direction:

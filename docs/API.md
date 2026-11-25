@@ -79,6 +79,42 @@ Each row reads only its two newest bars; no full histories, indicators or provid
 requests run. Explicit fixture mode returns the single AAPL fixture.
 `GET /api/stocks` (search, capped at 50) is unchanged.
 
+## Compare API
+
+GET /api/compare?symbols=AAPL,MSFT&range=1y compares 2–4 supported stocks on a
+common basis. Range is 1mo, 3mo, 1y (default) or all, the same session counts as
+price history. Symbols are case-insensitive and de-duplicated. Fewer than 2 or
+more than 4 distinct symbols, or a malformed ticker, returns 422 INVALID_COMPARISON.
+Symbols without stored history return 404 UNSUPPORTED_SYMBOL, naming each one in
+`detail.symbols`. Storage failure returns 503. Explicit fixture mode stores only
+AAPL, so it always returns that 404.
+
+Numerical rules (pending Parth's review):
+- **Shared cutoff:** the window ends at the newest session every selected stock
+  has stored. `aligned_to_shared_cutoff` is true when their latest dates differ;
+  each stock's own `as_of` and `last_close` are still reported.
+- **Common dates only:** dates missing for any stock are excluded, never
+  forward-filled. The window is the last N common dates (21/63/252/2000).
+  `common_sessions` can be below `requested_sessions` when a history is shorter.
+  With fewer than 2 common dates, every stock has `metric_status`
+  `insufficient_overlap` and `dates` is empty.
+- **Indexing:** `indexed[i] = close[i] / close[first common date] × 100`.
+  `period_change_pct = last indexed − 100`. Closes exclude dividends, so this is
+  price change, not total return.
+- **Splits:** each `stock_splits` event inside the window is checked against the
+  stored closes. A move within 25% of the split factor on that day means the
+  stored prices are unadjusted there (`price_adjusted: false`). The stock's
+  `metric_status` is then `split_unadjusted` and its `period_change_pct` is null.
+  The team snapshot's recorded splits (e.g. NVDA 2021/2024, AAPL 2020) are
+  continuous, i.e. already adjusted.
+
+Response fields: `range`, `requested_sessions`, `common_sessions`, `start`, `end`,
+`aligned_to_shared_cutoff`, `dates[]` and `stocks[]`. Each stock has `symbol`,
+`name` (null for placeholders), `as_of`, `last_close`, `series_revision`,
+`start_close`, `end_close`, `period_change_pct`, `metric_status`,
+`split_events[]` (`date`, `ratio`, `price_adjusted`) and `indexed[]`, aligned
+with `dates`.
+
 ## Storage selection and readiness
 
 A nonempty STOCKSIGHT_DATABASE_URL selects database reads with the same history response. Missing/empty URL explicitly selects fixture mode. GET /api/ready checks storage/schema (200 or sanitized 503); /api/health remains liveness only. Stock routes return 503 DATA_UNAVAILABLE if database reads fail, without fixture fallback. Search is capped at 50 and all-history at the latest 2,000 daily bars.

@@ -5,6 +5,7 @@ from typing import Annotated
 from fastapi import APIRouter, HTTPException, Query, Request
 from sqlalchemy.exc import SQLAlchemyError
 
+from app.compare import ComparePage, compare_database, compare_fixture, parse_symbols
 from app.explore import (
     PAGE_SIZE_DEFAULT,
     PAGE_SIZE_MAX,
@@ -68,6 +69,21 @@ def explore(
         return explore_fixture(query, page, page_size)
     try:
         return explore_database(request.app.state.engine, query, page, page_size)
+    except SQLAlchemyError:
+        raise unavailable() from None
+
+
+@router.get("/compare", response_model=ComparePage)
+def compare(
+    request: Request,
+    symbols: Annotated[str, Query(max_length=100)],
+    range: HistoryRange = "1y",
+) -> ComparePage:
+    selected = parse_symbols(symbols)
+    if request.app.state.engine is None:
+        return compare_fixture(selected)
+    try:
+        return compare_database(request.app.state.engine, selected, range)
     except SQLAlchemyError:
         raise unavailable() from None
 

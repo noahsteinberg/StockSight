@@ -6,7 +6,7 @@ function subscribe(listener) {
 }
 
 const snapshot = () => window.location.hash;
-const knownPages = new Set(['explore', 'analysis', 'dashboard', 'predictions', 'performance', 'methodology', 'login', 'signup', 'reset-password']);
+const knownPages = new Set(['explore', 'analysis', 'compare', 'dashboard', 'predictions', 'performance', 'methodology', 'login', 'signup', 'reset-password']);
 const aliases = { watchlist: 'dashboard', project: 'methodology', main: 'analysis' };
 
 export default function usePageRoute() {
@@ -24,6 +24,12 @@ export default function usePageRoute() {
     explore: {
       query: (params.get('q') || '').trim().slice(0, 40),
       page: Number.isInteger(requestedPage) && requestedPage >= 1 && requestedPage <= 1000 ? requestedPage : 1,
+    },
+    // Up to 10 are parsed so the Compare page can say when a link held more than 4.
+    compare: {
+      symbols: [...new Set((params.get('symbols') || '').split(',').map(value => value.trim().toUpperCase()))]
+        .filter(value => /^[A-Z][A-Z0-9.^=-]{0,15}$/.test(value)).slice(0, 10),
+      range: ['1mo', '3mo', '1y', 'all'].includes(params.get('range')) ? params.get('range') : '1y',
     },
     hash,
   };

@@ -155,7 +155,7 @@ test('Explore fits phone and desktop widths without page overflow', async ({ pag
     await expect(rows(page)).toHaveCount(25);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     // Every column, including Save, must be reachable without sideways table scrolling.
-    const star = rows(page).nth(1).getByRole('button');
+    const star = rows(page).nth(1).getByRole('button', { name: /^Compare TST/ });
     expect((await star.boundingBox()).x + (await star.boundingBox()).width).toBeLessThanOrEqual(width);
     expect(await page.locator('.explore-table').evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true);
     await page.screenshot({ path: `../.local-data/explore-${width}.png` });
