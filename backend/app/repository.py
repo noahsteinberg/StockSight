@@ -9,7 +9,7 @@ from app.market import SESSION_LIMITS, Bar, History, Stock
 from app.stock_metadata import company_name, symbols_named
 
 
-def search_database(engine: Engine, query: str) -> list[Stock]:
+def search_database(engine: Engine, query: str, limit: int = 50) -> list[Stock]:
     with Session(engine) as session:
         statement = select(StockRecord).where(
             StockRecord.symbol.in_(select(PriceSeries.symbol))
@@ -30,7 +30,7 @@ def search_database(engine: Engine, query: str) -> list[Stock]:
             Stock(
                 symbol=row.symbol, name=company_name(row.symbol, row.name) or row.name
             )
-            for row in session.scalars(statement.order_by(*ordering).limit(50))
+            for row in session.scalars(statement.order_by(*ordering).limit(limit))
         ]
 
 
