@@ -3,6 +3,15 @@ import { readFile } from 'node:fs/promises';
 
 const barsURL = '**/api/stocks/*/prices?*';
 const latest = page => page.getByText(/As of.*2017-02-16/);
+// The fixture API stores only AAPL, so suggestion tests use a catalog of real
+// supported tickers (names only; no prices are involved).
+const catalog = [['AAPL', 'Apple Inc.'], ['ABT', 'Abbott Laboratories'], ['ADBE', 'Adobe Inc.'], ['AMD', 'Advanced Micro Devices'],
+  ['AMZN', 'Amazon'], ['AVGO', 'Broadcom'], ['BA', 'Boeing'], ['BRK-B', 'Berkshire Hathaway'], ['COST', 'Costco'],
+  ['DIS', 'Walt Disney Company'], ['GOOG', 'Alphabet Inc. (Class C)'], ['GS', 'Goldman Sachs'], ['IBM', 'IBM'],
+  ['INTC', 'Intel'], ['JPM', 'JPMorgan Chase'], ['META', 'Meta Platforms'], ['MSFT', 'Microsoft'], ['NFLX', 'Netflix'],
+  ['NVDA', 'Nvidia'], ['ORCL', 'Oracle Corporation'], ['PLTR', 'Palantir Technologies'], ['QCOM', 'Qualcomm'],
+  ['TSLA', 'Tesla, Inc.'], ['V', 'Visa Inc.'], ['WMT', 'Walmart']].map(([symbol, name]) => ({ symbol, name }));
+const mockCatalog = page => page.route('**/api/stocks?limit=*', route => route.fulfill({ json: catalog }));
 
 test('real API: ranges, keyboard inspection, and observations table', async ({ page }) => {
   await page.goto('/#/analysis');
@@ -169,33 +178,36 @@ test('Escape dismisses a pending search and Clear keeps the current chart', asyn
   await expect(latest(page)).toBeVisible();
 });
 
-test('autocomplete debounces edits, prioritizes prefixes, and caps the list at eight', async ({ page }) => {
+test('focus lists every stock in a bounded scrolling box and typing narrows it', async ({ page }) => {
+  await mockCatalog(page);
   await page.goto('/#/analysis');
   await expect(latest(page)).toBeVisible();
-  await page.clock.install({ time: new Date('2026-11-22T15:00:00Z') });
-  await page.clock.pauseAt(new Date('2026-11-22T15:00:01Z'));
   const input = page.getByRole('combobox', { name: 'Ticker' });
-  await input.fill('MS');
-  await page.clock.runFor(150);
-  await input.fill('A');
-  await page.clock.runFor(199);
-  await expect(input).toHaveAttribute('aria-expanded', 'false');
-  await page.clock.runFor(1);
   const list = page.getByRole('listbox', { name: 'Stock suggestions' });
-  await expect(list.getByRole('option')).toHaveCount(8);
+  await input.fill('');
+  await expect(list.getByRole('option')).toHaveCount(catalog.length);
   await expect(list.getByRole('option').first()).toContainText('AAPL');
-  await expect(list.getByRole('option', { name: /MSFT/ })).toHaveCount(0);
+  const box = await list.evaluate(element => ({ height: element.clientHeight, scroll: element.scrollHeight, page: innerHeight }));
+  expect(box.height).toBeLessThanOrEqual(Math.min(370, box.page * .5));
+  expect(box.scroll).toBeGreaterThan(box.height);
+  await input.fill('MS');
+  await expect(list.getByRole('option').first()).toContainText('MSFT');
+  await input.fill('A');
+  // Ticker prefixes rank before names that merely contain the letter.
+  await expect(list.getByRole('option').first()).toContainText('AAPL');
+  await expect(list.getByRole('option').nth(5)).toContainText('AVGO');
   await expect(input).toHaveAttribute('aria-autocomplete', 'list');
   await expect(input).toHaveAttribute('aria-controls', await list.getAttribute('id'));
 });
 
 test('typed company names and light typos suggest the stock for keyboard selection', async ({ page }) => {
+  await mockCatalog(page);
   await page.goto('/#/analysis');
   const input = page.getByRole('combobox', { name: 'Ticker' });
   const list = page.getByRole('listbox', { name: 'Stock suggestions' });
   await input.fill('a');
   const options = list.getByRole('option');
-  await expect(options).toHaveCount(8);
+  await expect(options.first()).toContainText('AAPL');
   await input.press('ArrowDown');
   await expect(options.first()).toHaveAttribute('aria-selected', 'true');
   await input.press('ArrowDown');
@@ -219,6 +231,7 @@ test('typed company names and light typos suggest the stock for keyboard selecti
 });
 
 test('Escape and outside clicks dismiss suggestions and empty matches are non-selectable', async ({ page }) => {
+  await mockCatalog(page);
   await page.goto('/#/analysis');
   const input = page.getByRole('combobox', { name: 'Ticker' });
   const list = page.getByRole('listbox', { name: 'Stock suggestions' });

@@ -33,6 +33,8 @@ export function SeriesSwatch({ index }) {
 
 export default function CompareChart({ dates, stocks }) {
   const container = useRef(null);
+  // The plot itself, not the first <svg> in the card: the readout holds line samples.
+  const plot = useRef(null);
   const [width, setWidth] = useState(800);
   const [selected, setSelected] = useState(null);
   useEffect(() => {
@@ -60,22 +62,24 @@ export default function CompareChart({ dates, stocks }) {
     .reduce((placed, label) => [...placed, { ...label, y: Math.max(label.y, (placed.at(-1)?.y ?? -Infinity) + 14) }], []);
   const last = dates.length - 1;
   const active = selected === null ? null : Math.min(selected, last);
+  // The readout always shows one date (the latest until you point at another), so
+  // its size never changes and the chart never shifts under the cursor.
+  const shown = active ?? last;
   const middle = Math.floor(last / 2);
 
   function pick(clientX) {
-    const box = container.current.querySelector('svg').getBoundingClientRect();
+    const box = plot.current.getBoundingClientRect();
     const position = (clientX - box.left) / box.width * width;
     setSelected(Math.max(0, Math.min(last, Math.round((position - left) / (right - left) * last))));
   }
 
   return <div className="compare-chart" ref={container}>
     <p className="compare-readout" aria-live="polite">
-      {active === null ? 'Hover, tap or use the arrow keys to read values on a date.' : <>
-        <strong>{dates[active]}</strong>
-        {stocks.map((stock, index) => <span key={stock.symbol}><SeriesSwatch index={index} /> {stock.symbol} {indexFormat.format(stock.indexed[active])}</span>)}
-      </>}
+      <strong>{dates[shown]}</strong>
+      {stocks.map((stock, index) => <span key={stock.symbol}><SeriesSwatch index={index} /> {stock.symbol} {indexFormat.format(stock.indexed[shown])}</span>)}
+      <span className="compare-readout-hint" style={{ visibility: active === null ? 'visible' : 'hidden' }}>Latest · hover, tap or use arrow keys for other dates</span>
     </p>
-    <svg viewBox={`0 0 ${width} ${height}`} role="img" tabIndex="0"
+    <svg ref={plot} viewBox={`0 0 ${width} ${height}`} role="img" tabIndex="0"
       aria-label={`Price change indexed to 100 from ${dates[0]} to ${dates[last]} for ${stocks.map(stock => stock.symbol).join(', ')}. Use Left and Right Arrow to read values.`}
       onPointerMove={event => pick(event.clientX)} onPointerDown={event => pick(event.clientX)}
       onPointerLeave={event => { if (event.pointerType === 'mouse') setSelected(null); }}

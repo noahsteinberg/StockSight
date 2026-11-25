@@ -8,7 +8,7 @@ from app.db import DailyBar, PriceSeries, StockRecord, series_revision
 from app.market import SESSION_LIMITS, Bar, History, Stock
 
 
-def search_database(engine: Engine, query: str) -> list[Stock]:
+def search_database(engine: Engine, query: str, limit: int = 50) -> list[Stock]:
     with Session(engine) as session:
         statement = select(StockRecord).where(
             StockRecord.symbol.in_(select(PriceSeries.symbol))
@@ -26,7 +26,7 @@ def search_database(engine: Engine, query: str) -> list[Stock]:
         )
         return [
             Stock(symbol=row.symbol, name=row.name)
-            for row in session.scalars(statement.order_by(*ordering).limit(50))
+            for row in session.scalars(statement.order_by(*ordering).limit(limit))
         ]
 
 
