@@ -252,4 +252,11 @@ def test_exact_ticker_is_ranked_before_capped_partial_matches(database):
         matches = client.get("/api/stocks?query=t").json()
         assert len(matches) == 50
         assert matches[0]["symbol"] == "T"
+        # An explicit limit returns the whole catalog for the ticker dropdown.
+        catalog = client.get("/api/stocks?limit=1000").json()
+        assert len(catalog) == 52 and catalog == sorted(
+            catalog, key=lambda s: s["symbol"]
+        )
+        assert client.get("/api/stocks?limit=0").status_code == 422
+        assert client.get("/api/stocks?limit=1001").status_code == 422
         assert client.get("/api/stocks/T/prices").status_code == 200

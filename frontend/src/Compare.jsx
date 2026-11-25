@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import CompareChart, { SeriesSwatch } from './CompareChart.jsx';
+import StockSearchInput from './StockSearchInput.jsx';
 import { compareLimit, compareRanges } from './compare-api.js';
 import useCompare from './use-compare.js';
 import { compareHash } from './use-compare-selection.js';
@@ -55,7 +56,10 @@ export default function Compare({ symbols: requested, range, linkRange = range, 
   }
   function addSymbol(event) {
     event.preventDefault();
-    const symbol = draft.trim().toUpperCase();
+    addTicker(draft);
+  }
+  function addTicker(value) {
+    const symbol = value.trim().toUpperCase();
     if (!symbolPattern.test(symbol)) { setInputError('Enter a ticker symbol, such as MSFT.'); return; }
     if (symbols.includes(symbol)) { setInputError(`${symbol} is already in this comparison.`); return; }
     if (symbols.length >= compareLimit) { setInputError(`A comparison holds up to ${compareLimit} stocks. Remove one first.`); return; }
@@ -80,9 +84,9 @@ export default function Compare({ symbols: requested, range, linkRange = range, 
       </ul>
       <form className="compare-add" onSubmit={addSymbol} noValidate>
         <label htmlFor="compare-add-input" className="sr-only">Add a ticker to the comparison</label>
-        <input id="compare-add-input" value={draft} maxLength={16} autoComplete="off" spellCheck="false" placeholder="Add ticker"
-          aria-invalid={Boolean(inputError)} aria-describedby={inputError ? 'compare-add-error' : undefined}
-          onChange={event => { setDraft(event.target.value); setInputError(''); }} />
+        <StockSearchInput id="compare-add-input" value={draft} invalid={inputError} errorId="compare-add-error"
+          placeholder="Add ticker or company" icon={false} exclude={symbols}
+          onChange={value => { setDraft(value); setInputError(''); }} onSelect={addTicker} />
         <button type="submit">Add</button>
       </form>
       <fieldset className="compare-ranges">
