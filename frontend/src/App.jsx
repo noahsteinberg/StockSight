@@ -2,6 +2,8 @@ import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import Analysis from './Analysis.jsx';
 import AuthPage from './AuthPage.jsx';
 import AccountControls from './AccountControls.jsx';
+import Settings from './Settings.jsx';
+import { readChartDefaults, saveChartDefaults } from './chart-defaults.js';
 import SidebarHighlight from './SidebarHighlight.jsx';
 import { Dashboard, Methodology, ModelPerformance, Predictions } from './Pages.jsx';
 import { useAccount } from './auth-context.js';
@@ -38,6 +40,7 @@ export default function App() {
   const navigation = useRef(null);
   const menuButton = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [chartDefaults, setChartDefaults] = useState(readChartDefaults);
   const [selectedSymbol, setSelectedSymbol] = useState(() => {
     const saved = route.symbol || getSavedSymbol();
     return saved && /^[A-Z][A-Z0-9.^=-]{0,15}$/.test(saved) ? saved : 'AAPL';
@@ -54,7 +57,7 @@ export default function App() {
     if (previousPage !== route.page && account.isAuthenticated && !watchlistError && ['dashboard', 'analysis'].includes(route.page)) refreshWatchlist();
   }, [route.page, account.isAuthenticated, refreshWatchlist, watchlistError]);
   useEffect(() => {
-    document.title = `${({ login: 'Log in', signup: 'Create an account', 'reset-password': 'Reset password' })[route.page] || pages[activeIndex]?.[1] || 'Page not found'} | StockSight`;
+    document.title = `${({ login: 'Log in', signup: 'Create an account', 'reset-password': 'Reset password', settings: 'Settings' })[route.page] || pages[activeIndex]?.[1] || 'Page not found'} | StockSight`;
     main.current?.focus({ preventScroll: true });
     window.scrollTo(0, 0);
   }, [route.hash, route.page, activeIndex]);
@@ -97,6 +100,17 @@ export default function App() {
     rememberStock(value);
     window.location.hash = `/analysis?symbol=${encodeURIComponent(value)}`;
   }
+  function followSidebarLink(href) {
+    rememberStock(symbol);
+    if (menuOpen) {
+      setMenuOpen(false);
+      if (href === route.hash) main.current?.focus({ preventScroll: true });
+    }
+  }
+  function updateChartDefaults(next) {
+    setChartDefaults(next);
+    saveChartDefaults(next);
+  }
   if (['login', 'signup', 'reset-password'].includes(route.page)) return <AuthPage key={route.page} mode={route.page} />;
   return <div className="site-shell">
     <a className="skip-link" href="#main" onClick={event => { event.preventDefault(); main.current?.focus(); }}>Skip to content</a>
@@ -115,34 +129,37 @@ export default function App() {
       </div>
     </header>
     <nav id="site-navigation" ref={navigation} className="site-sidebar" aria-label="Main navigation" data-open={menuOpen}
+      style={{ '--sidebar-item-height': `${sidebarItemHeight}px`, '--sidebar-item-gap': `${sidebarItemGap}px` }}
       onBlur={event => {
         if (menuOpen && !event.currentTarget.contains(event.relatedTarget) && event.relatedTarget !== menuButton.current) setMenuOpen(false);
       }}>
-      <div className="sidebar-items" style={{ '--sidebar-item-height': `${sidebarItemHeight}px`, '--sidebar-item-gap': `${sidebarItemGap}px` }}>
+      <div className="sidebar-items">
         {pages.map(([page, label, icon], index) => {
           const href = `#/${page}${page === 'analysis' || page === 'predictions' ? `?symbol=${encodeURIComponent(symbol)}` : ''}`;
-          return <a key={page} href={href} aria-label={label} aria-current={activeIndex === index ? 'page' : undefined} onClick={() => {
-            rememberStock(symbol);
-            if (menuOpen) {
-              setMenuOpen(false);
-              if (href === route.hash) main.current?.focus({ preventScroll: true });
-            }
-          }}>
+          return <a key={page} href={href} aria-label={label} aria-current={activeIndex === index ? 'page' : undefined} onClick={() => followSidebarLink(href)}>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon} /></svg>
             <span aria-hidden="true">{label}</span>
           </a>;
         })}
         {activeIndex >= 0 && <SidebarHighlight activeIndex={activeIndex} itemHeight={sidebarItemHeight} itemGap={sidebarItemGap} reduceMotion={reduceMotion} />}
       </div>
+      <div className="sidebar-footer">
+        <a href="#/settings" aria-label="Settings" aria-current={route.page === 'settings' ? 'page' : undefined}
+          onClick={() => followSidebarLink('#/settings')}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 3-.5 2.2-2 .9-2-.9-2 3.5 1.6 1.5v2.5L3.5 14l2 3.5 2-.8 2 .9.5 2.4h4l.5-2.4 2-.9 2 .8 2-3.5-1.6-1.3v-2.5l1.6-1.5-2-3.5-2 .9-2-.9L14 3z"/><circle cx="12" cy="11.5" r="2.5"/></svg>
+          <span aria-hidden="true">Settings</span>
+        </a>
+      </div>
     </nav>
     <div className="app-content">
     <main ref={main} id="main" className="wrap" tabIndex="-1">
       {account.error && <div role="alert" className="account-error">{account.error}</div>}
-      {route.page === 'analysis' && <Analysis symbol={symbol} onSelectSymbol={selectStock} watchlist={watchlist} />}
+      {route.page === 'analysis' && <Analysis symbol={symbol} onSelectSymbol={selectStock} watchlist={watchlist} chartDefaults={chartDefaults} />}
       {route.page === 'dashboard' && <Dashboard watchlist={watchlist} onOpen={selectStock} />}
       {route.page === 'predictions' && <Predictions symbol={symbol} />}
       {route.page === 'performance' && <ModelPerformance />}
       {route.page === 'methodology' && <Methodology />}
+      {route.page === 'settings' && <Settings chartDefaults={chartDefaults} onChartDefaultsChange={updateChartDefaults} />}
       {route.page === 'not-found' && <section className="app-page"><h1>Page not found</h1><div className="page-panel unavailable-state"><p>This page is unavailable.</p><a className="button-link" href="#/analysis">Go to stock analysis</a></div></section>}
     </main>
     <footer className="footer wrap"><span>StockSight <span className="footer-dot">/</span> UConn</span><p>For education and research. Not financial advice.</p><a href="#/methodology" onClick={() => rememberStock(symbol)}>Data & methodology</a></footer>

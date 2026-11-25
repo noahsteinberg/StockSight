@@ -17,6 +17,10 @@
   The optional email can be used for recovery; Auth0 owns verification requirements.
 - Reset sends Auth0's recovery email. The confirmation does not identify whether
   an account exists. Accounts without recovery email may need administrator help.
+- Signed-in password users can also request the same email under Settings →
+  Account. Settings shows the sign-in provider from the current session and
+  shows a username or name when it has a matching provider profile in memory.
+  A cookie-only session can restore the sign-in method without restoring the name.
 - Google uses the existing official React SDK, Authorization Code + PKCE, and
   `connection=google-oauth2`; the provider consent/sign-in screens remain external.
 - **Trouble signing in?** opens a hosted password sign-in option for blocked cross-site

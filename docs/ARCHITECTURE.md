@@ -28,6 +28,7 @@ its schedule is gated pending manual Actions acceptance (see DAILY_REFRESH.md).
 | #/predictions?symbol=AAPL | Predictions | Selected stock, unavailable generation/history and return to Analysis |
 | #/performance | Model performance | Unavailable evaluation |
 | #/methodology | Data & methodology | Source, coverage, adjustment, indicator and project information |
+| #/settings | Settings | Browser-local SMA 20 and RSI 14 defaults, account details, recovery, and sign-out |
 
 Root / opens Analysis for compatibility. The brand opens Dashboard. Legacy
 #analysis, #watchlist and #project resolve to their corresponding views.
@@ -45,6 +46,9 @@ the selected stock, and a successful Auth0 callback returns to Dashboard.
   the observations table. Local autocomplete is supplied by stock-suggestions.js.
   Price and indicator requests have independent retry states. The client
   compares snapshot IDs and dates before combining the responses.
+- Settings initializes the indicator controls when Analysis opens. Changes to
+  the controls on the chart apply to the current Analysis view. The saved
+  defaults contain only two booleans and are shared by users of that browser.
 - FastAPI mounts public and private API routes under /api. app/config.py reads
   typed settings. app/api/stocks.py selects fixture or PostgreSQL storage.
   app/import_prices.py validates and imports histories per symbol. Alembic owns

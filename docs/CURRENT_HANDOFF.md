@@ -1,5 +1,18 @@
 # StockSight current handoff
 
+## Settings page
+
+- Gavin approved chart defaults and account controls, with Settings at the
+  bottom of the desktop sidebar and last in the mobile menu. The page is
+  available at `/#/settings` on `feature/settings-page` for review.
+- SMA 20 and RSI 14 defaults are saved in the browser and initialize Analysis.
+  Account settings display the sign-in method, available profile name, and
+  sign-out. Password accounts can use the existing Auth0 recovery email flow.
+  See [Accounts](ACCOUNTS.md) for cookie-only profile behavior.
+- Verification passed lint, production build, 42 public browser cases, and
+  26 isolated account browser cases. The local preview uses the AAPL fixture
+  on port 5173. Recovery submission used intercepted Auth0 requests in tests.
+
 ## Next product work: Vlad / @Hab1yer
 
 Read [FRONTEND_PRODUCT_HANDOFF.md](FRONTEND_PRODUCT_HANDOFF.md) for the proposed

@@ -172,8 +172,8 @@ function Session({ children }) {
   const restoring = session.status === 'loading' || (callback && sdkLoading)
     || (sdkAuthenticated && !session.authenticated && !expired && !action && session.status !== 'error');
   const displayUser = useMemo(() => !authenticated ? undefined :
-    sdkUser?.sub === sessionSubject ? sdkUser : { sub: sessionSubject, name: 'Your account' },
-  [authenticated, sdkUser, sessionSubject]);
+    sdkUser?.sub === sessionSubject ? sdkUser : session.profile || { sub: sessionSubject },
+  [authenticated, sdkUser, session.profile, sessionSubject]);
   const value = useMemo(() => ({
     configured: true, isAuthenticated: Boolean(authenticated), isLoading: Boolean(restoring),
     user: displayUser, login, loginHosted, loginWithPassword, signup, resetPassword, logout: signOut, authorizedFetch,

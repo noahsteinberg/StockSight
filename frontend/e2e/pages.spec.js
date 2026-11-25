@@ -1,5 +1,41 @@
 import { test, expect } from '@playwright/test';
 
+test('sidebar settings remembers chart defaults and can restore them', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/#/analysis');
+  const nav = page.getByRole('navigation', { name: 'Main navigation' });
+  const settings = nav.getByRole('link', { name: 'Settings', exact: true });
+  const position = await settings.boundingBox();
+  expect(position.height).toBe(48);
+  expect(900 - (position.y + position.height)).toBeLessThan(30);
+  await settings.click();
+  await expect(settings).toHaveAttribute('aria-current', 'page');
+  await expect(page).toHaveTitle('Settings | StockSight');
+  await expect(page.locator('main')).toBeFocused();
+
+  const sma = page.getByRole('switch', { name: 'Show SMA 20 by default' });
+  const rsi = page.getByRole('switch', { name: 'Show RSI 14 by default' });
+  await sma.check();
+  await rsi.check();
+  await page.reload();
+  await expect(sma).toBeChecked();
+  await expect(rsi).toBeChecked();
+
+  const analysis = nav.getByRole('link', { name: 'Analysis', exact: true });
+  const smaButton = page.getByRole('button', { name: 'SMA 20', exact: true });
+  const rsiButton = page.getByRole('button', { name: 'RSI 14', exact: true });
+  await analysis.click();
+  await expect(smaButton).toHaveAttribute('aria-pressed', 'true');
+  await expect(rsiButton).toHaveAttribute('aria-pressed', 'true');
+  await smaButton.click();
+  await settings.click();
+  await expect(sma).toBeChecked();
+  await page.getByRole('button', { name: 'Reset chart defaults' }).click();
+  await analysis.click();
+  await expect(smaButton).toHaveAttribute('aria-pressed', 'false');
+  await expect(rsiButton).toHaveAttribute('aria-pressed', 'false');
+});
+
 test('navigation supports refresh, browser history, active state and page focus', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Stock analysis', exact: true })).toBeVisible();
@@ -88,7 +124,7 @@ test('the desktop rail expands from icons, resizes the content, and stays fixed 
   const active = nav.getByRole('link', { name: 'Analysis', exact: true });
   const label = active.locator('span');
   await expect(active).toHaveAttribute('aria-current', 'page');
-  await expect(nav.locator('a svg')).toHaveCount(5);
+  await expect(nav.locator('a svg')).toHaveCount(6);
   await expect(label).toHaveCSS('opacity', '0');
   const before = await page.locator('main').boundingBox();
   const rail = await nav.boundingBox();
@@ -198,5 +234,9 @@ test('the mobile hamburger reveals the current page, supports Escape, and closes
   await expect(nav.getByRole('link', { name: 'Analysis', exact: true })).toHaveAttribute('aria-current', 'page');
   await page.mouse.click(317, 420);
   await expect(nav).toBeHidden();
+  await toggle.click();
+  await nav.getByRole('link', { name: 'Settings' }).click();
+  await expect(nav).toBeHidden();
+  await expect(page.getByRole('heading', { name: 'Settings', exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
 });

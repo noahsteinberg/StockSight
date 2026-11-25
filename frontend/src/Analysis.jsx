@@ -13,7 +13,7 @@ function responseError(status, searching = false) {
   return searching ? 'Could not search stocks. Check that the API is running.' : 'Could not load prices. Check that the API is running.';
 }
 
-export default function Analysis({ symbol, onSelectSymbol, watchlist }) {
+export default function Analysis({ symbol, onSelectSymbol, watchlist, chartDefaults }) {
   const tickerInput = useRef(null);
   const [inputError, setInputError] = useState('');
   const [draft, setDraft] = useState({ symbol, value: symbol });
@@ -24,8 +24,8 @@ export default function Analysis({ symbol, onSelectSymbol, watchlist }) {
   const [retry, setRetry] = useState(0);
   const [searchRequest, setSearchRequest] = useState(null);
   const [search, setSearch] = useState(null);
-  const [showSma, setShowSma] = useState(false);
-  const [showRsi, setShowRsi] = useState(false);
+  const [showSma, setShowSma] = useState(chartDefaults.showSma);
+  const [showRsi, setShowRsi] = useState(chartDefaults.showRsi);
   const requestKey = `${symbol}:${range}:${retry}`;
 
   useEffect(() => {

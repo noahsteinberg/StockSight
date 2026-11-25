@@ -21,7 +21,7 @@ async function mockSuccessfulPasswordLogin(page, request, onPasswordLogin) {
     const header = Buffer.from(JSON.stringify({ alg: 'RS256', kid: 'provider-test-key', typ: 'JWT' })).toString('base64url');
     const payload = Buffer.from(JSON.stringify({
       iss: 'https://e2e.auth0.test/', aud: 'test-only-client', sub: 'auth0|alice',
-      iat: now, exp: now + 300, nonce: url.searchParams.get('nonce'),
+      iat: now, exp: now + 300, nonce: url.searchParams.get('nonce'), preferred_username: 'test-username',
       at_hash: createHash('sha256').update(proof.access_token).digest().subarray(0, 16).toString('base64url'),
     })).toString('base64url');
     const signature = sign('RSA-SHA256', Buffer.from(`${header}.${payload}`), privateKey).toString('base64url');
@@ -144,6 +144,45 @@ test('reset email is sent through Auth0 with a non-enumerating confirmation', as
   await page.getByRole('button', { name: 'Send reset link' }).click();
   await expect(page.getByRole('status')).toContainText('If an account has this recovery email');
   expect(payload.email).toBe('synthetic@example.com');
+});
+
+test('password accounts can request recovery and sign out from Settings', async ({ page, request }) => {
+  await mockSuccessfulPasswordLogin(page, request, () => {});
+  await page.route('https://e2e.auth0.test/dbconnections/change_password', route => {
+    expect(route.request().postDataJSON()).toMatchObject({
+      email: 'synthetic@example.com', connection: 'Username-Password-Authentication',
+    });
+    return route.fulfill({ status: 200, contentType: 'text/plain', body: 'Request accepted.' });
+  });
+  await page.goto('/#/login');
+  await page.getByLabel('Username', { exact: true }).fill('test-username');
+  await page.getByLabel('Password', { exact: true }).fill('Synthetic-only!789');
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'My dashboard' })).toBeVisible();
+  await page.getByRole('link', { name: 'Settings' }).click();
+  const account = page.getByRole('region', { name: 'Account' });
+  await expect(account.getByText('test-username', { exact: true })).toBeVisible();
+  await expect(account.getByText('StockSight password', { exact: true })).toBeVisible();
+  await page.reload();
+  await account.getByText('Reset password', { exact: true }).click();
+  await account.getByLabel('Recovery email', { exact: true }).fill('synthetic@example.com');
+  await account.getByRole('button', { name: 'Send password reset email' }).click();
+  await expect(account.getByRole('status')).toContainText('If the address matches an account');
+  await account.getByRole('button', { name: 'Sign out' }).click();
+  await expect(account.getByRole('link', { name: 'Sign in' })).toBeVisible();
+  expect((await request.get('/api/watchlist')).status()).toBe(401);
+});
+
+test('Google accounts see their sign-in method without a StockSight password reset', async ({ page }) => {
+  await page.route('**/api/auth/session', route => route.fulfill({ json: {
+    authenticated: true, user: { id: 1, sub: 'google-oauth2|synthetic-user' },
+    csrf_token: 'synthetic-csrf-token', expires_at: new Date(Date.now() + 300000).toISOString(),
+  } }));
+  await page.route('**/api/watchlist', route => route.fulfill({ json: { items: [] } }));
+  await page.goto('/#/settings');
+  const account = page.getByRole('region', { name: 'Account' });
+  await expect(account.getByText('Google', { exact: true })).toBeVisible();
+  await expect(account.getByText('Reset password', { exact: true })).toHaveCount(0);
 });
 
 test('unsolicited fragment tokens fail closed and are removed from the URL', async ({ page }) => {

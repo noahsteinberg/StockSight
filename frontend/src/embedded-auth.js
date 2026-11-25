@@ -81,5 +81,9 @@ export async function completeEmbeddedLogin(hash) {
   if (!response.ok) throw new AuthFlowError('Your login was verified, but StockSight could not start your session. Please try again.');
   const session = await response.json();
   if (!session.authenticated) throw new Error('Sign-in could not be verified. Start again.');
-  return { ...session, status: 'authenticated' };
+  const claims = result.idTokenPayload;
+  const profile = claims && claims.sub === session.user?.sub
+    ? { sub: claims.sub, preferred_username: claims.preferred_username, name: claims.name }
+    : undefined;
+  return { ...session, status: 'authenticated', profile };
 }
