@@ -116,7 +116,12 @@ test('the chart reads values by keyboard and pointer', async ({ page }) => {
   await page.goto('/#/compare?symbols=TST000,TST001&range=1mo');
   const chart = page.getByRole('img', { name: /Price change indexed to 100/ });
   const readout = page.locator('.compare-readout');
-  await expect(readout).toContainText('Hover, tap or use the arrow keys');
+  // Before any selection the readout shows the latest date, in the same space it
+  // keeps while hovering, so the chart never moves under the pointer.
+  await expect(readout).toContainText('2025-01-21 TST000 110.0 TST001 80.0');
+  await expect(readout).toContainText('Latest');
+  await page.evaluate(() => document.fonts.ready);
+  const before = await chart.boundingBox();
   await chart.focus();
   await chart.press('End');
   await expect(readout).toContainText('2025-01-21 TST000 110.0 TST001 80.0');
@@ -124,11 +129,15 @@ test('the chart reads values by keyboard and pointer', async ({ page }) => {
   await expect(readout).toContainText('2025-01-20');
   await chart.press('Home');
   await expect(readout).toContainText('2025-01-01 TST000 100.0 TST001 100.0');
+  expect((await chart.boundingBox()).y).toBe(before.y);
   await chart.press('Escape');
-  await expect(readout).toContainText('Hover, tap or use the arrow keys');
+  await expect(readout).toContainText('Latest');
   const box = await chart.boundingBox();
   await page.mouse.move(box.x + box.width * .5, box.y + box.height * .5);
   await expect(readout).toContainText('2025-01-1');
+  expect((await chart.boundingBox()).y).toBe(before.y);
+  // The line samples stay small (a chart-wide rule used to stretch them).
+  for (const swatch of await readout.locator('.series-swatch').all()) expect((await swatch.boundingBox()).width).toBeLessThanOrEqual(24);
 });
 
 test('shared cutoffs, short overlap and splits are disclosed instead of hidden', async ({ page }) => {
@@ -233,4 +242,24 @@ test('research signals are listed separately from the price comparison', async (
   await expect(panel.getByRole('listitem').filter({ hasText: 'TST000' })).toHaveText('TST000 no approved model');
   await expect(panel.getByRole('listitem').filter({ hasText: 'TST001' })).toHaveText('TST001 not supported');
   await expect(panel).toContainText('Past price change is not a signal or a forecast.');
+});
+
+test('the Add box suggests supported stocks and adds the one picked', async ({ page }) => {
+  await mockApis(page);
+  // Synthetic catalog for the suggestion list (the fixture API stores only AAPL).
+  await page.route('**/api/stocks?limit=*', route => route.fulfill({ json: [
+    { symbol: 'TST000', name: 'Test Company 0' }, { symbol: 'TST001', name: 'Test Company 1' },
+    { symbol: 'TST002', name: 'Test Company 2' }, { symbol: 'TST003', name: 'Other Test Corp' },
+  ] }));
+  await page.goto('/#/compare?symbols=TST000,TST001');
+  const add = page.getByRole('combobox', { name: 'Add a ticker to the comparison' });
+  await add.focus();
+  const list = page.getByRole('listbox', { name: 'Stock suggestions' });
+  // Stocks already compared are left out of the list.
+  await expect(list.getByRole('option')).toHaveText(['TST002Test Company 2', 'TST003Other Test Corp']);
+  await add.fill('other');
+  await expect(list.getByRole('option')).toHaveText(['TST003Other Test Corp']);
+  await list.getByRole('option', { name: /TST003/ }).click();
+  await expect(page).toHaveURL(/symbols=TST000,TST001,TST003$/);
+  await expect(add).toHaveValue('');
 });

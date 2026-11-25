@@ -35,6 +35,7 @@ from app.stock_metadata import SOURCE as METADATA_SOURCE
 from app.stock_metadata import MetadataSource, Sector, profile_for
 
 router = APIRouter(tags=["stocks"])
+SEARCH_LIMIT_MAX = 1000
 
 
 def unavailable() -> HTTPException:
@@ -49,12 +50,16 @@ def unavailable() -> HTTPException:
 
 @router.get("/stocks", response_model=list[Stock])
 def search_stocks(
-    request: Request, query: Annotated[str, Query(max_length=40)] = ""
+    request: Request,
+    query: Annotated[str, Query(max_length=40)] = "",
+    # The default keeps the original 50-result contract; the ticker dropdown
+    # asks for the whole supported catalog once (494 stocks today).
+    limit: Annotated[int, Query(ge=1, le=SEARCH_LIMIT_MAX)] = 50,
 ) -> list[Stock]:
     query = query.strip().upper()
     if request.app.state.engine is not None:
         try:
-            return search_database(request.app.state.engine, query)
+            return search_database(request.app.state.engine, query, limit)
         except SQLAlchemyError:
             raise unavailable() from None
     return (
