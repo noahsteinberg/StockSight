@@ -107,7 +107,11 @@ def explore_database(
     page: int,
     page_size: int,
     sector: str | None = None,
+    *,
+    sectors: list[str] | None = None,
 ) -> ExplorePage:
+    # `sectors` (private discovery) widens the filter to any of several sectors.
+    chosen = sectors if sectors is not None else ([sector] if sector else [])
     newest = (
         select(DailyBar)
         .where(DailyBar.series_id == PriceSeries.id)
@@ -125,8 +129,9 @@ def explore_database(
         PriceSeries, PriceSeries.symbol == StockRecord.symbol
     )
     filtered = supported.where(_matches(query)) if query else supported
-    if sector:
-        filtered = filtered.where(StockRecord.symbol.in_(symbols_in_sector(sector)))
+    if chosen:
+        allowed = [symbol for name in chosen for symbol in symbols_in_sector(name)]
+        filtered = filtered.where(StockRecord.symbol.in_(allowed))
     ordering = (
         (case((StockRecord.symbol == query, 0), else_=1), StockRecord.symbol)
         if query
@@ -139,7 +144,7 @@ def explore_database(
         )
         total_matching = (
             session.scalar(select(func.count()).select_from(filtered.subquery()))
-            if query or sector
+            if query or chosen
             else total_supported
         )
         latest_session = session.scalar(

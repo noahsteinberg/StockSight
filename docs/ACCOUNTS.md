@@ -163,7 +163,7 @@ logout does not revoke every bearer token or all other device sessions.
 | GET /api/auth/session | Optional app cookie | 200 authenticated/user/csrf_token/expires_at, or authenticated=false |
 | POST /api/auth/session | Valid Auth0 API access token and exact Origin | 200 session state and HttpOnly Set-Cookie |
 | POST /api/auth/logout | App cookie, exact Origin and X-CSRF-Token | 204; expired/revoked session cleanup is idempotent |
-| /api/me and /api/watchlist routes | App cookie or valid Auth0 bearer token | Existing account/watchlist contract |
+| /api/me, /api/me/* and /api/watchlist routes | App cookie or valid Auth0 bearer token | Existing account/watchlist contract; preferences and discovery use the same rules |
 
 The cookie is stocksight_session, host-only, HttpOnly, SameSite=Lax, Path=/api.
 Secure is enabled for HTTPS deployment origins. Plain HTTP is accepted only for
@@ -201,6 +201,23 @@ from the configured issuer.
 | GET /api/watchlist | App session or bearer token | 200 `{ "items": [{ "symbol": "AAPL", "name": "Apple Inc.", "added_at": "ISO-UTC", "daily_change_pct": -0.12 }], "limit": 100 }` |
 | POST /api/watchlist | App session or bearer token; JSON `{ "symbol": "AAPL" }` | 201 saved item; 200 same item on repeat |
 | DELETE /api/watchlist/{symbol} | App session or bearer token | 204; repeated removal also 204 |
+| GET /api/me/preferences | App session or bearer token | 200 `{ "saved": false, "schema_version": 1, "purpose": null, "sectors": [], "horizon": null, "default_range": null, "updated_at": null }` |
+| PUT /api/me/preferences | App session or bearer token; JSON `{ purpose, sectors, horizon, default_range }` | 200 saved preferences (`saved: true`, ISO-UTC `updated_at`) |
+| DELETE /api/me/preferences | App session or bearer token | 204; repeated reset also 204 |
+| GET /api/me/discovery?query=&page=&page_size= | App session or bearer token | 200 Explore-shaped page plus `preference_sectors` and a `match_reason` per item |
+
+Research preferences (issue #19 phase 4) are optional and describe interests
+only. `purpose` is `learn`/`compare`/`track`, `horizon` is `weeks`/`months`/`years`,
+`default_range` is `1mo`/`3mo`/`1y`/`all` (each nullable = no preference), and
+`sectors` holds up to 11 distinct GICS sector names (stored in taxonomy order).
+Unknown values or extra fields (including any owner, income or holdings field)
+return 422. PUT replaces the whole record with one upsert; DELETE resets it.
+Cookie writes need the same Origin/CSRF/expected-user headers as watchlist
+writes. Discovery lists supported stocks in the saved sectors, A–Z, each with
+"Matches your selected sector: X". With no saved sectors it returns no items,
+never the full universe. Preferences never reach a model, a public URL or
+browser storage; the client keys them to the signed-in account. Storage failure
+returns 503 PREFERENCES_UNAVAILABLE.
 
 On the Analysis watchlist branch, saved items include `daily_change_pct`, calculated from the two most recent
 stored closes. A value of `-0.12` means `-0.12%`. The value is `null` when

@@ -16,14 +16,16 @@ function responseError(status, searching = false) {
   return searching ? 'Could not search stocks. Check that the API is running.' : 'Could not load prices. Check that the API is running.';
 }
 
-export default function Analysis({ symbol, onSelectSymbol, watchlist, selection }) {
+export default function Analysis({ symbol, onSelectSymbol, watchlist, selection, defaultRange }) {
   const comparing = selection?.symbols.includes(symbol);
   const tickerInput = useRef(null);
   const [inputError, setInputError] = useState('');
   const [draft, setDraft] = useState({ symbol, value: symbol });
   const input = draft.symbol === symbol ? draft.value : symbol;
   function setInput(value) { setDraft({ symbol, value }); }
-  const [range, setRange] = useState('3mo');
+  // A range picked here wins; until then the saved default (or 3M) applies.
+  const [chosenRange, setRange] = useState(null);
+  const range = chosenRange ?? defaultRange ?? '3mo';
   const [result, setResult] = useState({ loading: true });
   const [retry, setRetry] = useState(0);
   const [searchRequest, setSearchRequest] = useState(null);

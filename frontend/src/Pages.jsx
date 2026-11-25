@@ -1,9 +1,13 @@
 import CompareTray from './CompareTray.jsx';
 import Watchlist from './Watchlist.jsx';
 
-export function Dashboard({ watchlist, selection, onOpen }) {
+export function Dashboard({ watchlist, selection, onOpen, invite, onDismissInvite }) {
   return <section className="app-page" aria-labelledby="dashboard-title">
     <div className="page-heading"><h1 id="dashboard-title">Watchlist</h1><a className="button-link primary-link" href="#/explore">Explore stocks <span aria-hidden="true">↗</span></a></div>
+    {invite && <aside className="page-panel preference-invite" aria-labelledby="preference-invite-title">
+      <div><h2 id="preference-invite-title">Optional: set research preferences</h2><p>Choose sectors you’re curious about to list matching stocks in Explore, and pick a default chart window. You can skip this; nothing else changes.</p></div>
+      <div className="page-actions"><a className="button-link primary-link" href="#/preferences">Set preferences</a><button type="button" onClick={onDismissInvite}>Not now</button></div>
+    </aside>}
     <Watchlist watchlist={watchlist} selection={selection} onOpen={onOpen} />
     <CompareTray selection={selection} />
     <div className="dashboard-links"><a href="#/predictions"><span>Predictions</span><span className="muted">Currently unavailable</span><span aria-hidden="true">↗</span></a><a href="#/performance"><span>Model performance</span><span className="muted">Currently unavailable</span><span aria-hidden="true">↗</span></a></div>

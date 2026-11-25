@@ -39,7 +39,9 @@ function Notes({ data }) {
   </ul>;
 }
 
-export default function Compare({ symbols: requested, range, selection, onOpen }) {
+// `range` is what the page shows; `linkRange` is the range written in the URL (null
+// when the page follows the saved or built-in default), so edits keep links clean.
+export default function Compare({ symbols: requested, range, linkRange = range, selection, onOpen }) {
   const symbols = requested.slice(0, compareLimit);
   const overLimit = requested.length > compareLimit;
   const comparison = useCompare(symbols, range);
@@ -47,7 +49,7 @@ export default function Compare({ symbols: requested, range, selection, onOpen }
   const [draft, setDraft] = useState('');
   const [inputError, setInputError] = useState('');
 
-  function show(nextSymbols, nextRange = range) {
+  function show(nextSymbols, nextRange = linkRange) {
     selection.replace(nextSymbols);
     window.location.assign(compareHash(nextSymbols, nextRange));
   }

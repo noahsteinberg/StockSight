@@ -1,29 +1,39 @@
 import { useCallback, useEffect, useState } from 'react';
-import { fetchExplorePage, fetchSectors } from './explore-api.js';
+import { explorePageSize, fetchExplorePage, fetchSectors } from './explore-api.js';
+import { fetchDiscoveryPage } from './preferences-api.js';
 
 // Loads one Explore page. A newer query/page/sector/retry aborts the older request
 // and results are keyed to their request, so a slow response never replaces newer
 // rows. While the next page loads, the last settled rows stay visible and are marked busy.
-export default function useExplore(query, page, sector) {
+// `personal` ({ owner, authorizedFetch }) switches to the private discovery list; the
+// owner is part of the key, so another account's late response is never shown.
+export default function useExplore(query, page, sector, personal = null) {
   const [retry, setRetry] = useState(0);
-  const key = [query, page, sector, retry].join('\n');
-  const [result, setResult] = useState({ key: null, data: null });
+  const owner = personal?.owner ?? null;
+  const authorizedFetch = personal?.authorizedFetch ?? null;
+  const key = [query, page, sector, owner, retry].join('\n');
+  const [result, setResult] = useState({ key: null, owner: null, data: null });
 
   useEffect(() => {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10000);
     let active = true;
-    fetchExplorePage({ query, page, sector }, controller.signal)
-      .then(data => { if (active) setResult({ key, data }); })
+    const request = authorizedFetch
+      ? fetchDiscoveryPage({ query, page, pageSize: explorePageSize }, authorizedFetch, controller.signal)
+      : fetchExplorePage({ query, page, sector }, controller.signal);
+    request
+      .then(data => { if (active) setResult({ key, owner, data }); })
       .catch(error => {
-        if (active) setResult({ key, data: null, error: error.name === 'AbortError' ? 'Request timed out. Try again.' : error.message });
+        if (active) setResult({ key, owner, data: null, error: error.name === 'AbortError' ? 'Request timed out. Try again.' : error.message });
       })
       .finally(() => clearTimeout(timeout));
     return () => { active = false; clearTimeout(timeout); controller.abort(); };
-  }, [query, page, sector, key]);
+  }, [query, page, sector, owner, authorizedFetch, key]);
 
   return {
-    data: result.data,
+    // Older rows stay visible while the next page loads, but only for the same list
+    // and account: public and private results never stand in for each other.
+    data: result.key === key || result.owner === owner ? result.data : null,
     loading: result.key !== key,
     error: result.key === key ? result.error : null,
     retry: useCallback(() => setRetry(value => value + 1), []),

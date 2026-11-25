@@ -136,6 +136,12 @@ Response fields: `range`, `requested_sessions`, `common_sessions`, `start`, `end
 `split_events[]` (`date`, `ratio`, `price_adjusted`) and `indexed[]`, aligned
 with `dates`.
 
+## Private preferences and discovery
+
+GET/PUT/DELETE /api/me/preferences and GET /api/me/discovery are private account
+routes; their contract is in [the account guide](ACCOUNTS.md#watchlist-api).
+Discovery reuses the Explore item shape and adds a `match_reason` per item.
+
 ## Storage selection and readiness
 
 A nonempty STOCKSIGHT_DATABASE_URL selects database reads with the same history response. Missing/empty URL explicitly selects fixture mode. GET /api/ready checks storage/schema (200 or sanitized 503); /api/health remains liveness only. Stock routes return 503 DATA_UNAVAILABLE if database reads fail, without fixture fallback. Search is capped at 50 and all-history at the latest 2,000 daily bars.

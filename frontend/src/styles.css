@@ -46,6 +46,28 @@ input { min-width: 0; }
 .account-controls .primary-button:hover:not(:disabled) { background: #e4edfa; color: var(--navy); }
 .account-name, .account-status { font-size: 13px; color: #d0d9e9; }
 .account-name { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.account-link { color: white; font-size: 13px; text-decoration-color: #9aa9c0; text-underline-offset: 3px; }
+.app-content .primary-button { background: var(--navy); color: white; border-color: var(--navy); }
+.app-content .primary-button:hover:not(:disabled) { background: #1b2d4e; }
+.preferences-intro { max-width: 760px; margin-bottom: 20px; color: var(--muted); font-size: 14px; line-height: 1.6; }
+.preferences-form { display: grid; gap: 14px; }
+.preferences-form fieldset { min-width: 0; margin: 0; padding: 18px 20px; }
+.preferences-form legend { float: left; width: 100%; margin-bottom: 4px; font-size: 15px; font-weight: 600; color: var(--ink); }
+.preferences-form fieldset:disabled { opacity: .7; }
+.preference-help { clear: both; margin-bottom: 12px; font-size: 13px; color: var(--muted); }
+.preference-options { display: flex; flex-wrap: wrap; gap: 8px; }
+.sector-options { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); }
+.preference-choice { display: flex; align-items: center; gap: 8px; min-height: 40px; padding: 6px 12px; border: 1px solid #cbd4e0; border-radius: 8px; background: white; font-size: 14px; cursor: pointer; }
+.preference-choice:has(input:checked) { border-color: #b1c8e8; background: #eaf1fb; color: #164f91; }
+.preference-choice:has(input:focus-visible) { outline: 3px solid #357aca; outline-offset: 2px; }
+.preference-choice input { margin: 0; accent-color: var(--blue); }
+.text-button { margin-top: 10px; min-height: 32px; padding: 4px 10px; font-size: 13px; }
+.preference-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; font-size: 14px; }
+.preferences-status { margin-bottom: 14px; padding: 10px 14px; border-radius: 8px; background: #edf7f0; color: #1f5f37; font-size: 14px; }
+.preference-invite { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 24px; margin-bottom: 18px; padding: 18px 20px; }
+.preference-invite h2 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+.preference-invite p { max-width: 620px; font-size: 13px; color: var(--muted); }
+.explore-mine { min-height: 46px; }
 .menu-toggle { display: none; }
 .site-sidebar { position: fixed; z-index: 9; inset-block: var(--masthead-height) 0; inset-inline-start: 0; width: var(--rail-size); padding: 16px 9px; overflow: hidden auto; background: var(--surface); border-inline-end: 1px solid var(--line); transition: width .18s ease-out; }
 .sidebar-items { position: relative; display: flex; flex-direction: column; gap: var(--sidebar-item-gap); --sidebar-item-radius: 7px; }
@@ -400,7 +422,8 @@ section { scroll-margin-top: 24px; }
   .brand-divider, .brand-school { display: none; }
   .account-controls { min-width: 0; gap: 6px; }
   .account-controls button { min-height: 40px; padding-inline: 8px; font-size: 12px; white-space: nowrap; }
-  .account-name { max-width: 130px; }
+  .account-name { display: none; }
+  .account-link { font-size: 12px; }
   .account-status { text-align: right; }
   .analysis { padding-block: 18px 24px; }
   .section-heading h1 { font-size: 24px; }

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { WatchlistStar } from './AnalysisWatchlist.jsx';
+import { useAccount } from './auth-context.js';
 import CompareTray, { CompareToggle } from './CompareTray.jsx';
 import { explorePageSize, sectorNames } from './explore-api.js';
 import useExplore, { useSectors } from './use-explore.js';
@@ -11,7 +12,9 @@ const count = new Intl.NumberFormat('en-US');
 
 function summary(data, query, page, sector) {
   const parts = [`${count.format(data.total_supported)} supported ${data.total_supported === 1 ? 'stock' : 'stocks'}`];
-  if (query || sector) {
+  if (data.preference_sectors) {
+    parts.push(`${count.format(data.total_matching)} ${data.total_matching === 1 ? 'stock matches' : 'stocks match'}${query ? ` “${query}” and` : ''} your sectors (${data.preference_sectors.join(', ')})`);
+  } else if (query || sector) {
     parts.push(`${count.format(data.total_matching)} ${data.total_matching === 1 ? 'match' : 'matches'}${query ? ` for “${query}”` : ''}${sector ? ` in ${sector}` : ''}`);
   }
   if (data.items.length > 0) {
@@ -37,7 +40,7 @@ function StockRow({ stock, latestSession, watchlist, selection, onOpen }) {
         <strong>{stock.symbol}</strong>
         <span className={stock.name ? undefined : 'unknown-name'}>{stock.name || 'Name not yet available'}</span>
       </a>
-      <span className="explore-sector">{stock.sector || 'Sector unknown'}</span>
+      <span className="explore-sector">{stock.match_reason || stock.sector || 'Sector unknown'}</span>
     </th>
     <td>
       {stock.last_close == null ? <span className="muted">Unavailable</span> : price.format(stock.last_close)}
@@ -50,13 +53,16 @@ function StockRow({ stock, latestSession, watchlist, selection, onOpen }) {
   </tr>;
 }
 
-export default function Explore({ query, page, sector, watchlist, selection, onOpen }) {
+export default function Explore({ query, page, sector, mine, preferences, watchlist, selection, onOpen }) {
+  const account = useAccount();
+  // "Use my preferences" reads the private discovery list for the signed-in account.
+  const personal = mine && account.isAuthenticated ? { owner: preferences.owner, authorizedFetch: account.authorizedFetch } : null;
   const searchInput = useRef(null);
   const listTop = useRef(null);
   // The URL owns the applied search; the draft keeps exactly what is being typed.
   const [draft, setDraft] = useState({ source: query, value: query });
   const input = draft.source === query ? draft.value : query;
-  const explore = useExplore(query, page, sector);
+  const explore = useExplore(query, page, mine ? null : sector, personal);
   const sectors = useSectors();
   const sectorCounts = new Map(sectors.data?.sectors.map(item => [item.name, item.count]));
   const data = explore.data;
@@ -69,15 +75,15 @@ export default function Explore({ query, page, sector, watchlist, selection, onO
     // without recording one entry per keystroke.
     const timer = setTimeout(() => {
       setDraft(current => ({ ...current, source: next }));
-      window.location.hash = exploreHash({ query: next, sector });
+      window.location.hash = exploreHash({ query: next, sector, mine });
     }, 300);
     return () => clearTimeout(timer);
-  }, [draft, query, sector]);
+  }, [draft, query, sector, mine]);
 
   function applySearch(value) {
     const next = value.trim();
     setDraft({ source: next, value });
-    if (next !== query || page !== 1) window.location.hash = exploreHash({ query: next, sector });
+    if (next !== query || page !== 1) window.location.hash = exploreHash({ query: next, sector, mine });
   }
   function chooseSector(next) {
     window.location.hash = exploreHash({ query, sector: next || null });
@@ -92,7 +98,7 @@ export default function Explore({ query, page, sector, watchlist, selection, onO
     searchInput.current?.focus();
   }
   function goToPage(next) {
-    window.location.hash = exploreHash({ query, page: next, sector });
+    window.location.hash = exploreHash({ query, page: next, sector, mine });
     listTop.current?.scrollIntoView({ block: 'start' });
   }
 
@@ -105,17 +111,32 @@ export default function Explore({ query, page, sector, watchlist, selection, onO
       {input && <button type="button" onClick={clearSearch}>Clear</button>}
       <label className="explore-sector-filter">
         <span>Sector</span>
-        <select value={sector || ''} onChange={event => chooseSector(event.target.value)}>
+        <select value={mine ? '' : sector || ''} disabled={mine} onChange={event => chooseSector(event.target.value)}>
           <option value="">All sectors</option>
           {sectorNames.map(name => <option key={name} value={name}>{name}{sectorCounts.has(name) ? ` (${sectorCounts.get(name)})` : ''}</option>)}
         </select>
       </label>
-      {(query || sector) && <button type="button" className="explore-reset" onClick={clearFilters}>Reset filters</button>}
+      {account.isAuthenticated && <button type="button" className="explore-mine" aria-pressed={mine}
+        onClick={() => { window.location.hash = exploreHash({ query, mine: !mine }); }}>Use my preferences</button>}
+      {(query || sector || mine) && <button type="button" className="explore-reset" onClick={clearFilters}>Reset filters</button>}
     </form>
+    {mine && !account.isAuthenticated && <div className="page-panel unavailable-state">
+      <p>Sign in to list stocks that match your saved preferences. Everything else on Explore works without an account.</p>
+      <div className="page-actions">
+        <button type="button" className="primary-button" disabled={account.pending || !account.configured} onClick={() => account.login()}>Sign in</button>
+        <button type="button" onClick={clearFilters}>Show all stocks</button>
+      </div>
+    </div>}
+    {mine && account.isAuthenticated && data?.preference_sectors?.length === 0 && <div className="page-panel unavailable-state">
+      <p>You haven’t chosen any sectors yet, so nothing can match. Explore never widens an empty filter to everything.</p>
+      <div className="page-actions"><a className="button-link primary-link" href="#/preferences">Choose sectors</a><button type="button" onClick={clearFilters}>Show all stocks</button></div>
+    </div>}
+    {!(mine && (!account.isAuthenticated || data?.preference_sectors?.length === 0)) && <>
     <div ref={listTop} className="page-panel explore-panel">
       <p className="explore-summary" role="status">
         {data ? summary(data, query, page, sector) : explore.error ? 'Stock list unavailable' : 'Loading stocks…'}
         {data && explore.loading && <span className="muted"> · Updating…</span>}
+        {mine && data?.preference_sectors && <> · <a href="#/preferences">Edit preferences</a></>}
       </p>
       {explore.error && <div className="analysis-message error-state" role="alert">
         <p>{explore.error}</p>
@@ -125,10 +146,12 @@ export default function Explore({ query, page, sector, watchlist, selection, onO
         <span className="loading-spinner" /><div className="chart-skeleton" />
       </div>}
       {data && data.total_matching === 0 && <div className="analysis-message">
-        <p>{query || sector
+        <p>{data.preference_sectors
+          ? <>No supported stocks in your sectors match{query && <> “{query}”</>}.</>
+          : query || sector
           ? <>No supported stocks match{query && <> “{query}”</>}{sector && <> in {sector}</>}. Try another ticker or company name{sector ? ', or choose All sectors' : ''}.</>
           : 'No supported stocks are stored yet.'}</p>
-        {(query || sector) && <button type="button" onClick={clearFilters}>Reset filters</button>}
+        {(query || sector || mine) && <button type="button" onClick={clearFilters}>Reset filters</button>}
       </div>}
       {data && data.total_matching > 0 && data.items.length === 0 && <div className="analysis-message">
         <p>Page {page} is past the end of these results.</p>
@@ -152,6 +175,7 @@ export default function Explore({ query, page, sector, watchlist, selection, onO
         <button type="button" disabled={page >= totalPages || explore.loading} onClick={() => goToPage(page + 1)}>Next</button>
       </nav>}
     </div>
+    </>}
     <CompareTray selection={selection} />
     <p className="explore-note">
       {sectors.data

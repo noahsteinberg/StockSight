@@ -13,7 +13,7 @@ const nullable = check => value => value === null || check(value);
 const isText = value => typeof value === 'string' && value.length > 0;
 const isCount = value => Number.isInteger(value) && value >= 0;
 
-function validItem(item) {
+export function validExploreItem(item) {
   return item && typeof item === 'object' &&
     isText(item.symbol) &&
     nullable(isText)(item.name) &&
@@ -36,7 +36,7 @@ export function parseExplorePage(body) {
     body.total_matching <= body.total_supported &&
     nullable(isDate)(body.latest_session) &&
     Array.isArray(body.items) && body.items.length <= body.page_size &&
-    body.items.every(validItem);
+    body.items.every(validExploreItem);
   if (!valid) throw new Error('Stock list data was incomplete. Try again.');
   return body;
 }

@@ -4,11 +4,13 @@ import AuthPage from './AuthPage.jsx';
 import AccountControls from './AccountControls.jsx';
 import Compare from './Compare.jsx';
 import Explore from './Explore.jsx';
+import Preferences from './Preferences.jsx';
 import SidebarHighlight from './SidebarHighlight.jsx';
 import { Dashboard, Methodology, ModelPerformance, Predictions } from './Pages.jsx';
 import { useAccount } from './auth-context.js';
 import useCompareSelection, { compareHash } from './use-compare-selection.js';
 import useWatchlist from './use-watchlist.js';
+import usePreferences from './use-preferences.js';
 import usePageRoute from './use-page-route.js';
 
 // Predictions and Model performance stay reachable by link but leave the sidebar
@@ -22,7 +24,7 @@ const pages = [
 ];
 const pageTitles = {
   ...Object.fromEntries(pages.map(([page, label]) => [page, label])),
-  predictions: 'Predictions', performance: 'Model performance',
+  predictions: 'Predictions', performance: 'Model performance', preferences: 'Research preferences',
   login: 'Log in', signup: 'Create an account', 'reset-password': 'Reset password',
 };
 const selectedSymbolKey = 'stocksight:selected-symbol';
@@ -55,6 +57,8 @@ export default function App() {
   const symbol = route.symbol || selectedSymbol;
   const account = useAccount();
   const watchlist = useWatchlist();
+  const preferences = usePreferences();
+  const [inviteDismissed, setInviteDismissed] = useState(false);
   const compareSelection = useCompareSelection();
   const refreshWatchlist = watchlist.retry;
   const watchlistError = watchlist.error;
@@ -153,13 +157,15 @@ export default function App() {
     <div className="app-content">
     <main ref={main} id="main" className="wrap" tabIndex="-1">
       {account.error && <div role="alert" className="account-error">{account.error}</div>}
-      {route.page === 'explore' && <Explore query={route.explore.query} page={route.explore.page} sector={route.explore.sector} watchlist={watchlist} selection={compareSelection} onOpen={selectStock} />}
-      {route.page === 'analysis' && <Analysis symbol={symbol} onSelectSymbol={selectStock} watchlist={watchlist} selection={compareSelection} />}
-      {route.page === 'compare' && <Compare symbols={route.compare.symbols} range={route.compare.range} selection={compareSelection} onOpen={selectStock} />}
-      {route.page === 'dashboard' && <Dashboard watchlist={watchlist} selection={compareSelection} onOpen={selectStock} />}
+      {route.page === 'explore' && <Explore query={route.explore.query} page={route.explore.page} sector={route.explore.sector} mine={route.explore.mine} preferences={preferences} watchlist={watchlist} selection={compareSelection} onOpen={selectStock} />}
+      {route.page === 'analysis' && <Analysis symbol={symbol} onSelectSymbol={selectStock} watchlist={watchlist} selection={compareSelection} defaultRange={preferences.defaultRange} />}
+      {route.page === 'compare' && <Compare symbols={route.compare.symbols} range={route.compare.range ?? preferences.defaultRange ?? '1y'} linkRange={route.compare.range} selection={compareSelection} onOpen={selectStock} />}
+      {route.page === 'dashboard' && <Dashboard watchlist={watchlist} selection={compareSelection} onOpen={selectStock}
+        invite={account.isAuthenticated && preferences.data?.saved === false && !inviteDismissed} onDismissInvite={() => setInviteDismissed(true)} />}
       {route.page === 'predictions' && <Predictions symbol={symbol} />}
       {route.page === 'performance' && <ModelPerformance />}
       {route.page === 'methodology' && <Methodology />}
+      {route.page === 'preferences' && <Preferences preferences={preferences} />}
       {route.page === 'not-found' && <section className="app-page"><h1>Page not found</h1><div className="page-panel unavailable-state"><p>This page is unavailable.</p><a className="button-link" href="#/analysis">Go to stock analysis</a></div></section>}
     </main>
     <footer className="footer wrap"><span>StockSight <span className="footer-dot">/</span> UConn</span><p>For education and research. Not financial advice.</p><a href="#/methodology" onClick={() => rememberStock(symbol)}>Data & methodology</a></footer>

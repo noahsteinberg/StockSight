@@ -12,6 +12,7 @@ from app.db import (
     PriceSeries,
     StockRecord,
     UserIdentity,
+    UserPreference,
     WatchlistEntry,
 )
 
@@ -24,6 +25,7 @@ MODELS = (
     AuthSession,
     MarketRefreshRun,
     MarketBarChange,
+    UserPreference,
 )
 
 

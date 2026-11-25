@@ -52,7 +52,8 @@ verification fallback URL using the [account guide](ACCOUNTS.md#auth0-tenant-set
 
 Migrations use a separate direct/session pooler URL on port 5432, as documented
 in [Supabase setup](SUPABASE.md). Hosted head is `0006_market_refresh` after the
-November 23 coordinated release; verify the current version and existing data;
+November 23 coordinated release; the repository head `0007_user_preferences`
+must be applied before deploying code that includes it; verify the current version and existing data;
 do not run seeds, imports or destructive tests against the hosted database.
 
 ## Automatic deployment and GitHub Actions

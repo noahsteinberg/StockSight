@@ -32,7 +32,8 @@ export default function useCompareSelection() {
 export function compareHash(symbols, range) {
   const params = new URLSearchParams();
   if (symbols.length) params.set('symbols', symbols.join(','));
-  if (range && range !== '1y') params.set('range', range);
+  // An explicit range is kept even when it is 1Y, so it overrides a saved default.
+  if (range) params.set('range', range);
   const search = params.toString().replaceAll('%2C', ',');
   return `#/compare${search ? `?${search}` : ''}`;
 }

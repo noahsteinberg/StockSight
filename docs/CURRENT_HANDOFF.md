@@ -37,6 +37,75 @@ No deferred prediction persistence, saved-ranking research or model serving was
 claimed completed. The plan was published in commit 4e13e71; this checkpoint
 records the subsequent issue cleanup. No application code or hosted data changed.
 
+## Preferences increment (issue #19, Phase 4) — November 25
+
+Decisions (the plan's recommendations, accepted by Vlad):
+- Browsing never needs an account, and preferences are skippable.
+- The form lives at #/preferences, reached from the account menu. A small
+  "Not now"-able invitation appears on the Watchlist; logins are never
+  redirected.
+- Questions:
+  - purpose
+  - sectors (multi-select from the reviewed GICS list)
+  - research horizon (stored only; it doesn't select any forecast)
+  - default chart window (1M/3M/1Y/Max, used by Analysis and Compare until a
+    range is picked there)
+  - fluctuation level, shown disabled with its reason until a reviewed
+    variability metric exists
+- "Recommendations" are explainable matches only. Explore's "Use my
+  preferences" lists stocks in the saved sectors, A–Z, each with "Matches your
+  selected sector: X". There's no score or ranking, and no sectors means no
+  matches (never everything).
+
+Implemented on local branch `feature/preferences`, stacked on
+`feature/metadata-quote`. Not pushed.
+
+- Migration 0007_user_preferences: one additive, backend-only table keyed to
+  user_identities.id. It has RLS enabled and revokes PUBLIC/anon/authenticated,
+  the same boundary as the other tables. Readiness includes the table, so
+  deploying this code before the migration fails closed, as with 0006. **The
+  hosted DDL still needs human review and a coordinated release; it was not
+  applied to Supabase.** Locally it was applied to the Docker dev database
+  (empty table; 2,947,701 bars untouched).
+- API: owner-only GET/PUT/DELETE /api/me/preferences and GET /api/me/discovery
+  (contract in ACCOUNTS.md).
+  - Validation is strict enums with 422 for extra/owner/income fields.
+  - Saves use a single upsert.
+  - Cookie writes keep the Origin/CSRF checks.
+  - Responses send no-store, which now covers all of /api/me/*.
+- Frontend:
+  - preferences-api.js validators and an owner-keyed use-preferences.js (no
+    browser storage).
+  - Preferences.jsx.
+  - Explore mine=1 mode: the URL holds only `mine=1`, never sectors or IDs;
+    rows from another account or from the public list are never shown in
+    its place.
+  - Default ranges for Analysis and Compare. Compare URLs carry a range only
+    when one was picked.
+
+Verification on November 25:
+- Backend: 176 passed, 3 skipped on SQLite. With a disposable Docker
+  `stocksight_test` database: 243 passed, 2 skipped. That includes the
+  PostgreSQL upsert and the RLS test with user_preferences, where browser roles
+  can't select or delete. Ruff lint/format pass. The new tests cover:
+  - 401 for guests
+  - save/read/replace/reset
+  - two-account isolation
+  - 8 invalid payloads
+  - cookie CSRF/origin
+  - discovery reasons, query and no-broadening
+  - readiness failing closed
+- Frontend: lint and build pass.
+- Browser suites:
+  - Public 64/64.
+  - Accounts 28/28, including 4 new preferences cases: guest prompts; save →
+    explained matches → 1Y default on Analysis → reload persistence → reset;
+    a second account sees none of the first account's data; 320 px with no
+    overflow. A check confirmed no preference text in local/session storage.
+
+Review asks: Gavin (session/ownership and migration DDL), Noah/Parth (hosted
+migration timing). Next: Phase 5 honest signal connector.
+
 ## Metadata and quote increment (issue #19, Phase 3) — November 24
 
 Vlad asked to finish all remaining phases, accepting the plan's recommended

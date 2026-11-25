@@ -26,7 +26,9 @@ its schedule is gated pending manual Actions acceptance (see DAILY_REFRESH.md).
 | #/explore?q=app&sector=Energy&page=2 | Explore stocks | Public paginated list of supported stocks (25 per page) with search, GICS sector filter, reviewed name/sector, latest stored close/date, daily change, save star and compare toggle |
 | #/analysis?symbol=AAPL | Stock analysis | Company/sector line, separate TradingView latest-quote panel (hidden during replay), price and volume, SMA20/RSI14, inspection, historical replay, CSV, watchlist chips and Add to comparison |
 | #/compare?symbols=AAPL,MSFT&range=1y | Compare stocks | 2–4 stocks indexed to 100 on common dates, keyboard/pointer readout, summary table and disclosures (shared cutoff, short overlap, splits, price-only change) |
-| #/dashboard (#/watchlist) | Watchlist | Private watchlist, filtering, saved dates, open/remove and account states |
+| #/dashboard (#/watchlist) | Watchlist | Private watchlist, filtering, saved dates, open/remove, compare toggle, optional preferences invitation and account states |
+| #/preferences | Research preferences | Optional private form (purpose, sectors, horizon, default chart window; fluctuation disabled), save/reset/skip; guests see a sign-in prompt |
+| #/explore?mine=1 | Explore: Use my preferences | Private list of stocks in the account's saved sectors with a match reason per row; sector filter disabled; no URL carries the sectors or any user ID |
 | #/predictions?symbol=AAPL | Predictions | Selected stock, unavailable generation/history and return to Analysis |
 | #/performance | Model performance | Unavailable evaluation |
 | #/methodology | Data & methodology | Source, coverage, adjustment, indicator and project information |
@@ -68,6 +70,11 @@ callback returns to the Watchlist (#/dashboard).
 - MarketQuote.jsx (Parth's PR #16) embeds TradingView's Single Ticker widget on
   Analysis only; see [TRADINGVIEW.md](TRADINGVIEW.md). HistoricalChart reports
   replay through onReplayChange so the quote is hidden beside past dates.
+- use-preferences.js keeps the signed-in account's preferences (owner-keyed,
+  no browser storage) for Preferences.jsx, the Explore "Use my preferences"
+  list and the default chart range used by Analysis and Compare until a range
+  is picked there. app/api/preferences.py owns the private routes and the
+  user_preferences table (migration 0007).
 - Analysis.jsx integrates stock search, the native SVG PricePlot.jsx chart and
   the observations table. Local autocomplete is supplied by stock-suggestions.js.
   Price and indicator requests have independent retry states. The client

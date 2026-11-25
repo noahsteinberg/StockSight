@@ -38,7 +38,9 @@ requires instruction.
 
 - React/Vite JavaScript and plain CSS; native SVG price/volume chart, ticker/company
   search, ranges, keyboard date inspection, accessible table and watchlist UI.
-- FastAPI, SQLAlchemy/Alembic and PostgreSQL; migration head `0006_market_refresh`.
+- FastAPI, SQLAlchemy/Alembic and PostgreSQL; repository migration head
+  `0007_user_preferences` (issue #19 phase 4); hosted head `0006_market_refresh`
+  until 0007 is applied in a reviewed, coordinated release.
   Production schema/API and the full 494-stock hosted refresh were verified
   November 23. Both manual Actions modes passed; Noah reports enabling the
   schedule variable. The first actual scheduled event remains unobserved.

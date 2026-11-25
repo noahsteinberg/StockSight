@@ -138,6 +138,7 @@ def test_browser_roles_cannot_read_or_change_backend_tables():
                 "alembic_version",
                 "market_refresh_runs",
                 "market_bar_changes",
+                "user_preferences",
             }
             assert all(enabled for _, enabled in tables)
             assert connection.scalar(text("SELECT count(*) FROM daily_bars")) == 506
