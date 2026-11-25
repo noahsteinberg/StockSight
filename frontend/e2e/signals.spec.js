@@ -12,11 +12,13 @@ test('Analysis and Predictions read the real typed unavailable signal', async ({
   const requests = [];
   page.on('request', request => { if (request.url().includes('/signals')) requests.push(new URL(request.url())); });
   await page.goto('/#/analysis?symbol=AAPL');
-  const compact = page.getByRole('region', { name: 'Research signal · AAPL' });
-  await expect(compact).toContainText('No approved model signal is available.');
-  await expect(compact).toContainText('Unavailable');
+  // The compact status sits in the chart header, next to the price, not below the chart.
+  const compact = page.getByRole('group', { name: 'Model signal for AAPL' });
+  await expect(compact).toContainText('No approved model signal is available');
+  const chart = page.getByRole('img', { name: /price/i }).first();
+  expect((await compact.boundingBox()).y).toBeLessThan((await chart.boundingBox()).y);
   expect(requests.at(-1).searchParams.get('horizon_sessions')).toBe('1');
-  await compact.getByRole('link', { name: 'Signal details for AAPL' }).click();
+  await compact.getByRole('link', { name: 'Details & history' }).click();
   await expect(page).toHaveURL(/#\/predictions\?symbol=AAPL$/);
   const full = page.getByRole('region', { name: 'Research signal · AAPL' });
   await expect(full).toContainText('Nothing is generated when you open this page');

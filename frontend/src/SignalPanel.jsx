@@ -44,3 +44,18 @@ export function SignalStatus({ symbol }) {
     : 'no approved model';
   return <li><strong>{symbol}</strong> {text}</li>;
 }
+
+export function SignalBadge({ symbol, replaying = false }) {
+  const signal = useSignal(symbol);
+  if (signal.data === null) return null;
+  const available = signal.data?.status === 'available';
+  return <div className="signal-badge" role="group" aria-label={`Model signal for ${symbol}`} aria-busy={Boolean(signal.loading)}>
+    <span className="signal-badge-label">Model signal</span>
+    {replaying ? <strong>Hidden during replay</strong>
+      : signal.loading ? <strong>Checking…</strong>
+      : signal.error ? <span className="signal-badge-error"><strong>Status unavailable</strong> <button type="button" onClick={signal.retry}>Retry</button></span>
+      : available ? <strong>{signal.data.universe_percentile !== null ? `Rank ${signal.data.universe_percentile}th pct` : 'Available'} · for {signal.data.target_session}</strong>
+      : <strong>{reasonMessages[signal.data.unavailable_reason].replace(/\.$/, '')}</strong>}
+    <a href={`#/predictions?symbol=${encodeURIComponent(symbol)}`}>Details &amp; history <span aria-hidden="true">↗</span></a>
+  </div>;
+}

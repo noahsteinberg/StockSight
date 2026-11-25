@@ -124,6 +124,11 @@ export default function Compare({ symbols: requested, range, linkRange = range, 
       <div className="compare-card-heading">
         <h2>Price change since {data.start}</h2>
         <span className="muted">{data.start} to {data.end} · {count.format(data.common_sessions)} shared trading days</span>
+        <section className="compare-signals" aria-labelledby="compare-signals-title">
+          <h3 id="compare-signals-title">Research signals</h3>
+          <ul>{data.stocks.map(stock => <SignalStatus key={stock.symbol} symbol={stock.symbol} />)}</ul>
+          <a href="#/performance">Model performance <span aria-hidden="true">↗</span></a>
+        </section>
       </div>
       <CompareChart key={`${symbols.join(',')}:${range}`} dates={data.dates} stocks={data.stocks} />
       <div className="table-scroll compare-table">
@@ -146,10 +151,5 @@ export default function Compare({ symbols: requested, range, linkRange = range, 
       </div>
       <Notes data={data} />
     </div>}
-    {data && data.common_sessions > 0 && <section className="page-panel compare-signals" aria-labelledby="compare-signals-title">
-      <h2 id="compare-signals-title">Research signals</h2>
-      <ul>{data.stocks.map(stock => <SignalStatus key={stock.symbol} symbol={stock.symbol} />)}</ul>
-      <p className="signal-note">Shown separately from the price comparison. Past price change is not a signal or a forecast. <a href="#/performance">Model performance ↗</a></p>
-    </section>}
   </section>;
 }

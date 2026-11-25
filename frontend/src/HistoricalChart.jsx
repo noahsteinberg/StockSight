@@ -14,7 +14,7 @@ function downloadPrices(symbol, range, bars, replaying) {
   link.click();
 }
 
-export default function HistoricalChart({ data, range, showSma, showRsi, onToggleSma, onToggleRsi, indicators, onReload, titleAction, onReplayChange, children }) {
+export default function HistoricalChart({ data, range, showSma, showRsi, onToggleSma, onToggleRsi, indicators, onReload, titleAction, onReplayChange, aside, children }) {
   const [choosingStart, setChoosingStart] = useState(false);
   const [replay, setReplay] = useState(null);
   const replayId = useId();
@@ -56,10 +56,13 @@ export default function HistoricalChart({ data, range, showSma, showRsi, onToggl
           <span className="quote-date">{latest.date}<br />{replaying ? 'Replay close' : 'Latest stored close'}</span>
         </div>
       </div>
-      {change !== null && <div className={`range-change ${change < 0 ? 'negative' : 'positive'}`}>
-        <strong>{percentage.format(change)}</strong>
-        <span>{replaying ? 'Revealed range' : 'Range change'}</span>
-      </div>}
+      <div className="quote-side">
+        {aside}
+        {change !== null && <div className={`range-change ${change < 0 ? 'negative' : 'positive'}`}>
+          <strong>{percentage.format(change)}</strong>
+          <span>{replaying ? 'Revealed range' : 'Range change'}</span>
+        </div>}
+      </div>
     </div>
     <div className="indicator-toolbar" role="group" aria-label="Chart controls">
       <span className="muted">Indicators</span>

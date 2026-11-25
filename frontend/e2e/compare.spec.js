@@ -241,7 +241,9 @@ test('research signals are listed separately from the price comparison', async (
   const panel = page.getByRole('region', { name: 'Research signals' });
   await expect(panel.getByRole('listitem').filter({ hasText: 'TST000' })).toHaveText('TST000 no approved model');
   await expect(panel.getByRole('listitem').filter({ hasText: 'TST001' })).toHaveText('TST001 not supported');
-  await expect(panel).toContainText('Past price change is not a signal or a forecast.');
+  // Shown in the chart header, so it is visible together with the chart.
+  const chart = page.getByRole('img', { name: /Price change indexed to 100/ });
+  expect((await panel.boundingBox()).y).toBeLessThan((await chart.boundingBox()).y);
 });
 
 test('the Add box suggests supported stocks and adds the one picked', async ({ page }) => {

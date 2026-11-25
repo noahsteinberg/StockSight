@@ -6,7 +6,7 @@ import useIndicators from './use-indicators.js';
 import { compareHash } from './use-compare-selection.js';
 import MarketQuote from './MarketQuote.jsx';
 import useStockProfile from './use-stock-profile.js';
-import SignalPanel from './SignalPanel.jsx';
+import { SignalBadge } from './SignalPanel.jsx';
 
 const ranges = [['1mo', '1M'], ['3mo', '3M'], ['1y', '1Y'], ['all', 'Max']];
 
@@ -143,7 +143,6 @@ export default function Analysis({ symbol, onSelectSymbol, watchlist, selection,
         <span>{profile.data.sector ? `${profile.data.sector} · ${profile.data.sub_industry}` : 'Sector unknown'}</span>
         <a href="#/methodology">Sector source</a>
       </p>}
-      <MarketQuote key={symbol} symbol={symbol} asOf={data?.as_of} replaying={replaying} />
       <div className="chart-card">
       <div className="chart-toolbar"><span>Price & volume <span className="muted">· USD</span></span><fieldset><legend className="sr-only">Price history range</legend>{ranges.map(([value, label]) => <button key={value} type="button" aria-pressed={range === value} onClick={() => { if (range !== value) { reload(); setRange(value); } }}>{label}</button>)}</fieldset></div>
       <div aria-live="polite" aria-busy={Boolean(loadingPrices)}>
@@ -154,6 +153,7 @@ export default function Analysis({ symbol, onSelectSymbol, watchlist, selection,
       {data?.bars.length > 0 && <HistoricalChart
         key={requestKey} data={data} range={range} showSma={showSma} showRsi={showRsi}
         titleAction={<WatchlistStar symbol={data.symbol} watchlist={watchlist} />} onReplayChange={setReplaying}
+        aside={<SignalBadge symbol={symbol} replaying={replaying} />}
         onToggleSma={() => setShowSma(value => !value)} onToggleRsi={() => setShowRsi(value => !value)}
         indicators={indicators} onReload={() => { reload(); setRetry(value => value + 1); indicators.retry(); }}>
         <div className="chart-actions">
@@ -166,7 +166,8 @@ export default function Analysis({ symbol, onSelectSymbol, watchlist, selection,
         </div>
       </HistoricalChart>}
       </div>
-      {data && <SignalPanel symbol={symbol} compact />}
+      {/* The delayed vendor quote is secondary to the stored history above it. */}
+      <MarketQuote key={symbol} symbol={symbol} asOf={data?.as_of} replaying={replaying} />
     </section>
   );
 }

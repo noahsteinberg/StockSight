@@ -37,6 +37,32 @@ No deferred prediction persistence, saved-ranking research or model serving was
 claimed completed. The plan was published in commit 4e13e71; this checkpoint
 records the subsequent issue cleanup. No application code or hosted data changed.
 
+## Review fixes after Vlad's walkthrough — November 25
+
+- **Compare crosshair:** pointer positions were measured against the first
+  `<svg>` in the card. Once hovering began, that was a readout line sample,
+  so the date jumped instead of following the cursor. A chart-wide CSS rule
+  also stretched those samples into large bars. Fixed (phase 2 branch); the
+  readout now always shows one date in a fixed space, so the chart can't move
+  under the pointer.
+- **Ticker dropdowns (Analysis and Compare's Add box):** they now use the whole
+  supported catalog, from `GET /api/stocks?limit=` (optional; the default is
+  still 50, max 1000).
+  - On focus the dropdown lists every stock A–Z in a bounded scrolling box,
+    and narrows as you type.
+  - Compare leaves out stocks already in the comparison.
+  - This replaces the old 28-ticker hard-coded list, which included
+    unsupported ETFs.
+- **Layout (phase 5 branch):**
+  - Analysis shows a compact "Model signal" box in the chart header, beside
+    the price. Details and history stay on Predictions.
+  - Compare lists signal status in the chart card header.
+  - The TradingView quote panel moved below the chart.
+- **Verification:** backend 151 passed (phase 2); public browser 70/70 and
+  accounts 28/28 on the top branch. Checked in the browser with the full local
+  data: the crosshair tracks the cursor; the dropdowns list 494/492 stocks
+  inside 318–367 px boxes.
+
 ## Signal connector (issue #19, Phase 5) — November 25
 
 On local branch `feature/signal-connector`, stacked on `feature/preferences`.
