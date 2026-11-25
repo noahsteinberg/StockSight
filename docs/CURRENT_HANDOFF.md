@@ -37,11 +37,10 @@ No deferred prediction persistence, saved-ranking research or model serving was
 claimed completed. The plan was published in commit 4e13e71; this checkpoint
 records the subsequent issue cleanup. No application code or hosted data changed.
 
-## Signal connector (issue #19, Phase 5) — November 25, work in progress
+## Signal connector (issue #19, Phase 5) — November 25
 
-Committed on local branch `feature/signal-connector` (stacked on
-`feature/preferences`). Not pushed. The code and tests are done; the docs are
-pending.
+On local branch `feature/signal-connector`, stacked on `feature/preferences`.
+No model, training, prediction table or fixture fallback was added.
 - GET /api/stocks/{symbol}/signals?horizon_sessions=1 (app/signals.py) follows
   the FRONTEND_ML_INTEGRATION_SPEC.md §4 schema exactly:
   - A supported stock gets 200 `unavailable`/`model_not_approved`, with every
@@ -61,9 +60,11 @@ pending.
   - Public browser suite: 69/69, with new signals.spec.js (4 tests) and one
     Compare test. One found bug is fixed: MarketQuote and SignalPanel shared
     the key `symbol`, which left a stale quote panel behind.
-  - The accounts suite was not rerun after Phase 5.
-- Still to do: API.md/ARCHITECTURE.md entries for the signal route, an
-  accounts-suite rerun, and Noah's review of the meaning.
+  - Sign-in (accounts) browser suite: 28/28 after Phase 5.
+- Contract documented in API.md ("Research signal status") and ARCHITECTURE.md.
+- Review ask: Noah, on the meaning and wording of "no approved model". Any real
+  signal still needs the separately approved model, artifact and persistence
+  work described in FRONTEND_ML_INTEGRATION_SPEC.md.
 
 ## Preferences increment (issue #19, Phase 4) — November 25
 

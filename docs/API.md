@@ -11,7 +11,9 @@ unchanged refresh runs leave them stable. Public HTTP requests never ingest
 provider data. See [daily refresh](DAILY_REFRESH.md).
 
 Continuation context: [CURRENT_HANDOFF.md](CURRENT_HANDOFF.md). Public stock
-contracts below are implemented; prediction/evaluation routes do not exist.
+contracts below are implemented. The research-signal route exists but always
+answers "unavailable" (no approved model); prediction-history and evaluation
+routes do not exist.
 
 The moving-average/RSI backend contract is in [INDICATORS.md](INDICATORS.md):
 `GET /api/stocks/{symbol}/indicators?range=3mo`. It returns dated SMA20 and Wilder
@@ -135,6 +137,33 @@ Response fields: `range`, `requested_sessions`, `common_sessions`, `start`, `end
 `start_close`, `end_close`, `period_change_pct`, `metric_status`,
 `split_events[]` (`date`, `ratio`, `price_adjusted`) and `indexed[]`, aligned
 with `dates`.
+
+## Research signal status
+
+GET /api/stocks/{symbol}/signals?horizon_sessions=1 (issue #19 phase 5) returns
+the schema in [FRONTEND_ML_INTEGRATION_SPEC.md §4](FRONTEND_ML_INTEGRATION_SPEC.md):
+`schema_version`, `ticker`, `status`, `unavailable_reason`, `message`,
+`horizon_sessions` and the signal fields `target_kind`, `as_of_session`,
+`target_session`, `published_at`, `direction`, `raw_score`, `probability`,
+`signal_strength`, `universe_percentile`, `risk_level`, `model_version`,
+`data_snapshot` and `provenance`.
+
+- No model is approved, so a supported stock always gets 200 with `status:
+  "unavailable"`, `unavailable_reason: "model_not_approved"`, the message
+  "No approved model signal is available." and every signal field null.
+  Nothing is computed, generated or stored when the route is called.
+- `horizon_sessions` must be 1 (the only horizon the research spec defines);
+  any other value returns 422 and is never mapped to another horizon.
+- A symbol without stored history returns 404 UNSUPPORTED_SYMBOL; storage
+  failure returns 503 DATA_UNAVAILABLE. Fixture mode serves AAPL only.
+- The response model rejects contradictions: an unavailable response can't carry
+  any value (zero is a value, not "unavailable"), and an available one needs
+  its target, dates, model/data versions and provenance. Available responses
+  exist only as a test fixture until a model, artifact and persistence layer
+  are separately approved.
+
+The frontend adapter (signal-api.js) applies the same checks and shows nothing
+for an inconsistent response.
 
 ## Private preferences and discovery
 

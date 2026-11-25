@@ -29,7 +29,7 @@ its schedule is gated pending manual Actions acceptance (see DAILY_REFRESH.md).
 | #/dashboard (#/watchlist) | Watchlist | Private watchlist, filtering, saved dates, open/remove, compare toggle, optional preferences invitation and account states |
 | #/preferences | Research preferences | Optional private form (purpose, sectors, horizon, default chart window; fluctuation disabled), save/reset/skip; guests see a sign-in prompt |
 | #/explore?mine=1 | Explore: Use my preferences | Private list of stocks in the account's saved sectors with a match reason per row; sector filter disabled; no URL carries the sectors or any user ID |
-| #/predictions?symbol=AAPL | Predictions | Selected stock, unavailable generation/history and return to Analysis |
+| #/predictions?symbol=AAPL | Predictions | Selected stock, typed research-signal status from the API (currently "no approved model"), unavailable history and return to Analysis |
 | #/performance | Model performance | Unavailable evaluation |
 | #/methodology | Data & methodology | Source, coverage, adjustment, indicator and project information |
 
@@ -75,6 +75,10 @@ callback returns to the Watchlist (#/dashboard).
   list and the default chart range used by Analysis and Compare until a range
   is picked there. app/api/preferences.py owns the private routes and the
   user_preferences table (migration 0007).
+- signal-api.js validates GET /api/stocks/{symbol}/signals; use-signal.js keys
+  the request to the symbol. SignalPanel.jsx renders the status under the
+  Analysis chart and on Predictions, and lists per-stock status on Compare,
+  separate from price change. app/signals.py builds the typed response.
 - Analysis.jsx integrates stock search, the native SVG PricePlot.jsx chart and
   the observations table. Local autocomplete is supplied by stock-suggestions.js.
   Price and indicator requests have independent retry states. The client
