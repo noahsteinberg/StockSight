@@ -375,7 +375,7 @@ section { scroll-margin-top: 24px; }
   .explore-table th, .explore-table td { padding-inline: 6px; font-size: 12px; }
   .explore-table thead th { white-space: normal; vertical-align: bottom; }
   .explore-table a span { overflow-wrap: normal; }
-  .explore-table .older-session { display: block; }
+  .explore-table .older-session { display: block; white-space: normal; }
   .explore-table th:last-child, .explore-table td:last-child { width: 44px; padding-inline: 2px; }
   .explore-summary, .explore-pages { padding-inline: 14px; }
 }
