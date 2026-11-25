@@ -37,6 +37,34 @@ No deferred prediction persistence, saved-ranking research or model serving was
 claimed completed. The plan was published in commit 4e13e71; this checkpoint
 records the subsequent issue cleanup. No application code or hosted data changed.
 
+## Signal connector (issue #19, Phase 5) — November 25, work in progress
+
+Committed on local branch `feature/signal-connector` (stacked on
+`feature/preferences`). Not pushed. The code and tests are done; the docs are
+pending.
+- GET /api/stocks/{symbol}/signals?horizon_sessions=1 (app/signals.py) follows
+  the FRONTEND_ML_INTEGRATION_SPEC.md §4 schema exactly:
+  - A supported stock gets 200 `unavailable`/`model_not_approved`, with every
+    signal field null.
+  - An unknown stock gets 404; any other horizon gets 422 (no fallback);
+    storage failure gets 503.
+  - The validator forbids values on unavailable responses and requires dates
+    and provenance on available ones. There's no training, no tables and no
+    fixture fallback.
+- Frontend: signal-api.js (strict adapter), use-signal.js and SignalPanel.jsx.
+  - Compact panel under the Analysis chart.
+  - Full panel on Predictions, replacing the disabled "Generate prediction"
+    button.
+  - Per-stock status list on Compare.
+- Verification:
+  - Backend: 188 passed, 3 skipped (SQLite), including 12 new signal tests.
+  - Public browser suite: 69/69, with new signals.spec.js (4 tests) and one
+    Compare test. One found bug is fixed: MarketQuote and SignalPanel shared
+    the key `symbol`, which left a stale quote panel behind.
+  - The accounts suite was not rerun after Phase 5.
+- Still to do: API.md/ARCHITECTURE.md entries for the signal route, an
+  accounts-suite rerun, and Noah's review of the meaning.
+
 ## Preferences increment (issue #19, Phase 4) — November 25
 
 Decisions (the plan's recommendations, accepted by Vlad):

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import CompareChart, { SeriesSwatch } from './CompareChart.jsx';
+import { SignalStatus } from './SignalPanel.jsx';
 import { compareLimit, compareRanges } from './compare-api.js';
 import useCompare from './use-compare.js';
 import { compareHash } from './use-compare-selection.js';
@@ -141,5 +142,10 @@ export default function Compare({ symbols: requested, range, linkRange = range, 
       </div>
       <Notes data={data} />
     </div>}
+    {data && data.common_sessions > 0 && <section className="page-panel compare-signals" aria-labelledby="compare-signals-title">
+      <h2 id="compare-signals-title">Research signals</h2>
+      <ul>{data.stocks.map(stock => <SignalStatus key={stock.symbol} symbol={stock.symbol} />)}</ul>
+      <p className="signal-note">Shown separately from the price comparison. Past price change is not a signal or a forecast. <a href="#/performance">Model performance ↗</a></p>
+    </section>}
   </section>;
 }

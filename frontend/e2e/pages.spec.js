@@ -25,9 +25,11 @@ test('predictions preserve stock context and never call an absent ML service', a
   await page.goto('/#/analysis?symbol=AAPL');
   await page.getByRole('link', { name: 'Predictions for AAPL' }).click();
   await expect(page.getByRole('heading', { name: 'AAPL', exact: true })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Generate prediction' })).toBeDisabled();
+  // The typed signal API answers "unavailable"; no disabled generate button remains.
+  await expect(page.getByRole('region', { name: 'Research signal · AAPL' })).toContainText('No approved model signal is available.');
+  await expect(page.getByRole('button', { name: 'Generate prediction' })).toHaveCount(0);
   await expect(page.getByText('Prediction history is unavailable', { exact: true })).toBeVisible();
-  await page.getByRole('link', { name: 'Model performance', exact: true }).click();
+  await page.getByRole('link', { name: 'Model performance', exact: true }).first().click();
   await expect(page.getByRole('heading', { name: 'No evaluated model is available' })).toBeVisible();
   expect(calls).toEqual([]);
 });

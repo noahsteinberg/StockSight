@@ -218,3 +218,19 @@ test('Compare and the Explore tray fit phone and desktop widths', async ({ page 
     await page.goto('about:blank');
   }
 });
+
+test('research signals are listed separately from the price comparison', async ({ page }) => {
+  await mockApis(page);
+  // Synthetic TST tickers: one typed "unavailable" and one unsupported (real API 404).
+  await page.route('**/api/stocks/TST000/signals?*', route => route.fulfill({ json: {
+    schema_version: '1', ticker: 'TST000', status: 'unavailable', unavailable_reason: 'model_not_approved',
+    message: 'No approved model signal is available.', target_kind: null, horizon_sessions: 1, as_of_session: null,
+    target_session: null, published_at: null, direction: null, raw_score: null, probability: null, signal_strength: null,
+    universe_percentile: null, risk_level: null, model_version: null, data_snapshot: null, provenance: null,
+  } }));
+  await page.goto('/#/compare?symbols=TST000,TST001');
+  const panel = page.getByRole('region', { name: 'Research signals' });
+  await expect(panel.getByRole('listitem').filter({ hasText: 'TST000' })).toHaveText('TST000 no approved model');
+  await expect(panel.getByRole('listitem').filter({ hasText: 'TST001' })).toHaveText('TST001 not supported');
+  await expect(panel).toContainText('Past price change is not a signal or a forecast.');
+});

@@ -6,6 +6,7 @@ import useIndicators from './use-indicators.js';
 import { compareHash } from './use-compare-selection.js';
 import MarketQuote from './MarketQuote.jsx';
 import useStockProfile from './use-stock-profile.js';
+import SignalPanel from './SignalPanel.jsx';
 
 const ranges = [['1mo', '1M'], ['3mo', '3M'], ['1y', '1Y'], ['all', 'Max']];
 
@@ -165,6 +166,7 @@ export default function Analysis({ symbol, onSelectSymbol, watchlist, selection,
         </div>
       </HistoricalChart>}
       </div>
+      {data && <SignalPanel symbol={symbol} compact />}
     </section>
   );
 }

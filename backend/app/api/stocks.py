@@ -30,6 +30,7 @@ from app.market import (
     load_bars,
 )
 from app.repository import database_history, search_database, supported_symbol
+from app.signals import SUPPORTED_HORIZONS, SignalResponse, unavailable_signal
 from app.stock_metadata import SOURCE as METADATA_SOURCE
 from app.stock_metadata import MetadataSource, Sector, profile_for
 
@@ -100,8 +101,7 @@ class StockProfileResponse(BaseModel):
     source: MetadataSource
 
 
-@router.get("/stocks/{symbol}/profile", response_model=StockProfileResponse)
-def stock_profile(request: Request, symbol: str) -> StockProfileResponse:
+def require_supported(request: Request, symbol: str) -> str:
     symbol = symbol.strip().upper()
     if request.app.state.engine is None:
         supported = symbol == "AAPL"
@@ -112,6 +112,12 @@ def stock_profile(request: Request, symbol: str) -> StockProfileResponse:
             raise unavailable() from None
     if not supported:
         raise unsupported()
+    return symbol
+
+
+@router.get("/stocks/{symbol}/profile", response_model=StockProfileResponse)
+def stock_profile(request: Request, symbol: str) -> StockProfileResponse:
+    symbol = require_supported(request, symbol)
     profile = profile_for(symbol)
     return StockProfileResponse(
         symbol=symbol,
@@ -135,6 +141,19 @@ def compare(
         return compare_database(request.app.state.engine, selected, range)
     except SQLAlchemyError:
         raise unavailable() from None
+
+
+@router.get("/stocks/{symbol}/signals", response_model=SignalResponse)
+def signals(
+    request: Request,
+    symbol: str,
+    horizon_sessions: Annotated[
+        int, Query(ge=min(SUPPORTED_HORIZONS), le=max(SUPPORTED_HORIZONS))
+    ] = 1,
+) -> SignalResponse:
+    """Typed research-signal status. No model is approved, so a supported stock
+    always gets a 200 "unavailable" response; nothing is generated on request."""
+    return unavailable_signal(require_supported(request, symbol), horizon_sessions)
 
 
 @router.get("/stocks/{symbol}/prices", response_model=History)

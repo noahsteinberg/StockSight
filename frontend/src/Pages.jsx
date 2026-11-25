@@ -1,4 +1,5 @@
 import CompareTray from './CompareTray.jsx';
+import SignalPanel from './SignalPanel.jsx';
 import Watchlist from './Watchlist.jsx';
 
 export function Dashboard({ watchlist, selection, onOpen, invite, onDismissInvite }) {
@@ -19,8 +20,8 @@ export function Predictions({ symbol }) {
     <div className="page-heading"><h1 id="predictions-title">Predictions</h1><span className="historical-badge">Unavailable</span></div>
     <div className="page-panel prediction-request">
       <div><span className="note-label">SELECTED STOCK</span><h2>{symbol}</h2><a href={`#/analysis?symbol=${encodeURIComponent(symbol)}`}>View {symbol} analysis ↗</a></div>
-      <div className="prediction-action"><button type="button" disabled aria-describedby="prediction-unavailable">Generate prediction</button><p id="prediction-unavailable">Prediction generation is not available yet.</p></div>
     </div>
+    <SignalPanel symbol={symbol} />
     <div className="page-panel history-panel"><div className="panel-heading"><h2>Prediction history</h2></div><div className="unavailable-state"><span className="state-mark" aria-hidden="true">↗</span><h3>Prediction history is unavailable</h3><p>No prediction service is connected. Saved forecasts and their outcomes cannot be shown yet.</p><div className="page-actions"><a className="button-link" href="#/analysis">Continue stock analysis</a><a href="#/performance">Model performance <span aria-hidden="true">↗</span></a></div></div></div>
     <details className="page-panel help-disclosure"><summary>How prediction outcomes work</summary><div><dl className="definition-list"><div><dt>Pending</dt><dd>The target trading session has not resolved.</dd></div><div><dt>Resolved</dt><dd>The forecast can be compared with its observed outcome.</dd></div></dl><p>Historical replay must be labeled separately from a newly generated forecast.</p></div></details>
   </section>;
