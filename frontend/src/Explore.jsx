@@ -10,7 +10,7 @@ const count = new Intl.NumberFormat('en-US');
 
 function summary(data, query, page) {
   const parts = [`${count.format(data.total_supported)} supported ${data.total_supported === 1 ? 'stock' : 'stocks'}`];
-  if (query) parts.push(`${count.format(data.total_matching)} ${data.total_matching === 1 ? 'matches' : 'match'} “${query}”`);
+  if (query) parts.push(`${count.format(data.total_matching)} ${data.total_matching === 1 ? 'match' : 'matches'} for “${query}”`);
   if (data.items.length > 0) {
     const first = (page - 1) * explorePageSize + 1;
     parts.push(`showing ${count.format(first)}–${count.format(first + data.items.length - 1)}`);
@@ -103,7 +103,7 @@ export default function Explore({ query, page, watchlist, onOpen }) {
         <span className="loading-spinner" /><div className="chart-skeleton" />
       </div>}
       {data && data.total_matching === 0 && <div className="analysis-message">
-        <p>{query ? <>No supported stocks match “{query}”. Try another ticker or company name.</> : 'No supported stocks are stored yet.'}</p>
+        <p>{query ? <>No supported stocks match “{query}”. Most company names aren’t stored yet, so try a ticker symbol, such as AAPL.</> : 'No supported stocks are stored yet.'}</p>
         {query && <button type="button" onClick={clearSearch}>Clear search</button>}
       </div>}
       {data && data.total_matching > 0 && data.items.length === 0 && <div className="analysis-message">

@@ -90,7 +90,7 @@ test('search is debounced, keeps focus and typed text, and syncs with the URL', 
   await expect(page).toHaveURL(/#\/explore\?q=tst01$/);
   await expect(search).toBeFocused();
   await expect(search).toHaveValue('tst01 ');
-  await expect(page.getByText('60 supported stocks · 10 match “tst01” · showing 1–10')).toBeVisible();
+  await expect(page.getByText('60 supported stocks · 10 matches for “tst01” · showing 1–10')).toBeVisible();
   // One request for the initial page and one after typing paused, not one per key.
   expect(requests.filter(params => params.get('query') !== '').map(params => params.get('query'))).toEqual(['tst01']);
   await page.goBack();
@@ -105,13 +105,13 @@ test('search is debounced, keeps focus and typed text, and syncs with the URL', 
   await search.fill('tst05');
   await search.press('Enter');
   await expect(page).toHaveURL(/#\/explore\?q=tst05$/);
-  await expect(page.getByText('10 match “tst05”')).toBeVisible();
+  await expect(page.getByText('10 matches for “tst05”')).toBeVisible();
 });
 
 test('empty, failed and malformed responses show distinct recoverable states', async ({ page }) => {
   await mockExplore(page);
   await page.goto('/#/explore?q=zzz');
-  await expect(page.getByText('No supported stocks match “zzz”. Try another ticker or company name.')).toBeVisible();
+  await expect(page.getByText('No supported stocks match “zzz”. Most company names aren’t stored yet, so try a ticker symbol, such as AAPL.')).toBeVisible();
   await page.getByRole('button', { name: 'Clear search' }).click();
   await expect(rows(page)).toHaveCount(25);
 

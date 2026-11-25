@@ -81,9 +81,27 @@ Verification on November 24 (fixture mode, local; nothing hosted):
 - Explore browser cases use the real AAPL fixture plus clearly synthetic TST
   responses for multi-page, search, error and stale-response checks.
 
-Not yet verified: Explore over the full 494-stock database (needs local Docker +
-team snapshot, or a hosted deploy after review) and hosted Auth0 saving from
-Explore. Next: human review of the branch, then push/PR when Vlad asks; Phase 2
+Full-data check, November 24:
+- Vlad's local Docker PostgreSQL was loaded with `app.complete_backend` from
+  the team snapshot (SHA256 matches PRICES_IMPORT.md). BACKEND VERIFIED: 494
+  symbols, 2,947,701 rows. Local history ends 2026-11-12; hosted is newer.
+- Live HTTP checks against app.main:app:
+  - All 20 pages return the 494 stocks exactly once.
+  - The first page took ~150 ms cold, later pages ~35 ms.
+  - Every name is null locally: the local snapshot has no verified names, not
+    even AAPL.
+  - MSFT's Explore close/date/revision equal its price-history response.
+- Browser checks: search and ticker ranking (e.g. "ms" puts MS first), the last
+  page, and opening a stock's real chart all work. At 375 px, neither the page
+  nor the table overflows.
+- Fixes from this pass:
+  - The summary now reads "N match(es) for “q”".
+  - An empty search explains that company names aren't stored yet and suggests
+    a ticker (searching "apple" finds nothing until Phase 3 metadata).
+- Noted for Phase 3: Analysis shows the placeholder twice ("MSFT MSFT").
+
+Not yet verified: hosted Auth0 saving from Explore, and Explore on the hosted
+deployment (it reaches production only after review/merge to main). Next: human review of the branch, then push/PR when Vlad asks; Phase 2
 (Compare + compare tray) needs its own approval.
 
 ## Daily refresh implementation — November 23
