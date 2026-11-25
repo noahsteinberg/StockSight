@@ -355,6 +355,8 @@ section { scroll-margin-top: 24px; }
 .compare-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
 .compare-chips a { text-decoration: none; }
 .compare-add { display: flex; gap: 6px; }
+/* The ticker dropdown must extend past the controls panel over the chart card. */
+.compare-controls.page-panel { position: relative; z-index: 3; overflow: visible; }
 .compare-add .ticker-control { flex: none; width: 240px; }
 .compare-add .search-input { padding-left: 10px; border-radius: 6px; }
 .compare-add .search-input input { height: 40px; padding-block: 6px; font-size: 13px; }
