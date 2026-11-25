@@ -52,7 +52,7 @@ for (const mode of ['login', 'signup']) {
     await page.getByLabel('Username', { exact: true }).fill(username);
     await page.getByLabel('Password', { exact: true }).fill(password);
     await page.getByRole('button', { name: mode === 'signup' ? 'Create account' : 'Continue', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'My dashboard' })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: 'Watchlist', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Sign out' })).toBeVisible();
     expect(events).toEqual(mode === 'signup' ? ['signup', 'login'] : ['login']);
     expect(page.url()).toMatch(/#\/dashboard$/);

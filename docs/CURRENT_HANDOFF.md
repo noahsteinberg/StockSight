@@ -37,6 +37,55 @@ No deferred prediction persistence, saved-ranking research or model serving was
 claimed completed. The plan was published in commit 4e13e71; this checkpoint
 records the subsequent issue cleanup. No application code or hosted data changed.
 
+## Explore increment (issue #19, Phase 1) — November 24
+
+Vlad approved the Phase 0 direction:
+- Explore, Compare and the existing watchlist ship first.
+- Navigation is Explore · Analysis · Compare · Watchlist.
+- "Recommendations" means explainable filter matches, never ML scores.
+- Explore becomes the landing page.
+- Predictions and Model performance leave the sidebar but keep their routes.
+- The compare tray moves to Phase 2, so it ships with the Compare page.
+
+The decision record is drafted for issue #19 (paste it from Vlad's local
+issue19-phase0-comment.md). Implemented on local branch `feature/explore-page`
+(not pushed, no PR yet):
+
+- Public GET /api/explore (see API.md). It is a paginated summary of supported
+  stocks with the newest stored close/date and the change between the two newest
+  stored closes. Placeholder names (name == symbol) and UNKNOWN exchanges are
+  returned as null. No schema change, data write, provider call or ML.
+- Explore page (#/explore?q=&page=) with debounced search kept in the URL, 25 rows
+  per page, Previous/Next, and separate loading, empty, past-the-end, 503/error
+  and malformed-response states. Each row has a save star (guests are sent to
+  sign-in) and an "earlier session" note when a stock's date trails the newest
+  session. On phones, all columns fit at 320/390 px.
+- Root / and the brand now open Explore. The sidebar is Explore, Analysis,
+  Watchlist (#/dashboard, renamed) and Methodology. Predictions links to Model
+  performance.
+- Audit finding: about 490 of 494 hosted catalog names are placeholders, so
+  most Explore rows show "Name not yet available". Verified names and sectors
+  remain Phase 3 metadata work. PR #16 conflicts with main only in
+  frontend/src/Pages.jsx; it is untouched.
+
+Verification on November 24 (fixture mode, local; nothing hosted):
+- Backend: 138 passed, 3 skipped (PostgreSQL-only). This includes 11 new
+  explore tests on migrated SQLite: placeholders, paging, query, 422 and 503.
+  Ruff lint/format pass.
+- Frontend: lint and build pass. The public browser suite passed 47/47. In
+  the final full rerun, the existing analysis-chart test "null warm-up values…"
+  failed once and then passed 4/4 on repeat (timing flake, unrelated to Explore).
+- Account suite: 24/24, after one fix. Explore rows are named by their content
+  (e.g. "AAPL Apple Inc."), so they can't be confused with private watchlist
+  links ("Open AAPL analysis").
+- Explore browser cases use the real AAPL fixture plus clearly synthetic TST
+  responses for multi-page, search, error and stale-response checks.
+
+Not yet verified: Explore over the full 494-stock database (needs local Docker +
+team snapshot, or a hosted deploy after review) and hosted Auth0 saving from
+Explore. Next: human review of the branch, then push/PR when Vlad asks; Phase 2
+(Compare + compare tray) needs its own approval.
+
 ## Daily refresh implementation — November 23
 
 ### GitHub automation prepared — November 23

@@ -5,7 +5,7 @@ const barsURL = '**/api/stocks/*/prices?*';
 const latest = page => page.getByText(/As of.*2017-02-16/);
 
 test('real API: ranges, keyboard inspection, and observations table', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/#/analysis');
   await expect(latest(page)).toContainText('63 sessions');
   for (const [label, count] of [['1M',21], ['1Y',252], ['Max',506]]) {
     await page.getByRole('button', { name: label, exact: true }).click();
@@ -20,7 +20,7 @@ test('real API: ranges, keyboard inspection, and observations table', async ({ p
 });
 
 test('blank ticker gives feedback; unsupported ticker and normalized recovery', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/#/analysis');
   await expect(latest(page)).toBeVisible();
   await page.getByLabel('Ticker', { exact: true }).fill('   ');
   await page.getByRole('button', { name: 'Search', exact: true }).click();
@@ -38,7 +38,7 @@ test('blank ticker gives feedback; unsupported ticker and normalized recovery', 
 
 test('API failure recovers through Retry', async ({ page }) => {
   await page.route(barsURL, route => route.fulfill({ status: 503, body: 'Unavailable' }));
-  await page.goto('/');
+  await page.goto('/#/analysis');
   await expect(page.getByRole('alert')).toContainText('price storage is unavailable');
   await page.unroute(barsURL);
   await page.getByRole('button', { name: 'Retry', exact: true }).click();
@@ -47,7 +47,7 @@ test('API failure recovers through Retry', async ({ page }) => {
 
 test('empty response has a visible empty state', async ({ page }) => {
   await page.route(barsURL, route => route.fulfill({ json: { bars: [] } }));
-  await page.goto('/');
+  await page.goto('/#/analysis');
   await expect(page.getByText('No observations in this range.')).toBeVisible();
   await expect(page.getByRole('img')).toHaveCount(0);
 });
@@ -57,7 +57,7 @@ test('stalled request times out and Retry recovers', async ({ page }) => {
   let intercepted;
   const started = new Promise(resolve => { intercepted = resolve; });
   await page.route(barsURL, () => { intercepted(); });
-  await page.goto('/');
+  await page.goto('/#/analysis');
   await started;
   await page.clock.runFor(10001);
   await expect(page.getByRole('alert')).toContainText('Request timed out. Try again.');
@@ -67,7 +67,7 @@ test('stalled request times out and Retry recovers', async ({ page }) => {
 });
 
 test('changing range cancels an older request and keeps the latest selection', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/#/analysis');
   await expect(latest(page)).toContainText('63 sessions');
   let intercepted;
   const started = new Promise(resolve => { intercepted = resolve; });
@@ -81,7 +81,7 @@ test('changing range cancels an older request and keeps the latest selection', a
 
 test('mobile chart uses readable tick sizing and fits the page', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/');
+  await page.goto('/#/analysis');
   await expect(latest(page)).toBeVisible();
   const svg = page.getByRole('img');
   // The responsive viewBox width must follow CSS width so text is not scaled down.
@@ -95,7 +95,7 @@ test('mobile chart uses readable tick sizing and fits the page', async ({ page }
 
 
 test('company search selects a supported stock through the real API', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/#/analysis');
   await page.getByLabel('Ticker', { exact: true }).fill('apple');
   const search = page.waitForResponse(response => response.url().includes('/api/stocks?query=apple'));
   await page.getByRole('button', { name: 'Search', exact: true }).click();
@@ -112,7 +112,7 @@ test('company search selects a supported stock through the real API', async ({ p
 
 test('search failure retries without hiding the current chart', async ({ page }) => {
   await page.route('**/api/stocks?query=*', route => route.fulfill({ status: 503, body: 'Unavailable' }));
-  await page.goto('/');
+  await page.goto('/#/analysis');
   await expect(latest(page)).toBeVisible();
   await page.getByRole('button', { name: 'Search', exact: true }).click();
   await expect(page.getByRole('alert')).toContainText('Could not search stocks');
@@ -128,14 +128,14 @@ test('source labels and capped-history notice use the response', async ({ page }
     const data = await response.json();
     await route.fulfill({ json: { ...data, source: 'Alternate historical source', adjustment: 'Documented test adjustment', has_earlier: true, session_limit: 2000 } });
   });
-  await page.goto('/');
+  await page.goto('/#/analysis');
   await expect(page.getByRole('link', { name: 'Source: Alternate historical source' })).toBeVisible();
   await expect(page.getByText(/Documented test adjustment/)).toBeVisible();
   await expect(page.getByText(/Earlier stored sessions/)).toContainText('2');
 });
 
 test('new search cancels an older pending query', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/#/analysis');
   let intercepted;
   const started = new Promise(resolve => { intercepted = resolve; });
   await page.route('**/api/stocks?query=old', () => { intercepted(); });
@@ -149,7 +149,7 @@ test('new search cancels an older pending query', async ({ page }) => {
 });
 
 test('Escape dismisses a pending search and Clear keeps the current chart', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/#/analysis');
   await expect(latest(page)).toBeVisible();
   let intercepted;
   const started = new Promise(resolve => { intercepted = resolve; });
@@ -170,7 +170,7 @@ test('Escape dismisses a pending search and Clear keeps the current chart', asyn
 });
 
 test('autocomplete debounces edits, prioritizes prefixes, and caps the list at eight', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/#/analysis');
   await expect(latest(page)).toBeVisible();
   await page.clock.install({ time: new Date('2026-11-22T15:00:00Z') });
   await page.clock.pauseAt(new Date('2026-11-22T15:00:01Z'));
@@ -190,7 +190,7 @@ test('autocomplete debounces edits, prioritizes prefixes, and caps the list at e
 });
 
 test('typed company names and light typos suggest the stock for keyboard selection', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/#/analysis');
   const input = page.getByRole('combobox', { name: 'Ticker' });
   const list = page.getByRole('listbox', { name: 'Stock suggestions' });
   await input.fill('a');
@@ -219,7 +219,7 @@ test('typed company names and light typos suggest the stock for keyboard selecti
 });
 
 test('Escape and outside clicks dismiss suggestions and empty matches are non-selectable', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/#/analysis');
   const input = page.getByRole('combobox', { name: 'Ticker' });
   const list = page.getByRole('listbox', { name: 'Stock suggestions' });
   await input.fill('zzzz-not-a-stock');
@@ -240,7 +240,7 @@ test.describe('touch autocomplete', () => {
   test.use({ hasTouch: true, viewport: { width: 320, height: 720 } });
 
   test('tapping a suggestion fills the field and loads its symbol', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/#/analysis');
     await expect(latest(page)).toBeVisible();
     const input = page.getByRole('combobox', { name: 'Ticker' });
     await input.fill('apple');
@@ -257,7 +257,7 @@ test.describe('touch autocomplete', () => {
 test('hover previews a session, clicking pins it, and keyboard inspection clears cleanly', async ({ page, request }) => {
   const response = await request.get('/api/stocks/AAPL/prices?range=3mo');
   const { bars } = await response.json();
-  await page.goto('/');
+  await page.goto('/#/analysis');
   const plot = page.locator('.plot-inspection-target');
   const readout = page.locator('.inspection-readout');
   await plot.hover({ position: { x: 1, y: 20 } });
@@ -293,7 +293,7 @@ test.describe('touch chart', () => {
   test.use({ hasTouch: true, viewport: { width: 390, height: 844 } });
 
   test('a tap pins a point without hovering', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/#/analysis');
     await page.locator('.plot-inspection-target').tap({ position: { x: 1, y: 20 } });
     await expect(page.locator('.inspection-readout')).toContainText('Pinned');
     await expect(page.locator('.inspection-readout time')).toHaveText('2016-11-16');
@@ -304,7 +304,7 @@ test.describe('touch chart', () => {
 test('replay reveals one session at a time across the chart, indicators, table, and CSV', async ({ page, request }) => {
   const response = await request.get('/api/stocks/AAPL/prices?range=3mo');
   const { bars } = await response.json();
-  await page.goto('/');
+  await page.goto('/#/analysis');
   const start = bars.length - 3;
   const startDate = bars[start].date;
   const nextDate = bars[start + 1].date;
@@ -346,7 +346,7 @@ test('replay reveals one session at a time across the chart, indicators, table, 
 });
 
 test('CSV contains the raw OHLCV rows for the displayed range', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/#/analysis');
   const response = page.waitForResponse('**/prices?range=1mo');
   await page.getByRole('button', { name: '1M', exact: true }).click();
   const { bars } = await (await response).json();

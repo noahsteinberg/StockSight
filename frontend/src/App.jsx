@@ -2,19 +2,26 @@ import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import Analysis from './Analysis.jsx';
 import AuthPage from './AuthPage.jsx';
 import AccountControls from './AccountControls.jsx';
+import Explore from './Explore.jsx';
 import SidebarHighlight from './SidebarHighlight.jsx';
 import { Dashboard, Methodology, ModelPerformance, Predictions } from './Pages.jsx';
 import { useAccount } from './auth-context.js';
 import useWatchlist from './use-watchlist.js';
 import usePageRoute from './use-page-route.js';
 
+// Predictions and Model performance stay reachable by link but leave the sidebar
+// until an approved model exists (issue #19, Phase 0 decision).
 const pages = [
-  ['dashboard', 'Dashboard', 'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z'],
+  ['explore', 'Explore', 'M17 10.5a6.5 6.5 0 1 1-13 0a6.5 6.5 0 0 1 13 0M20 20l-4.9-4.9'],
   ['analysis', 'Analysis', 'M4 4v16h16M7 15l4-5 4 2 5-6'],
-  ['predictions', 'Predictions', 'M4 19l6-6 4 3 6-10M14 6h6v6'],
-  ['performance', 'Model performance', 'M4 20h16M6 16v-5m6 5V5m6 11V8'],
+  ['dashboard', 'Watchlist', 'm12 3 2.76 5.59 6.17.9-4.47 4.35 1.06 6.15L12 17.09l-5.52 2.9 1.06-6.15-4.47-4.35 6.17-.9L12 3Z'],
   ['methodology', 'Methodology', 'M6 4h9l3 3v13H6zM14 4v4h4M9 12h6m-6 4h6'],
 ];
+const pageTitles = {
+  ...Object.fromEntries(pages.map(([page, label]) => [page, label])),
+  predictions: 'Predictions', performance: 'Model performance',
+  login: 'Log in', signup: 'Create an account', 'reset-password': 'Reset password',
+};
 const selectedSymbolKey = 'stocksight:selected-symbol';
 const sidebarItemHeight = 48;
 const sidebarItemGap = 5;
@@ -51,13 +58,16 @@ export default function App() {
   useEffect(() => {
     const previousPage = lastWatchlistPage.current;
     lastWatchlistPage.current = route.page;
-    if (previousPage !== route.page && account.isAuthenticated && !watchlistError && ['dashboard', 'analysis'].includes(route.page)) refreshWatchlist();
+    if (previousPage !== route.page && account.isAuthenticated && !watchlistError && ['dashboard', 'analysis', 'explore'].includes(route.page)) refreshWatchlist();
   }, [route.page, account.isAuthenticated, refreshWatchlist, watchlistError]);
+  // Explore keeps its search/page in the URL; typing must not move focus away
+  // from the search field, so only entering Explore counts as a navigation.
+  const focusKey = route.page === 'explore' ? 'explore' : route.hash;
   useEffect(() => {
-    document.title = `${({ login: 'Log in', signup: 'Create an account', 'reset-password': 'Reset password' })[route.page] || pages[activeIndex]?.[1] || 'Page not found'} | StockSight`;
+    document.title = `${pageTitles[route.page] || 'Page not found'} | StockSight`;
     main.current?.focus({ preventScroll: true });
     window.scrollTo(0, 0);
-  }, [route.hash, route.page, activeIndex]);
+  }, [focusKey, route.page]);
   useEffect(() => {
     if (!menuOpen) return;
     const nav = navigation.current;
@@ -106,7 +116,7 @@ export default function App() {
           <button ref={menuButton} type="button" className="menu-toggle" aria-label={menuOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={menuOpen} aria-controls="site-navigation" onClick={() => setMenuOpen(open => !open)}>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d={menuOpen ? 'm6 6 12 12M18 6 6 18' : 'M4 6h16M4 12h16M4 18h16'} /></svg>
           </button>
-          <a className="brand" href="#/dashboard" onClick={() => rememberStock(symbol)} aria-label="StockSight home">
+          <a className="brand" href="#/explore" onClick={() => rememberStock(symbol)} aria-label="StockSight home">
             <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5 23V9M5 23h22M10 19l6-7 5 3 7-9" /></svg>
             StockSight<span className="brand-divider" aria-hidden="true" /><span className="brand-school">UCONN</span>
           </a>
@@ -138,6 +148,7 @@ export default function App() {
     <div className="app-content">
     <main ref={main} id="main" className="wrap" tabIndex="-1">
       {account.error && <div role="alert" className="account-error">{account.error}</div>}
+      {route.page === 'explore' && <Explore query={route.explore.query} page={route.explore.page} watchlist={watchlist} onOpen={selectStock} />}
       {route.page === 'analysis' && <Analysis symbol={symbol} onSelectSymbol={selectStock} watchlist={watchlist} />}
       {route.page === 'dashboard' && <Dashboard watchlist={watchlist} onOpen={selectStock} />}
       {route.page === 'predictions' && <Predictions symbol={symbol} />}

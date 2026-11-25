@@ -52,6 +52,33 @@ in USD. The [source license](../backend/app/fixtures/SOURCE_LICENSE) is tracked
 with the fixture.
 See [import policy](PRICES_IMPORT.md) for the separate team snapshot.
 
+## Explore API
+
+GET /api/explore?query=&page=1&page_size=25 returns one public page of supported
+stocks (those with a stored price series), ordered by symbol. A query matches
+ticker or company name, case-insensitively, and an exact ticker ranks first.
+`query` is at most 40 characters; `page` is 1–1000; `page_size` is 1–50 (default 25).
+Invalid values return 422, and storage failure returns 503 DATA_UNAVAILABLE.
+A page past the end returns an empty `items` array with the real totals.
+
+Response: `query` (normalized to uppercase), `page`, `page_size`, `total_supported`,
+`total_matching`, `latest_session` (newest stored session across all series) and
+`items[]`. Each item has `symbol`, `name`, `exchange`, `last_close`, `as_of`,
+`daily_change_pct` and `series_revision`.
+
+- `name` is null when the stored name only repeats the ticker (the importer's
+  placeholder), and `exchange` is null when it is `UNKNOWN`. Neither is a
+  verified fact, so the UI shows "Name not yet available" instead.
+- `daily_change_pct` is `(latest close / previous stored close − 1) × 100`, or
+  null with fewer than two stored sessions. It is price change only, not total
+  return, and not a forecast.
+- `series_revision` matches the `snapshot_id` that the stock's price history
+  reports.
+
+Each row reads only its two newest bars; no full histories, indicators or provider
+requests run. Explicit fixture mode returns the single AAPL fixture.
+`GET /api/stocks` (search, capped at 50) is unchanged.
+
 ## Storage selection and readiness
 
 A nonempty STOCKSIGHT_DATABASE_URL selects database reads with the same history response. Missing/empty URL explicitly selects fixture mode. GET /api/ready checks storage/schema (200 or sanitized 503); /api/health remains liveness only. Stock routes return 503 DATA_UNAVAILABLE if database reads fail, without fixture fallback. Search is capped at 50 and all-history at the latest 2,000 daily bars.

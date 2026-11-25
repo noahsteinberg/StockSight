@@ -2,17 +2,19 @@ import { test, expect } from '@playwright/test';
 
 test('navigation supports refresh, browser history, active state and page focus', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Stock analysis', exact: true })).toBeVisible();
-  await page.getByRole('link', { name: 'Dashboard', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'My dashboard' })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Dashboard', exact: true })).toHaveAttribute('aria-current', 'page');
+  await expect(page.getByRole('heading', { name: 'Explore stocks', exact: true })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Explore', exact: true })).toHaveAttribute('aria-current', 'page');
+  await expect(page).toHaveTitle('Explore | StockSight');
+  await page.getByRole('link', { name: 'Watchlist', exact: true }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Watchlist', exact: true })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Watchlist', exact: true })).toHaveAttribute('aria-current', 'page');
   await expect(page.locator('main')).toBeFocused();
-  await page.getByRole('link', { name: 'Predictions', exact: true }).first().click();
+  await page.getByRole('link', { name: /^Predictions/ }).click();
   await expect(page.getByRole('heading', { name: 'Predictions', exact: true })).toBeVisible();
   await page.reload();
   await expect(page).toHaveTitle('Predictions | StockSight');
   await page.goBack();
-  await expect(page.getByRole('heading', { name: 'My dashboard' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Watchlist', exact: true })).toBeVisible();
   await page.goForward();
   await expect(page.getByRole('heading', { name: 'Predictions', exact: true })).toBeVisible();
 });
@@ -35,7 +37,7 @@ test('methodology and legacy links resolve; unknown pages recover', async ({ pag
   await expect(page.getByRole('heading', { name: 'Data & methodology', exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Historical data' })).toBeVisible();
   await page.goto('/#watchlist');
-  await expect(page.getByRole('heading', { name: 'My dashboard' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Watchlist', exact: true })).toBeVisible();
   await page.goto('/#/does-not-exist');
   await expect(page.getByRole('heading', { name: 'Page not found' })).toBeVisible();
   await page.getByRole('link', { name: 'Go to stock analysis' }).click();
@@ -64,7 +66,7 @@ test('navigation remembers the stock selected through browser history', async ({
   await page.goto('/#/predictions?symbol=AAPL');
   await page.goto('/#/predictions?symbol=MSFT');
   await expect(page.getByRole('heading', { name: 'MSFT', exact: true })).toBeVisible();
-  await page.getByRole('link', { name: 'Dashboard', exact: true }).click();
+  await page.getByRole('link', { name: 'Watchlist', exact: true }).click();
   await page.getByRole('link', { name: 'Analysis', exact: true }).click();
   await expect(page.getByLabel('Ticker', { exact: true })).toHaveValue('MSFT');
 });
@@ -72,7 +74,7 @@ test('navigation remembers the stock selected through browser history', async ({
 test('new pages fit desktop and mobile viewports', async ({ page }) => {
   for (const width of [1440, 390, 320]) {
     await page.setViewportSize({ width, height: 900 });
-    for (const [route, heading] of [['dashboard', 'My dashboard'], ['predictions', 'Predictions'], ['performance', 'Model performance'], ['methodology', 'Data & methodology']]) {
+    for (const [route, heading] of [['explore', 'Explore stocks'], ['dashboard', 'Watchlist'], ['predictions', 'Predictions'], ['performance', 'Model performance'], ['methodology', 'Data & methodology']]) {
       await page.goto(`/#/${route}`);
       await expect(page.getByRole('heading', { level: 1, name: heading, exact: true })).toBeVisible();
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -83,12 +85,12 @@ test('new pages fit desktop and mobile viewports', async ({ page }) => {
 
 test('the desktop rail expands from icons, resizes the content, and stays fixed on scroll', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 600 });
-  await page.goto('/');
+  await page.goto('/#/analysis');
   const nav = page.getByRole('navigation', { name: 'Main navigation' });
   const active = nav.getByRole('link', { name: 'Analysis', exact: true });
   const label = active.locator('span');
   await expect(active).toHaveAttribute('aria-current', 'page');
-  await expect(nav.locator('a svg')).toHaveCount(5);
+  await expect(nav.locator('a svg')).toHaveCount(4);
   await expect(label).toHaveCSS('opacity', '0');
   const before = await page.locator('main').boundingBox();
   const rail = await nav.boundingBox();

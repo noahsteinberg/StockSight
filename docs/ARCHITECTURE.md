@@ -1,9 +1,9 @@
 # Architecture
 
 For proposed discovery/comparison/preferences views and their approval gates,
-read [the frontend product handoff](FRONTEND_PRODUCT_HANDOFF.md). Its proposed
-routes/tables are not implemented by this documentation change; existing view
-contracts below remain the running application until an approved increment ships.
+read [the frontend product handoff](FRONTEND_PRODUCT_HANDOFF.md). Increment 1
+(Explore) is implemented on branch `feature/explore-page`; Compare, preferences,
+sectors and signals remain proposals until their increments are approved.
 
 ## Incremental daily refresh
 
@@ -23,24 +23,34 @@ its schedule is gated pending manual Actions acceptance (see DAILY_REFRESH.md).
 
 | URL fragment | View | Behavior |
 | --- | --- | --- |
-| #/dashboard | My dashboard | Private watchlist, filtering, saved dates, open/remove and account states |
+| #/explore?q=app&page=2 | Explore stocks | Public paginated list of supported stocks (25 per page) with search, latest stored close/date, daily change, unknown-name state and save star |
 | #/analysis?symbol=AAPL | Stock analysis | Stock lookup, price and volume, SMA20/RSI14, inspection, historical replay, CSV and watchlist chips |
+| #/dashboard (#/watchlist) | Watchlist | Private watchlist, filtering, saved dates, open/remove and account states |
 | #/predictions?symbol=AAPL | Predictions | Selected stock, unavailable generation/history and return to Analysis |
 | #/performance | Model performance | Unavailable evaluation |
 | #/methodology | Data & methodology | Source, coverage, adjustment, indicator and project information |
 
-Root / opens Analysis for compatibility. The brand opens Dashboard. Legacy
-#analysis, #watchlist and #project resolve to their corresponding views.
-Unknown pages provide recovery to Analysis. Browser back/forward and refresh
-work via hash navigation. Page changes update the title, active item and
-main-content focus. The skip link focuses the current page. Navigation retains
-the selected stock, and a successful Auth0 callback returns to Dashboard.
+Root / opens Explore, and so does the brand. The sidebar lists Explore, Analysis,
+Watchlist and Methodology. Predictions and Model performance are no longer in the
+sidebar; they stay reachable from Analysis ("Predictions for X"), the Watchlist
+page and each other. Legacy #analysis, #watchlist and #project resolve to their
+corresponding views. Unknown pages provide recovery to Analysis. Browser
+back/forward and refresh work via hash navigation. Page changes update the title,
+active item and main-content focus. On Explore, the search text and page number
+live in the URL: a search becomes a history step after a 300 ms typing pause, and
+changing it does not move focus away from the search field. The skip link focuses
+the current page. Navigation retains the selected stock, and a successful Auth0
+callback returns to the Watchlist (#/dashboard).
 
 ## Implementation
 
 - App.jsx owns the selected stock, account-scoped watchlist and navigation.
   use-page-route.js subscribes to hash changes. The desktop sidebar expands on
   hover/focus, and the mobile hamburger exposes the same routes.
+- Explore.jsx renders the stock list. explore-api.js validates each
+  GET /api/explore response before rendering, and use-explore.js cancels
+  superseded requests, so a slow older search cannot replace newer rows.
+  app/explore.py reads only the newest two stored closes per series.
 - Analysis.jsx integrates stock search, the native SVG PricePlot.jsx chart and
   the observations table. Local autocomplete is supplied by stock-suggestions.js.
   Price and indicator requests have independent retry states. The client

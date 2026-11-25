@@ -5,6 +5,13 @@ from typing import Annotated
 from fastapi import APIRouter, HTTPException, Query, Request
 from sqlalchemy.exc import SQLAlchemyError
 
+from app.explore import (
+    PAGE_SIZE_DEFAULT,
+    PAGE_SIZE_MAX,
+    ExplorePage,
+    explore_database,
+    explore_fixture,
+)
 from app.indicators import CALCULATION_LIMIT, IndicatorHistory, calculate_indicators
 from app.market import (
     ADJUSTMENT,
@@ -47,6 +54,22 @@ def search_stocks(
         if not query or query in "AAPL" or query in "APPLE INC."
         else []
     )
+
+
+@router.get("/explore", response_model=ExplorePage)
+def explore(
+    request: Request,
+    query: Annotated[str, Query(max_length=40)] = "",
+    page: Annotated[int, Query(ge=1, le=1000)] = 1,
+    page_size: Annotated[int, Query(ge=1, le=PAGE_SIZE_MAX)] = PAGE_SIZE_DEFAULT,
+) -> ExplorePage:
+    query = query.strip().upper()
+    if request.app.state.engine is None:
+        return explore_fixture(query, page, page_size)
+    try:
+        return explore_database(request.app.state.engine, query, page, page_size)
+    except SQLAlchemyError:
+        raise unavailable() from None
 
 
 @router.get("/stocks/{symbol}/prices", response_model=History)
