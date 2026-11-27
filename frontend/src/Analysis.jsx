@@ -7,6 +7,7 @@ import MarketQuote from './MarketQuote.jsx';
 import useStockProfile from './use-stock-profile.js';
 import { SignalBadge } from './SignalPanel.jsx';
 import { compareHash } from './use-compare-selection.js';
+import PatternExplorer from './PatternExplorer.jsx';
 
 const ranges = [['1mo', '1M'], ['3mo', '3M'], ['1y', '1Y'], ['all', 'Max']];
 
@@ -165,6 +166,8 @@ export default function Analysis({ symbol, onSelectSymbol, watchlist, selection,
         </div>
       </HistoricalChart>}
       </div>
+      <PatternExplorer key={`patterns-${symbol}`} symbol={symbol} history={data} replaying={replaying}
+        onReloadHistory={() => { reload(); setRetry(value => value + 1); indicators.retry(); }} />
       {/* The delayed vendor quote is secondary to the stored history above it. */}
       <MarketQuote key={symbol} symbol={symbol} asOf={data?.as_of} replaying={replaying} />
     </section>

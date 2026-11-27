@@ -1,5 +1,31 @@
 # Current API
 
+## Historical pattern comparisons
+
+`GET /api/stocks/{symbol}/patterns?horizon_sessions=21` returns descriptive
+historical comparisons. Supported horizons are exactly 5 and 21 stored sessions;
+default 21. The symbol is normalized to uppercase. Unknown symbols or those with
+no history return 404 `UNSUPPORTED_SYMBOL`, invalid horizons return 422, and
+storage failures return sanitized 503 `DATA_UNAVAILABLE` without fixture fallback.
+
+The response includes `methodology=historical-price-patterns-v1`, symbol/name,
+`as_of`, `snapshot_id`, source/source_url/adjustment, `horizon_sessions`,
+`calculation_start`, `calculation_sessions` (at most 2500), `has_earlier`,
+`eligible_candidates` and `excluded_event_windows`. The snapshot agrees with
+price history for the same revision. Explicit fixture mode serves AAPL only.
+
+Available responses have `reason=null`, `current_setup` (20-session change,
+daily variability and price vs. 50-session average, all percent), 8–12 matches,
+`matched_count`, `summary` (median/quartile ending changes and rose/fell/unchanged
+counts), and `points` (per-step quartiles and median, including step zero).
+Each match contains `date`, `end_date`, `setup`, `change_pct`, and `path` of
+`horizon_sessions + 1` values, starting at zero.
+
+Unavailable responses have reason `insufficient_history`, `insufficient_matches`
+or `invalid_history`, null summary, zero matched_count and empty matches/points.
+`current_setup` is null when a usable setup cannot be computed. No forecast,
+probability or provider call is generated. See [the calculation and limitations](PATTERNS.md).
+
 ## Incremental daily-history extension
 
 After migration 0006 and an explicit refresh, prices and indicators may return

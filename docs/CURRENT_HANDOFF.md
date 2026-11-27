@@ -1,5 +1,42 @@
 # StockSight current handoff
 
+## Historical Pattern Explorer — GitHub review, November 27
+
+Parth reviewed the working local preview and authorized a feature-branch push
+and PR for Noah on November 27. **Merge and deployment remain unauthorized.**
+Keep the feature off main until Noah reviews it and a release is approved.
+Vercel's existing configuration enables deployments only for main; feature
+branches are disabled. No deployment configuration was changed.
+
+Branch `feature/historical-pattern-explorer`, based on main `8237d79`, adds an
+opt-in Analysis panel using existing stored prices. It finds similar historical
+setups, offers 5/21-session example outcomes, median/quartiles, counts, a path
+plot and inspectable dates. It does not serve an ML prediction. The existing
+model-signal unavailable state remains intact. No migration, provider ingestion
+or hosted write is part of this change. The separately completed ranking
+experiment remains on `research/parth-ranking-pilot` and is not bundled here.
+
+Preview while local servers run: `http://127.0.0.1:5188/#/analysis?symbol=AAPL`.
+It reads the existing hosted stock history through a local backend. Local Auth0
+is not configured, so account controls say sign-in unavailable. Configuration
+and credentials remain ignored. See [PATTERNS.md](PATTERNS.md) for numerical
+rules, exact scope, test evidence and remaining release checks.
+
+Full-catalog API acceptance passed all 494 stocks at both horizons: 988/988
+available responses, zero unavailable states/errors, with frontend contract
+validation and chart revision/date agreement. This read-only check used the
+hosted stored prices through the local feature backend. The reusable checker
+is `frontend/scripts/check-pattern-coverage.mjs`; reports stay outside Git.
+
+Verification: backend 207 passed/3 skipped; 17 new pattern tests passed;
+frontend three contract tests, lint and build passed. Manual browser checks
+covered both horizons, keyboard highlight, replay hiding and 320px overflow.
+The new automated Playwright cases are pending: this Mac lacks the required
+Chromium headless executable. Hosted release review is still Noah's decision.
+
+The production status below describes the deployed main branch, not this local
+feature preview.
+
 ## Dashboard and Explore integration
 
 [Production](https://stocksight-rose.vercel.app/) is serving the November 27,

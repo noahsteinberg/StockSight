@@ -48,6 +48,13 @@ callback returns to Dashboard (#/dashboard).
 
 ## Implementation
 
+- PatternExplorer.jsx adds an opt-in historical-comparison panel below Analysis's
+  chart. pattern-api.js validates its dated paths and summaries; app/patterns.py
+  retrieves at most 2,500 bars plus a retention sentinel in one SELECT and
+  computes descriptive setup matches. Snapshot mismatch hides results; replay
+  hides the panel. No model, provider request, persistence or schema change is
+  involved. See [Historical Pattern Explorer](PATTERNS.md).
+
 - App.jsx owns the selected stock, account-scoped watchlist and navigation.
   use-page-route.js subscribes to hash changes. The desktop sidebar expands on
   hover/focus, and the mobile hamburger exposes the same routes.

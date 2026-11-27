@@ -30,6 +30,7 @@ from app.market import (
     fixture_snapshot_id,
     load_bars,
 )
+from app.patterns import PatternResponse, patterns_database, patterns_fixture
 from app.repository import database_history, search_database, supported_symbol
 from app.signals import SUPPORTED_HORIZONS, SignalResponse, unavailable_signal
 from app.stock_metadata import SOURCE as METADATA_SOURCE
@@ -161,6 +162,34 @@ def signals(
     """Typed research-signal status. No model is approved, so a supported stock
     always gets a 200 "unavailable" response; nothing is generated on request."""
     return unavailable_signal(require_supported(request, symbol), horizon_sessions)
+
+
+@router.get("/stocks/{symbol}/patterns", response_model=PatternResponse)
+def patterns(
+    request: Request,
+    symbol: str,
+    horizon_sessions: Annotated[int, Query(ge=5, le=21)] = 21,
+) -> PatternResponse:
+    if horizon_sessions not in (5, 21):
+        raise HTTPException(
+            422,
+            detail={
+                "code": "INVALID_PATTERN_HORIZON",
+                "message": "Choose 5 or 21 stored sessions.",
+            },
+        )
+    symbol = symbol.strip().upper()
+    if request.app.state.engine is None:
+        if symbol != "AAPL":
+            raise unsupported()
+        return patterns_fixture(horizon_sessions)
+    try:
+        result = patterns_database(request.app.state.engine, symbol, horizon_sessions)
+    except SQLAlchemyError:
+        raise unavailable() from None
+    if result is None:
+        raise unsupported()
+    return result
 
 
 @router.get("/stocks/{symbol}/prices", response_model=History)
