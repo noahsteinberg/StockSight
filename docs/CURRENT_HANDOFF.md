@@ -1,5 +1,32 @@
 # StockSight current handoff
 
+## Dashboard and Explore integration
+
+The integration branch combines PRs #20–#24 with the Settings release (#25).
+Dashboard is the root and logo destination and contains the private watchlist,
+latest stored closes, dates, daily changes and a link to Explore. Explore
+remains its own public browsing tab. Compare and Analysis are separate views.
+Settings retains browser-local indicator defaults and account controls.
+Research preferences can set a default chart range independently.
+
+The earlier Explore-as-home decision below describes the original PR stack.
+For the combined release, review migration 0007 and apply it before deployment
+as documented in VERCEL.md. Verify production readiness and signed-in flows
+after deployment. The integration branch is for review before merging.
+
+## Settings page
+
+- Gavin approved chart defaults and account controls, with Settings at the
+  bottom of the desktop sidebar and last in the mobile menu. The page is
+  available at `/#/settings` on `feature/settings-page` for review.
+- SMA 20 and RSI 14 defaults are saved in the browser and initialize Analysis.
+  Account settings display the sign-in method, available profile name, and
+  sign-out. Password accounts can use the existing Auth0 recovery email flow.
+  See [Accounts](ACCOUNTS.md) for cookie-only profile behavior.
+- Verification passed lint, production build, 42 public browser cases, and
+  26 isolated account browser cases. The local preview uses the AAPL fixture
+  on port 5173. Recovery submission used intercepted Auth0 requests in tests.
+
 ## Next product work: Vlad / @Hab1yer
 
 Read [FRONTEND_PRODUCT_HANDOFF.md](FRONTEND_PRODUCT_HANDOFF.md) for the proposed

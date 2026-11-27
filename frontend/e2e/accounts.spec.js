@@ -139,7 +139,7 @@ test('mobile account and saved-stock actions fit the viewport', async ({ page })
   await page.getByRole('button', { name: 'Watchlist for AAPL', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Watchlist for AAPL' })).toBeVisible();
   await page.getByRole('button', { name: 'Open navigation' }).click();
-  await page.getByRole('link', { name: 'Watchlist', exact: true }).click();
+  await page.getByRole('link', { name: 'Dashboard', exact: true }).click();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   if (process.env.STOCKSIGHT_VISUAL_QA === '1') await page.screenshot({ path: '../.local-data/accounts-mobile.png', fullPage: true });
 });
@@ -200,9 +200,12 @@ test('dashboard filters persisted stocks and opens analysis after refresh', asyn
   await signIn(page);
   await page.getByRole('button', { name: 'Watchlist for AAPL', exact: true }).click();
   await expect(page.getByRole('link', { name: 'Open AAPL analysis' })).toBeVisible();
-  await page.getByRole('link', { name: 'Watchlist', exact: true }).click();
-  await expect(page.getByRole('heading', { level: 1, name: 'Watchlist', exact: true })).toBeVisible();
+  await page.getByRole('link', { name: 'Dashboard', exact: true }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Dashboard', exact: true })).toBeVisible();
   await expect(page.getByRole('table', { name: 'Your saved stocks' })).toBeVisible();
+  const savedStock = page.getByRole('row', { name: /AAPL/ });
+  await expect(savedStock.locator('time')).toHaveAttribute('datetime', '2017-02-16');
+  await expect(savedStock.getByRole('cell', { name: /\$.*2017-02-16/ })).toBeVisible();
   await page.getByLabel('Filter saved stocks').fill('no-match');
   await expect(page.getByText('No saved stocks match “no-match”.')).toBeVisible();
   await page.getByRole('button', { name: 'Clear filter' }).click();
@@ -212,7 +215,7 @@ test('dashboard filters persisted stocks and opens analysis after refresh', asyn
   await expect(page.getByRole('table', { name: 'Your saved stocks' })).toBeVisible();
   await page.getByRole('link', { name: 'Open AAPL analysis' }).click();
   await expect(page.getByRole('heading', { name: 'AAPL Apple Inc.' })).toBeVisible();
-  await page.getByRole('link', { name: 'Watchlist', exact: true }).click();
+  await page.getByRole('link', { name: 'Dashboard', exact: true }).click();
   await page.getByRole('button', { name: 'Remove AAPL' }).click();
   await expect(page.getByText('No saved stocks yet.')).toBeVisible();
   await page.reload();

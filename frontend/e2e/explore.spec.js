@@ -34,10 +34,10 @@ async function mockExplore(page, total = 60) {
 
 const rows = page => page.getByRole('table').locator('tbody tr');
 
-test('Explore is the landing page and lists the real fixture stock with its stored close', async ({ page, request }) => {
+test('Explore lists the real fixture stock with its stored close', async ({ page, request }) => {
   const api = await (await request.get('/api/explore')).json();
   const aapl = api.items[0];
-  await page.goto('/');
+  await page.goto('/#/explore');
   await expect(page.getByRole('heading', { name: 'Explore stocks', exact: true })).toBeVisible();
   await expect(page.getByRole('status').filter({ hasText: 'supported stock' })).toContainText(`1 supported stock · showing 1–1 · latest stored session ${api.latest_session}`);
   await expect(rows(page)).toHaveCount(1);

@@ -17,6 +17,10 @@
   The optional email can be used for recovery; Auth0 owns verification requirements.
 - Reset sends Auth0's recovery email. The confirmation does not identify whether
   an account exists. Accounts without recovery email may need administrator help.
+- Signed-in password users can also request the same email under Settings →
+  Account. Settings shows the sign-in provider from the current session and
+  shows a username or name when it has a matching provider profile in memory.
+  A cookie-only session can restore the sign-in method without restoring the name.
 - Google uses the existing official React SDK, Authorization Code + PKCE, and
   `connection=google-oauth2`; the provider consent/sign-in screens remain external.
 - **Trouble signing in?** opens a hosted password sign-in option for blocked cross-site
@@ -198,7 +202,7 @@ from the configured issuer.
 | Method and path | Request | Success |
 | --- | --- | --- |
 | GET /api/me | App session or bearer token | 200 `{ "id": "local-user-uuid" }` |
-| GET /api/watchlist | App session or bearer token | 200 `{ "items": [{ "symbol": "AAPL", "name": "Apple Inc.", "added_at": "ISO-UTC", "daily_change_pct": -0.12 }], "limit": 100 }` |
+| GET /api/watchlist | App session or bearer token | 200 with `items` and `limit`. Each item includes `symbol`, `name`, `added_at`, `last_close`, `as_of`, and `daily_change_pct`. Prices and dates are from stored daily sessions. |
 | POST /api/watchlist | App session or bearer token; JSON `{ "symbol": "AAPL" }` | 201 saved item; 200 same item on repeat |
 | DELETE /api/watchlist/{symbol} | App session or bearer token | 204; repeated removal also 204 |
 | GET /api/me/preferences | App session or bearer token | 200 `{ "saved": false, "schema_version": 1, "purpose": null, "sectors": [], "horizon": null, "default_range": null, "updated_at": null }` |

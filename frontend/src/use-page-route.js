@@ -7,13 +7,13 @@ function subscribe(listener) {
 }
 
 const snapshot = () => window.location.hash;
-const knownPages = new Set(['explore', 'analysis', 'compare', 'dashboard', 'preferences', 'predictions', 'performance', 'methodology', 'login', 'signup', 'reset-password']);
+const knownPages = new Set(['explore', 'analysis', 'compare', 'dashboard', 'preferences', 'settings', 'predictions', 'performance', 'methodology', 'login', 'signup', 'reset-password']);
 const aliases = { watchlist: 'dashboard', project: 'methodology', main: 'analysis' };
 
 export default function usePageRoute() {
   const hash = useSyncExternalStore(subscribe, snapshot);
   const [path, query = ''] = hash.replace(/^#\/?/, '').split('?');
-  const page = aliases[path] || path || 'explore';
+  const page = aliases[path] || path || 'dashboard';
   const params = new URLSearchParams(query);
   const requestedSymbol = params.get('symbol');
   const symbol = requestedSymbol?.trim().toUpperCase();

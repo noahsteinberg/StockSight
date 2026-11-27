@@ -1,6 +1,6 @@
 """Private, bounded watchlists. Auth0 owns signup, login and password lifecycle."""
 
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from typing import Annotated
 from uuid import uuid4
 
@@ -44,6 +44,8 @@ class SavedStock(BaseModel):
     symbol: str
     name: str
     added_at: datetime
+    last_close: float | None = None
+    as_of: date | None = None
     daily_change_pct: float | None = None
 
     @field_validator("added_at")
@@ -99,7 +101,7 @@ def current_user(
 
 
 def saved_query(user_id):
-    # These two index-backed lookups read only the newest stored closes per symbol.
+    # Index-backed lookups use the same session ordering for the close and date.
     recent_close = (
         select(DailyBar.close)
         .where(DailyBar.series_id == PriceSeries.id)
@@ -108,10 +110,18 @@ def saved_query(user_id):
         .correlate(PriceSeries)
     )
     latest = cast(recent_close.scalar_subquery(), Float)
+    as_of = recent_close.with_only_columns(DailyBar.session_date).scalar_subquery()
     previous = cast(recent_close.offset(1).scalar_subquery(), Float)
     change = ((latest / func.nullif(previous, 0) - 1) * 100).label("daily_change_pct")
     return (
-        select(WatchlistEntry.symbol, StockRecord.name, WatchlistEntry.added_at, change)
+        select(
+            WatchlistEntry.symbol,
+            StockRecord.name,
+            WatchlistEntry.added_at,
+            latest.label("last_close"),
+            as_of.label("as_of"),
+            change,
+        )
         .join(StockRecord, WatchlistEntry.symbol == StockRecord.symbol)
         .outerjoin(PriceSeries, WatchlistEntry.symbol == PriceSeries.symbol)
         .where(WatchlistEntry.user_id == user_id)

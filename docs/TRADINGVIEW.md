@@ -15,7 +15,7 @@ last stored (see DAILY_REFRESH.md); the panel's footer shows the chart's actual
 or become model-training data.
 
 *Integration update (issue #19 phase 3, Vlad):* the panel moved onto the current
-navigation (Analysis is at `#/analysis`; the root opens Explore) and is hidden
+navigation (Analysis is at `#/analysis`; the root opens Dashboard) and is hidden
 while historical replay shows a past date, so a present-day quote never sits
 beside a replayed session. The embed stays mounted while hidden, so exiting
 replay needs no reload. Explore and Compare deliberately have no widgets.

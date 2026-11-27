@@ -206,7 +206,7 @@ test('Analysis and Watchlist pages can add the current stock to the comparison',
   await page.getByRole('button', { name: 'Add to comparison' }).click();
   await expect(page.getByRole('button', { name: 'In comparison' })).toHaveAttribute('aria-pressed', 'true');
   await expect(page.getByRole('link', { name: /Compare \d stocks/ })).toHaveCount(0);
-  await page.getByRole('link', { name: 'Watchlist', exact: true }).click();
+  await page.getByRole('link', { name: 'Dashboard', exact: true }).click();
   await expect(page.getByRole('region', { name: 'Stocks selected for comparison' })).toContainText('AAPL');
   await expect(page.getByRole('link', { name: 'Compare', exact: true })).toHaveAttribute('href', '#/compare?symbols=AAPL');
 });
