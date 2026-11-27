@@ -55,12 +55,10 @@ From `backend` on macOS/Linux (Windows uses `.venv\Scripts\python.exe`):
 .venv/bin/python -m alembic current
 ```
 
-The repository head is `0007_user_preferences` (issue #19 phase 4; adds the
-backend-only, RLS-enabled `user_preferences` table). The hosted project stays at
-`0006_market_refresh` until that additive migration is reviewed and applied in a
-coordinated release (code expecting 0007 fails readiness closed on 0006). Alembic
-owns the nine application tables plus its version table; do not create separate, incompatible stock tables
-manually. API startup does not run migrations.
+The repository and hosted head are `0007_user_preferences`. This release added
+the backend-only, RLS-enabled `user_preferences` table on November 27. Alembic
+owns the nine application tables plus its version table. Apply future migrations
+as part of a coordinated release because API startup does not run migrations.
 
 Migration 0006 adds the nullable series update timestamp and two backend-only
 refresh audit tables. It was applied to the existing hosted project on November

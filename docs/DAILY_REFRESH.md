@@ -2,6 +2,13 @@
 
 ## Delivery state
 
+The scheduled workflow is active. The
+[November 27 scheduled run](https://github.com/noahsteinberg/StockSight/actions/runs/46035699596)
+passed the update and deployed API checks. For the current hosted schema and
+frontend release, see the [current handoff](CURRENT_HANDOFF.md).
+
+### Original November 23 rollout
+
 PR #18 merged into main at d65544a on November 23. Hosted migration
 0006_market_refresh is applied and the compatible Vercel deployment is READY.
 The migration used the Supabase migration tool with SQL generated from the
@@ -68,8 +75,9 @@ New-Item -ItemType Directory -Path .local-data -Force
 .\.venv-refresh\Scripts\python.exe -m app.refresh_prices --symbols AAPL,MSFT,NVDA --report .local-data/refresh-preview-001.json
 ~~~
 
-Migration head is 0006_market_refresh. Deploying new code against the old schema
-fails readiness closed; deploy code and migrate in a coordinated release.
+The updater requires the market-refresh schema introduced in
+`0006_market_refresh`. The combined app release uses
+`0007_user_preferences`. Coordinate schema changes with deployment.
 
 No --write means no database writes, including no refresh-run audit insert.
 The report must be a new file. It includes proposed inserts/corrections, rejected
@@ -223,10 +231,8 @@ Manual Actions acceptance passed November 23: preview run 45328253600 checked
 all 494 stocks with writes disabled; update run 45328799719 succeeded for all
 494 with writes enabled and passed the production smoke check. Both found zero
 pending inserts/corrections, missing sessions or blockers. Preview took about
-three minutes; update about seven. The repository enable variable is Noah's
-remaining activation step and was not changed by the agent. The scheduled event
-itself still needs observation after activation. No secret was copied into Git,
-workflow source or artifacts.
+three minutes; update about seven. Noah enabled scheduled updates after both
+manual checks. No secret was copied into Git, workflow source or artifacts.
 
 ## References
 

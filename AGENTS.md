@@ -38,13 +38,10 @@ requires instruction.
 
 - React/Vite JavaScript and plain CSS; native SVG price/volume chart, ticker/company
   search, ranges, keyboard date inspection, accessible table and watchlist UI.
-- FastAPI, SQLAlchemy/Alembic and PostgreSQL; repository migration head
-  `0007_user_preferences` (issue #19 phase 4); hosted head `0006_market_refresh`
-  until 0007 is applied in a reviewed, coordinated release.
-  Production schema/API and the full 494-stock hosted refresh were verified
-  November 23. Both manual Actions modes passed; Noah reports enabling the
-  schedule variable. The first actual scheduled event remains unobserved.
-  See docs/DAILY_REFRESH.md before activating incremental updates.
+- FastAPI, SQLAlchemy/Alembic and PostgreSQL; repository and hosted migration
+  head `0007_user_preferences` after the November 27 release. The full 494-stock
+  catalog and scheduled daily refresh were verified. See docs/DAILY_REFRESH.md
+  for activation, monitoring and recovery.
   Explicit fixture mode is available. No provider request runs inside chart APIs.
   Supabase setup and connection/security behavior are in docs/SUPABASE.md;
   docs/YAHOO_FINANCE.md records provider research without enabling refresh.
@@ -55,7 +52,7 @@ requires instruction.
   locally verified. See INDICATORS.md for null
   warm-up values, fixed calculation history and versioned numerical conventions.
 - Dashboard, Explore, Compare and optional private research preferences are
-  implemented on the combined release branch. Product ML inference, stored
+  live from PR #26. Product ML inference, stored
   forecasts and outcomes, and evaluation remain unfinished. Keep the
   typed unavailable state until an output is approved.
 

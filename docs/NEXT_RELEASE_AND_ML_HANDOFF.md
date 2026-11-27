@@ -1,14 +1,14 @@
 # StockSight release and next increments
 
 Start with [the current handoff](CURRENT_HANDOFF.md) for branch and delivery
-status. [PR #26](https://github.com/noahsteinberg/StockSight/pull/26) combines
+status. [PR #26](https://github.com/noahsteinberg/StockSight/pull/26) shipped
 Dashboard, Explore, Compare, preferences, Settings, the quote widget and
 research-signal availability. The release starts with 494 supported stocks.
 Daily history comes from Supabase after the Yahoo updater writes completed
 sessions. The TradingView panel in Analysis displays a separate quote, with
 provider-dependent freshness. No widget prices enter the stored history.
 
-## Review before merge
+## Preview and regression checklist
 
 Open the local review preview at `http://127.0.0.1:5177/` while it is running.
 It uses an isolated copy of all 494 hosted series through November 25, 2026
@@ -25,7 +25,11 @@ actions are for hosted acceptance. The automated account suite uses test users.
 | Signals | Open AAPL's research signal from Analysis and confirm its ticker persists. Model performance is accessible from that view and Methodology. Both say that approved evidence is unavailable. Existing deep links still work. |
 | Settings | Set indicator defaults, reload and open Analysis. Confirm the selected indicators start on. Repeat the main path at phone width. |
 
-## Release order
+## Release checklist for #26
+
+The migration, merge and public production checks were completed on November
+27, 2026. Step 5 is the remaining acceptance. Use the same order for future
+schema releases and verify the current Alembic revision before each rollout.
 
 1. Get Noah's preview sign-off and verify GitHub checks on the reviewed PR
    head. Confirm that `main` is still the production deployment branch.

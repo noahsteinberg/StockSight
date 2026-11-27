@@ -2,6 +2,10 @@
 
 ## Dashboard and Explore integration
 
+[Production](https://stocksight-rose.vercel.app/) is serving the November 27,
+2026 release from merge commit `651de1a`.
+[Vercel release](https://vercel.com/noah-steinbergs-projects/stocksight/8iHcTTauU2wqRV5Pww2dCNvVqnA9)
+
 [PR #26](https://github.com/noahsteinberg/StockSight/pull/26) combines PRs #20–#24
 with the Settings release (#25). Dashboard is the home and watchlist. Explore
 has 494 supported stocks, all 11 sectors, search, 10 stocks per page and catalog-wide
@@ -15,11 +19,28 @@ default chart window drives Analysis and Compare. Purpose and horizon are saved
 for future work. The signal API serves the typed unavailable state because
 there is no approved model.
 
-Use the [release and next-increment handoff](NEXT_RELEASE_AND_ML_HANDOFF.md) for
-Noah's manual review, migration 0007, production acceptance, assignable product
-follow-up and ML gates. The 494-stock localhost review copy has completed
-sessions through November 25, 2026. Production stays on its existing release
-until review, the additive migration and the PR merge.
+The reviewed PR passed all GitHub checks. Alembic migration
+`0007_user_preferences` was applied before merge. Verification confirmed the
+new revision, RLS, revoked browser-role privileges and all 494 price series.
+Production HTTP and Chromium checks passed for readiness, 11 sectors, Explore
+pagination (10 per full page and four on page 50), AAPL and MSFT price/indicator
+revision agreement, two-stock Compare, signal navigation and guest rejection
+on the watchlist, preferences and private discovery endpoints. The latest
+stored session and the shared comparison date were November 25.
+
+Scheduled daily refresh is active. The
+[November 27 scheduled run](https://github.com/noahsteinberg/StockSight/actions/runs/46035699596)
+passed its updater and deployed API verification steps.
+
+PRs #20–#24 are included in the release history. The TradingView panel from
+#16 shipped through the reviewed #22 integration. The original #16 branch
+should not be merged as a second quote implementation.
+
+The remaining release acceptance is real Auth0 login, watchlist and preferences
+save/reload/reset, sign-out and isolation across two authorized test accounts.
+Automated account tests used test identities. See the
+[release and next-increment handoff](NEXT_RELEASE_AND_ML_HANDOFF.md) for the
+account walkthrough, assignable product work and ML gates.
 
 The dated sections below record earlier checkpoints. Use the status above for
 release decisions.
