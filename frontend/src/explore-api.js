@@ -1,7 +1,7 @@
 // Fetches and validates one Explore page from GET /api/explore.
 // Validation keeps a malformed response from rendering as if it were real data.
 
-export const explorePageSize = 25;
+export const explorePageSize = 10;
 export const exploreSortOptions = [
   ['ticker', 'Ticker A–Z'],
   ['change_desc', 'Daily change: high to low'],

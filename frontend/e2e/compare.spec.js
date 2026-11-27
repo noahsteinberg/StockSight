@@ -28,12 +28,14 @@ function syntheticComparison(url, change = {}) {
 }
 
 function syntheticExplore(url) {
-  const page = Number(new URL(url).searchParams.get('page'));
+  const params = new URL(url).searchParams;
+  const page = Number(params.get('page'));
+  const pageSize = Number(params.get('page_size'));
   const items = Array.from({ length: 6 }, (_, index) => ({
     symbol: `TST00${index}`, name: null, exchange: null, sector: null, sub_industry: null, last_close: 10 + index, as_of: '2025-03-01',
     daily_change_pct: 1, series_revision: 'f'.repeat(64),
   }));
-  return { query: '', sector: null, page, page_size: 25, total_supported: 6, total_matching: 6, latest_session: '2025-03-01', items: page === 1 ? items : [] };
+  return { query: '', sector: null, page, page_size: pageSize, total_supported: 6, total_matching: 6, latest_session: '2025-03-01', items: page === 1 ? items : [] };
 }
 
 async function mockApis(page, change) {

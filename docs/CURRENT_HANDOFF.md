@@ -4,7 +4,7 @@
 
 [PR #26](https://github.com/noahsteinberg/StockSight/pull/26) combines PRs #20–#24
 with the Settings release (#25). Dashboard is the home and watchlist. Explore
-has 494 supported stocks, all 11 sectors, search, paging and catalog-wide
+has 494 supported stocks, all 11 sectors, search, 10 stocks per page and catalog-wide
 daily-change sorting. Analysis has a stock-specific comparison action and a
 research-signal link. Compare supports two to four stocks. The separate
 TradingView quote panel from Parth's #16 is included in the branch.

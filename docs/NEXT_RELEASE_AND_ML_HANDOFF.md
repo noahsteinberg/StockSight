@@ -19,7 +19,7 @@ actions are for hosted acceptance. The automated account suite uses test users.
 | View | Try this |
 | --- | --- |
 | Dashboard | Open the bare URL and click the logo from another page. Both should land here. Open Explore with the main button. |
-| Explore | Confirm 494 supported stocks, a 25-stock first page and 20 pages. Pick a sector, sort by highest or lowest daily change, then use Next and Previous. Search by company and try Reset filters. A result should open the matching ticker in Analysis. |
+| Explore | Confirm 494 supported stocks, 10 stocks on the first page and 50 pages. Pick a sector, sort by highest or lowest daily change, then use Next and Previous. Search by company and try Reset filters. A result should open the matching ticker in Analysis. |
 | Analysis | Pick AAPL, verify the latest stored date, ranges, SMA/RSI, price inspection, Refresh data and CSV. Review the separate quote panel and historical replay. Add AAPL to comparison, and open its research signal. |
 | Compare | With one stock, the tray prompts for one more and Compare offers an empty state. With two stocks, check the indexed chart, common dates and change summary. Add up to four, remove one and revisit the link. |
 | Signals | Open AAPL's research signal from Analysis and confirm its ticker persists. Model performance is accessible from that view and Methodology. Both say that approved evidence is unavailable. Existing deep links still work. |

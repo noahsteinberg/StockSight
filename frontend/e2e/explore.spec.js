@@ -55,10 +55,10 @@ test('Explore lists the real fixture stock with its stored close', async ({ page
 });
 
 test('pages through results with URL state, browser history and honest unknown values', async ({ page }) => {
-  await mockExplore(page);
+  await mockExplore(page, 24);
   await page.goto('/#/explore');
-  await expect(page.getByText('60 supported stocks · showing 1–25 · latest stored session 2026-11-23')).toBeVisible();
-  await expect(rows(page)).toHaveCount(25);
+  await expect(page.getByText('24 supported stocks · showing 1–10 · latest stored session 2026-11-23')).toBeVisible();
+  await expect(rows(page)).toHaveCount(10);
   const pages = page.getByRole('navigation', { name: 'Stock list pages' });
   await expect(pages).toContainText('Page 1 of 3');
   await expect(pages.getByRole('button', { name: 'Previous' })).toBeDisabled();
@@ -70,24 +70,25 @@ test('pages through results with URL state, browser history and honest unknown v
   await expect(rows(page).nth(5)).toContainText('+1.50%');
   await pages.getByRole('button', { name: 'Next' }).click();
   await expect(page).toHaveURL(/#\/explore\?page=2$/);
-  await expect(rows(page).first()).toContainText('TST025');
-  await pages.getByRole('button', { name: 'Next' }).click();
+  await expect(rows(page).first()).toContainText('TST010');
   await expect(rows(page)).toHaveCount(10);
+  await pages.getByRole('button', { name: 'Next' }).click();
+  await expect(rows(page)).toHaveCount(4);
   await expect(pages.getByRole('button', { name: 'Next' })).toBeDisabled();
   await page.goBack();
-  await expect(rows(page).first()).toContainText('TST025');
+  await expect(rows(page).first()).toContainText('TST010');
   await page.reload();
   await expect(pages).toContainText('Page 2 of 3');
   await page.goto('/#/explore?page=9');
   await expect(page.getByText('Page 9 is past the end of these results.')).toBeVisible();
   await page.getByRole('button', { name: 'Go to page 3' }).click();
-  await expect(rows(page).first()).toContainText('TST050');
+  await expect(rows(page).first()).toContainText('TST020');
 });
 
 test('search is debounced, keeps focus and typed text, and syncs with the URL', async ({ page }) => {
   const requests = await mockExplore(page);
   await page.goto('/#/explore?page=2');
-  await expect(rows(page).first()).toContainText('TST025');
+  await expect(rows(page).first()).toContainText('TST010');
   const search = page.getByLabel('Search ticker or company');
   await search.pressSequentially('tst01 ', { delay: 40 });
   await expect(page).toHaveURL(/#\/explore\?q=tst01$/);
@@ -98,13 +99,13 @@ test('search is debounced, keeps focus and typed text, and syncs with the URL', 
   expect(requests.filter(params => params.get('query') !== '').map(params => params.get('query'))).toEqual(['tst01']);
   await page.goBack();
   await expect(search).toHaveValue('');
-  await expect(rows(page).first()).toContainText('TST025');
+  await expect(rows(page).first()).toContainText('TST010');
   await page.goForward();
   await expect(search).toHaveValue(/^tst01 ?$/);
   await page.getByRole('button', { name: 'Clear', exact: true }).click();
   await expect(page).toHaveURL(/#\/explore$/);
   await expect(search).toBeFocused();
-  await expect(rows(page)).toHaveCount(25);
+  await expect(rows(page).first()).toContainText('TST000');
   await search.fill('tst05');
   await search.press('Enter');
   await expect(page).toHaveURL(/#\/explore\?q=tst05$/);
@@ -115,9 +116,9 @@ test('changing sort retains the sector, returns to page one and follows the next
   const requests = await mockExplore(page);
   await page.goto('/#/explore?sector=Industrials&page=2');
   const pages = page.getByRole('navigation', { name: 'Stock list pages' });
-  await expect(pages).toContainText('Page 2 of 2');
+  await expect(pages).toContainText('Page 2 of 5');
   await page.getByLabel('Sort by').selectOption('change_desc');
-  await expect(pages).toContainText('Page 1 of 2');
+  await expect(pages).toContainText('Page 1 of 5');
   await expect.poll(() => requests.at(-1).get('sort')).toBe('change_desc');
   expect(requests.at(-1).get('sector')).toBe('Industrials');
   expect(requests.at(-1).get('page')).toBe('1');
@@ -126,7 +127,7 @@ test('changing sort retains the sector, returns to page one and follows the next
   expect(requests.at(-1).get('sort')).toBe('change_desc');
   await page.reload();
   await expect(page.getByLabel('Sort by')).toHaveValue('change_desc');
-  await expect(pages).toContainText('Page 2 of 2');
+  await expect(pages).toContainText('Page 2 of 5');
 });
 
 test('empty, failed and malformed responses show distinct recoverable states', async ({ page }) => {
@@ -134,7 +135,7 @@ test('empty, failed and malformed responses show distinct recoverable states', a
   await page.goto('/#/explore?q=zzz');
   await expect(page.getByText('No supported stocks match “zzz”. Try another ticker or company name.')).toBeVisible();
   await page.getByRole('button', { name: 'Reset filters' }).last().click();
-  await expect(rows(page)).toHaveCount(25);
+  await expect(rows(page)).toHaveCount(10);
 
   await page.unroute('**/api/explore?*');
   let failing = true;
@@ -146,7 +147,7 @@ test('empty, failed and malformed responses show distinct recoverable states', a
   await expect(page.getByRole('table')).toHaveCount(0);
   failing = false;
   await page.getByRole('button', { name: 'Retry' }).click();
-  await expect(rows(page)).toHaveCount(25);
+  await expect(rows(page)).toHaveCount(10);
 
   await page.unroute('**/api/explore?*');
   await page.route('**/api/explore?*', route => route.fulfill({ json: { ...syntheticPage(route.request().url()), total_matching: 'many' } }));
@@ -173,7 +174,7 @@ test('Explore fits phone and desktop widths without page overflow', async ({ pag
   for (const width of [320, 390, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     await page.goto('/#/explore');
-    await expect(rows(page)).toHaveCount(25);
+    await expect(rows(page)).toHaveCount(10);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     // Every column, including Save, must be reachable without sideways table scrolling.
     const star = rows(page).nth(1).getByRole('button', { name: /^Compare TST/ });
