@@ -56,11 +56,14 @@ See [import policy](PRICES_IMPORT.md) for the separate team snapshot.
 
 ## Explore API
 
-GET /api/explore?query=&sector=&page=1&page_size=25 returns one public page of
+GET /api/explore?query=&sector=&sort=ticker&page=1&page_size=25 returns one public page of
 supported stocks (those with a stored price series), ordered by symbol. A query
 matches ticker, stored name or reviewed company name, case-insensitively, and an
 exact ticker ranks first. `sector` is optional and must be one of the 11 GICS
 sector names (for example `Information Technology`); it combines with `query`.
+`sort=change_desc` and `sort=change_asc` sort all matches by daily close change
+before pagination. Missing changes sort last; equal changes use ticker order.
+Exact ticker promotion applies to the default `ticker` order.
 `query` is at most 40 characters; `page` is 1–1000; `page_size` is 1–50 (default 25).
 Invalid values (including an unknown sector) return 422, and storage failure
 returns 503 DATA_UNAVAILABLE. A filter that matches nothing returns no items; it
@@ -169,7 +172,8 @@ for an inconsistent response.
 
 GET/PUT/DELETE /api/me/preferences and GET /api/me/discovery are private account
 routes; their contract is in [the account guide](ACCOUNTS.md#watchlist-api).
-Discovery reuses the Explore item shape and adds a `match_reason` per item.
+Discovery reuses Explore pagination and sort options and adds a `match_reason`
+per item.
 
 ## Storage selection and readiness
 

@@ -1,9 +1,7 @@
 # Architecture
 
-For proposed discovery/comparison/preferences views and their approval gates,
-read [the frontend product handoff](FRONTEND_PRODUCT_HANDOFF.md). Explore
-(increment 1), Compare (2) and reviewed metadata plus the TradingView panel (3)
-are implemented on stacked branches; see CURRENT_HANDOFF.md for their delivery state.
+For the combined release, human approval and next increments, read the
+[release handoff](NEXT_RELEASE_AND_ML_HANDOFF.md).
 
 ## Incremental daily refresh
 
@@ -23,29 +21,29 @@ its schedule is gated pending manual Actions acceptance (see DAILY_REFRESH.md).
 
 | URL fragment | View | Behavior |
 | --- | --- | --- |
-| #/explore?q=app&sector=Energy&page=2 | Explore stocks | Public paginated list of supported stocks (25 per page) with search, GICS sector filter, reviewed name/sector, latest stored close/date, daily change, save star and compare toggle |
+| #/explore?sector=Energy&sort=change_desc&page=2 | Explore stocks | Public paginated list of supported stocks (25 per page) with search, GICS sector filter, ticker or daily-change sorting, latest stored close/date, save star and compare toggle |
 | #/analysis?symbol=AAPL | Stock analysis | Company/sector line, separate TradingView latest-quote panel (hidden during replay), price and volume, SMA20/RSI14, inspection, historical replay, CSV, watchlist chips and Add to comparison |
 | #/compare?symbols=AAPL,MSFT&range=1y | Compare stocks | 2–4 stocks indexed to 100 on common dates, keyboard/pointer readout, summary table and disclosures (shared cutoff, short overlap, splits, price-only change) |
 | #/dashboard (#/watchlist) | Dashboard | Private watchlist with stored closes, session dates and daily change, filtering, open/remove, compare toggle, optional preferences invitation and account states |
-| #/preferences | Research preferences | Optional private form (purpose, sectors, horizon, default chart window; fluctuation disabled), save/reset/skip; guests see a sign-in prompt |
+| #/preferences | Research preferences | Optional private form with purpose, sectors, horizon and default chart window, save/reset and guest sign-in prompt |
 | #/explore?mine=1 | Explore: Use my preferences | Private list of stocks in the account's saved sectors with a match reason per row; sector filter disabled; no URL carries the sectors or any user ID |
 | #/predictions?symbol=AAPL | Predictions | Selected stock, typed research-signal status from the API (currently "no approved model"), unavailable history and return to Analysis |
 | #/performance | Model performance | Unavailable evaluation |
 | #/methodology | Data & methodology | Source, coverage, adjustment, indicator and project information |
-| #/settings | Settings | Browser-local SMA 20 and RSI 14 defaults, account details, recovery, and sign-out |
+| #/settings | Settings | Browser-local SMA 20 and RSI 14 defaults, account details, research preferences link, recovery and sign-out |
 
 The root and StockSight logo open Dashboard. The sidebar lists Dashboard,
 Explore, Analysis, Compare and Methodology, with Settings at the bottom.
 Dashboard links to Explore. The Compare link carries the current selection.
 Stocks are picked with the + button on Explore and Watchlist rows, or with Add
 to comparison on Analysis. The tray (up to 4) is kept in this tab's
-sessionStorage; it holds public tickers only, never private data. Predictions and Model performance are no longer in the
-sidebar; they stay reachable from Analysis ("Predictions for X"), the Dashboard
-page and each other. Legacy #analysis, #watchlist and #project resolve to their
+sessionStorage; it holds public tickers only. The selected stock's Predictions
+view opens from "Research signal for X" in Analysis. Model performance opens
+from Predictions and Methodology. Legacy #analysis, #watchlist and #project resolve to their
 corresponding views. Unknown pages provide recovery to Analysis. Browser
 back/forward and refresh work via hash navigation. Page changes update the title,
-active item and main-content focus. On Explore, the search text and page number
-live in the URL: a search becomes a history step after a 300 ms typing pause, and
+active item and main-content focus. Explore keeps search, sector, sort and page
+in the URL. A search becomes a history step after a 300 ms typing pause, and
 changing it does not move focus away from the search field. The skip link focuses
 the current page. Navigation retains the selected stock, and a successful Auth0
 callback returns to Dashboard (#/dashboard).

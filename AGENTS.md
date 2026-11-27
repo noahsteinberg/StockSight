@@ -17,7 +17,7 @@ checkout.
 ## Product implementation requires human review first
 
 For the next product/frontend work, read
-[Vlad's product plan](docs/FRONTEND_PRODUCT_HANDOFF.md) before changing application
+[the release and next increments](docs/NEXT_RELEASE_AND_ML_HANDOFF.md) before changing application
 code, contracts, schema, dependencies or UX. Vlad (@Hab1yer) coordinates it.
 Present concrete proposed changes and a small wireframe, ask the supervising
 user concise multiple-choice questions about unresolved UX decisions, and wait
@@ -54,9 +54,10 @@ requires instruction.
 - SMA20/Wilder RSI14 backend API and frontend toggles/plots are implemented and
   locally verified. See INDICATORS.md for null
   warm-up values, fixed calculation history and versioned numerical conventions.
-- Product ML inference, stored forecasts/outcomes, evaluation and the new Explore/
-  Compare/preferences features remain unfinished. Do not add fake
-  scores, prices, forecasts or claims that the full MVP is complete.
+- Dashboard, Explore, Compare and optional private research preferences are
+  implemented on the combined release branch. Product ML inference, stored
+  forecasts and outcomes, and evaluation remain unfinished. Keep the
+  typed unavailable state until an output is approved.
 
 Read the [application view contracts](docs/ARCHITECTURE.md) before wiring ML.
 Preserve team ownership in ROADMAP.md and follow the current task scope.

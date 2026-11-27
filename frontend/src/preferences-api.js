@@ -68,7 +68,8 @@ export async function resetPreferences(authorizedFetch, signal) {
   await checked(await authorizedFetch('/api/me/preferences', { method: 'DELETE', signal }));
 }
 
-export async function fetchDiscoveryPage({ query, page, pageSize }, authorizedFetch, signal) {
+export async function fetchDiscoveryPage({ query, page, pageSize, sort }, authorizedFetch, signal) {
   const params = new URLSearchParams({ query, page: String(page), page_size: String(pageSize) });
+  if (sort !== 'ticker') params.set('sort', sort);
   return parseDiscoveryPage(await checked(await authorizedFetch(`/api/me/discovery?${params}`, { signal })));
 }

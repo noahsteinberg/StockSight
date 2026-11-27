@@ -2,6 +2,15 @@
 // Validation keeps a malformed response from rendering as if it were real data.
 
 export const explorePageSize = 25;
+export const exploreSortOptions = [
+  ['ticker', 'Ticker A–Z'],
+  ['change_desc', 'Daily change: high to low'],
+  ['change_asc', 'Daily change: low to high'],
+];
+
+export function normalizeExploreSort(sort) {
+  return exploreSortOptions.some(([key]) => key === sort) ? sort : 'ticker';
+}
 
 // The fixed GICS sector names used by the reviewed metadata (see GET /api/sectors).
 export const sectorNames = ['Communication Services', 'Consumer Discretionary', 'Consumer Staples', 'Energy',
@@ -47,9 +56,10 @@ export function exploreErrorMessage(status) {
   return 'Could not load stocks. Check that the API is running.';
 }
 
-export async function fetchExplorePage({ query, page, sector }, signal) {
+export async function fetchExplorePage({ query, page, sector, sort }, signal) {
   const params = new URLSearchParams({ query, page: String(page), page_size: String(explorePageSize) });
   if (sector) params.set('sector', sector);
+  if (sort !== 'ticker') params.set('sort', sort);
   const response = await fetch(`/api/explore?${params}`, { signal });
   if (!response.ok) throw new Error(exploreErrorMessage(response.status));
   return parseExplorePage(await response.json());

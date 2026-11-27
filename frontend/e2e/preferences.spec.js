@@ -37,15 +37,13 @@ test('save, explained matches, default range, reload persistence and reset', asy
   await expect(invite).toBeVisible();
   await invite.getByRole('button', { name: 'Not now' }).click();
   await expect(invite).toHaveCount(0);
-  await page.getByRole('link', { name: 'Preferences', exact: true }).click();
+  await page.getByRole('link', { name: 'Settings', exact: true }).click();
+  await page.getByRole('link', { name: 'Edit research preferences' }).click();
   await expect(page.getByRole('heading', { name: 'Research preferences' })).toBeVisible();
   await page.getByLabel('Compare choices').check();
   await page.getByLabel('Information Technology').check();
   await page.getByLabel('Months').check();
   await page.getByRole('radio', { name: '1Y', exact: true }).check();
-  const fluctuation = page.getByRole('group', { name: 'Which historical fluctuation level would you like to explore?' });
-  await expect(fluctuation).toHaveAttribute('disabled', '');
-  await expect(fluctuation).toContainText('Unavailable until a reviewed measure of past price variability exists.');
   const saved = page.waitForResponse(response => response.url().endsWith('/api/me/preferences') && response.request().method() === 'PUT');
   await page.getByRole('button', { name: 'Save preferences' }).click();
   expect((await saved).status()).toBe(200);
@@ -67,6 +65,7 @@ test('save, explained matches, default range, reload persistence and reset', asy
   await page.reload();
   await expect(page.getByLabel('Information Technology')).toBeChecked();
   await expect(page.getByLabel('Compare choices')).toBeChecked();
+  await expect(page.getByLabel('Months')).toBeChecked();
   await page.getByRole('button', { name: 'Reset preferences' }).click();
   await expect(page.getByRole('status').filter({ hasText: 'Preferences reset.' })).toBeVisible();
   await expect(page.getByLabel('Information Technology')).not.toBeChecked();

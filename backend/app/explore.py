@@ -6,9 +6,10 @@ sectors come from the reviewed static metadata in app.stock_metadata.
 """
 
 from datetime import date
+from typing import Literal
 
 from pydantic import BaseModel
-from sqlalchemy import case, func, select
+from sqlalchemy import Float, case, cast, func, select
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
 
@@ -26,6 +27,7 @@ from app.stock_metadata import (
 
 PAGE_SIZE_DEFAULT = 25
 PAGE_SIZE_MAX = 50
+ExploreSort = Literal["ticker", "change_desc", "change_asc"]
 FIXTURE_STOCK = ("AAPL", "Apple Inc.", "NASDAQ")
 
 
@@ -109,6 +111,7 @@ def explore_database(
     sector: str | None = None,
     *,
     sectors: list[str] | None = None,
+    sort: ExploreSort = "ticker",
 ) -> ExplorePage:
     # `sectors` (private discovery) widens the filter to any of several sectors.
     chosen = sectors if sectors is not None else ([sector] if sector else [])
@@ -137,6 +140,10 @@ def explore_database(
         if query
         else (StockRecord.symbol,)
     )
+    if sort != "ticker":
+        change = cast(latest_close, Float) / func.nullif(cast(previous_close, Float), 0)
+        ranked = change.desc() if sort == "change_desc" else change.asc()
+        ordering = (ranked.nulls_last(), StockRecord.symbol)
 
     with Session(engine) as session:
         total_supported = session.scalar(

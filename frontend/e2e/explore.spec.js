@@ -111,6 +111,24 @@ test('search is debounced, keeps focus and typed text, and syncs with the URL', 
   await expect(page.getByText('10 matches for “tst05”')).toBeVisible();
 });
 
+test('changing sort retains the sector, returns to page one and follows the next page', async ({ page }) => {
+  const requests = await mockExplore(page);
+  await page.goto('/#/explore?sector=Industrials&page=2');
+  const pages = page.getByRole('navigation', { name: 'Stock list pages' });
+  await expect(pages).toContainText('Page 2 of 2');
+  await page.getByLabel('Sort by').selectOption('change_desc');
+  await expect(pages).toContainText('Page 1 of 2');
+  await expect.poll(() => requests.at(-1).get('sort')).toBe('change_desc');
+  expect(requests.at(-1).get('sector')).toBe('Industrials');
+  expect(requests.at(-1).get('page')).toBe('1');
+  await pages.getByRole('button', { name: 'Next' }).click();
+  await expect.poll(() => requests.at(-1).get('page')).toBe('2');
+  expect(requests.at(-1).get('sort')).toBe('change_desc');
+  await page.reload();
+  await expect(page.getByLabel('Sort by')).toHaveValue('change_desc');
+  await expect(pages).toContainText('Page 2 of 2');
+});
+
 test('empty, failed and malformed responses show distinct recoverable states', async ({ page }) => {
   await mockExplore(page);
   await page.goto('/#/explore?q=zzz');

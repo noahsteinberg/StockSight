@@ -23,7 +23,7 @@ export default function CompareTray({ selection }) {
     </li>)}</ul>
     <div className="compare-tray-actions">
       {ready ? <a className="button-link primary-link" href={compareHash(symbols)}>Compare {symbols.length} stocks</a>
-        : <span className="muted">Pick at least one more stock</span>}
+        : <span className="muted">Add one more stock to compare</span>}
       <button type="button" onClick={selection.clear}>Clear</button>
     </div>
   </section>;

@@ -17,7 +17,13 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app.api.accounts import CurrentUser, account_engine, current_user
 from app.db import PriceSeries, UserPreference
-from app.explore import PAGE_SIZE_DEFAULT, PAGE_SIZE_MAX, ExploreItem, explore_database
+from app.explore import (
+    PAGE_SIZE_DEFAULT,
+    PAGE_SIZE_MAX,
+    ExploreItem,
+    ExploreSort,
+    explore_database,
+)
 from app.stock_metadata import SECTORS, Sector
 
 router = APIRouter(tags=["preferences"])
@@ -163,8 +169,9 @@ def discovery(
     query: Annotated[str, Query(max_length=40)] = "",
     page: Annotated[int, Query(ge=1, le=1000)] = 1,
     page_size: Annotated[int, Query(ge=1, le=PAGE_SIZE_MAX)] = PAGE_SIZE_DEFAULT,
+    sort: ExploreSort = "ticker",
 ) -> DiscoveryPage:
-    """Supported stocks in the account's chosen sectors, A–Z, with the reason.
+    """Supported stocks in the account's chosen sectors, with the match reason.
 
     There is no score or ranking: a stock either matches an explicit rule or not.
     """
@@ -176,7 +183,7 @@ def discovery(
             supported = connection.scalar(select(func.count()).select_from(PriceSeries))
         listing = (
             explore_database(
-                engine, query, page, page_size, sectors=preferences.sectors
+                engine, query, page, page_size, sectors=preferences.sectors, sort=sort
             )
             if preferences.sectors
             else None

@@ -62,6 +62,10 @@ function AccountSettings() {
       </div>
       {passwordAccount && <PasswordRecovery key={user.sub} resetPassword={account.resetPassword} disabled={account.pending} />}
       <div className="settings-row settings-action">
+        <h3>Research preferences</h3>
+        <a className="button-link" href="#/preferences">Edit research preferences</a>
+      </div>
+      <div className="settings-row settings-action">
         <h3>Session</h3>
         <button type="button" onClick={account.logout} disabled={account.pending}>Sign out</button>
       </div>

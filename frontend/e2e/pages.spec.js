@@ -50,21 +50,20 @@ test('navigation supports refresh, browser history, active state and page focus'
   await expect(page.getByRole('heading', { level: 1, name: 'Dashboard', exact: true })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Dashboard', exact: true })).toHaveAttribute('aria-current', 'page');
   await expect(page.locator('main')).toBeFocused();
-  await page.getByRole('link', { name: /^Predictions/ }).click();
-  await expect(page.getByRole('heading', { name: 'Predictions', exact: true })).toBeVisible();
+  await expect(page.getByRole('link', { name: /^Predictions/ })).toHaveCount(0);
   await page.reload();
-  await expect(page).toHaveTitle('Predictions | StockSight');
+  await expect(page).toHaveTitle('Dashboard | StockSight');
   await page.goBack();
-  await expect(page.getByRole('heading', { level: 1, name: 'Dashboard', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Explore stocks', exact: true })).toBeVisible();
   await page.goForward();
-  await expect(page.getByRole('heading', { name: 'Predictions', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Dashboard', exact: true })).toBeVisible();
 });
 
 test('predictions preserve stock context and never call an absent ML service', async ({ page }) => {
   const calls = [];
   page.on('request', request => { if (/\/api\/(predictions|evaluation|performance)/.test(request.url())) calls.push(request.url()); });
   await page.goto('/#/analysis?symbol=AAPL');
-  await page.getByRole('link', { name: 'Predictions for AAPL' }).click();
+  await page.getByRole('link', { name: 'Research signal for AAPL' }).click();
   await expect(page.getByRole('heading', { name: 'AAPL', exact: true })).toBeVisible();
   // The typed signal API answers "unavailable"; no disabled generate button remains.
   await expect(page.getByRole('region', { name: 'Research signal · AAPL' })).toContainText('No approved model signal is available.');

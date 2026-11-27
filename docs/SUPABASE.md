@@ -76,7 +76,8 @@ is not a rerunnable script for an existing database. Later changes still belong
 in Alembic migrations.
 
 An older saved bootstrap may stop at 0005. After using it on an empty project,
-run `alembic upgrade head` and verify 0006 before starting the current API.
+run `alembic upgrade head` and verify `0007_user_preferences` before starting the
+combined release API.
 
 Migration 0005 enables PostgreSQL RLS and revokes table privileges from PUBLIC and
 Supabase's `anon`/`authenticated` roles when present. No browser policies are

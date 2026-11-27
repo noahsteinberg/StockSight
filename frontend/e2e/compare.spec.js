@@ -53,7 +53,7 @@ test('Explore selections fill the tray, persist in the tab and open a comparison
   await expect(tray).toHaveCount(0);
   await page.getByRole('button', { name: 'Compare TST000' }).click();
   await expect(tray).toContainText('Compare (1 of 4)');
-  await expect(tray).toContainText('Pick at least one more stock');
+  await expect(tray).toContainText('Add one more stock to compare');
   for (const symbol of ['TST001', 'TST002', 'TST003']) await page.getByRole('button', { name: `Compare ${symbol}` }).click();
   await expect(tray).toContainText('Compare (4 of 4)');
   await expect(page.getByRole('button', { name: 'Compare TST000' })).toHaveAttribute('aria-pressed', 'true');
@@ -203,8 +203,8 @@ test('the real fixture API names the stock it cannot compare', async ({ page }) 
 
 test('Analysis and Watchlist pages can add the current stock to the comparison', async ({ page }) => {
   await page.goto('/#/analysis?symbol=AAPL');
-  await page.getByRole('button', { name: 'Add to comparison' }).click();
-  await expect(page.getByRole('button', { name: 'In comparison' })).toHaveAttribute('aria-pressed', 'true');
+  await page.getByRole('button', { name: 'Add AAPL to comparison' }).click();
+  await expect(page.getByRole('button', { name: 'Remove AAPL from comparison' })).toHaveAttribute('aria-pressed', 'true');
   await expect(page.getByRole('link', { name: /Compare \d stocks/ })).toHaveCount(0);
   await page.getByRole('link', { name: 'Dashboard', exact: true }).click();
   await expect(page.getByRole('region', { name: 'Stocks selected for comparison' })).toContainText('AAPL');

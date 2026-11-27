@@ -121,10 +121,6 @@ input { min-width: 0; }
 .dashboard-table th, .dashboard-table td { font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; }
 .dashboard-table a { display: grid; gap: 3px; text-decoration: none; }
 .dashboard-table a span { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; white-space: normal; }
-.dashboard-links { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 24px; }
-.dashboard-links a { display: grid; grid-template-columns: 1fr auto; gap: 5px 16px; padding: 20px; border: 1px solid var(--line); border-radius: 8px; background: white; text-decoration: none; font-size: 15px; }
-.dashboard-links .muted { grid-row: 2; font-size: 12px; }
-.dashboard-links a > span:last-child { grid-row: 1; grid-column: 2; }
 .prediction-request { display: flex; align-items: center; justify-content: space-between; gap: 32px; padding: 28px; }
 .prediction-request h2 { margin-bottom: 12px; font-size: 28px; }
 .prediction-request a { font-size: 13px; }
@@ -198,7 +194,7 @@ input { min-width: 0; }
   .app-page { padding-block: 24px; }
   .page-heading { gap: 12px; flex-wrap: wrap; }
   .page-heading h1, .app-page > h1 { font-size: 25px; }
-  .dashboard-links, .methodology-grid { grid-template-columns: 1fr; gap: 16px; }
+  .methodology-grid { grid-template-columns: 1fr; gap: 16px; }
   .prediction-request { align-items: flex-start; flex-direction: column; padding: 22px; gap: 22px; }
   .watchlist-filter { align-items: flex-start; flex-direction: column; gap: 8px; }
   .watchlist-filter input { width: 100%; }

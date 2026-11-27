@@ -1,5 +1,9 @@
 # StockSight product and frontend implementation handoff
 
+For the combined Dashboard/Explore release and future assignments, start with
+[the release handoff](NEXT_RELEASE_AND_ML_HANDOFF.md). The sections below record
+the original issue #19 plan and approval rules.
+
 Owner/coordinator: **Vladislav (Vlad), @Hab1yer**. Requested by Noah after the
 daily-data rollout. This is a proposed implementation plan, **not implemented
 features and not permission for an AI to start coding**. Review checkpoint:

@@ -2,17 +2,27 @@
 
 ## Dashboard and Explore integration
 
-The integration branch combines PRs #20–#24 with the Settings release (#25).
-Dashboard is the root and logo destination and contains the private watchlist,
-latest stored closes, dates, daily changes and a link to Explore. Explore
-remains its own public browsing tab. Compare and Analysis are separate views.
-Settings retains browser-local indicator defaults and account controls.
-Research preferences can set a default chart range independently.
+[PR #26](https://github.com/noahsteinberg/StockSight/pull/26) combines PRs #20–#24
+with the Settings release (#25). Dashboard is the home and watchlist. Explore
+has 494 supported stocks, all 11 sectors, search, paging and catalog-wide
+daily-change sorting. Analysis has a stock-specific comparison action and a
+research-signal link. Compare supports two to four stocks. The separate
+TradingView quote panel from Parth's #16 is included in the branch.
 
-The earlier Explore-as-home decision below describes the original PR stack.
-For the combined release, review migration 0007 and apply it before deployment
-as documented in VERCEL.md. Verify production readiness and signed-in flows
-after deployment. The integration branch is for review before merging.
+Settings keeps browser-local indicator defaults and links signed-in users to
+optional private research preferences. Sectors drive Explore matches and the
+default chart window drives Analysis and Compare. Purpose and horizon are saved
+for future work. The signal API serves the typed unavailable state because
+there is no approved model.
+
+Use the [release and next-increment handoff](NEXT_RELEASE_AND_ML_HANDOFF.md) for
+Noah's manual review, migration 0007, production acceptance, assignable product
+follow-up and ML gates. The 494-stock localhost review copy has completed
+sessions through November 25, 2026. Production stays on its existing release
+until review, the additive migration and the PR merge.
+
+The dated sections below record earlier checkpoints. Use the status above for
+release decisions.
 
 ## Settings page
 
@@ -27,7 +37,7 @@ after deployment. The integration branch is for review before merging.
   26 isolated account browser cases. The local preview uses the AAPL fixture
   on port 5173. Recovery submission used intercepted Auth0 requests in tests.
 
-## Next product work: Vlad / @Hab1yer
+## Original product planning checkpoint
 
 Read [FRONTEND_PRODUCT_HANDOFF.md](FRONTEND_PRODUCT_HANDOFF.md) for the proposed
 stock-exploration product: Explore, preserved Analysis, 2–4-stock Compare, private

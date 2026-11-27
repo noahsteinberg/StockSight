@@ -26,7 +26,7 @@ function PreferencesForm({ initial, preferences }) {
   return <form className="preferences-form" onSubmit={event => { event.preventDefault(); preferences.save(draft); }}>
     <fieldset className="page-panel">
       <legend>What would you like to do?</legend>
-      <p className="preference-help">Changes the tips you see, nothing else.</p>
+      <p className="preference-help">Saved for future research features.</p>
       <div className="preference-options">
         {purposeOptions.map(([value, label]) => <Choice key={value} name="purpose" value={value} current={draft.purpose} label={label} onChange={set('purpose')} />)}
         <Choice name="purpose" value={null} current={draft.purpose} label="No preference" onChange={set('purpose')} />
@@ -58,10 +58,6 @@ function PreferencesForm({ initial, preferences }) {
         {rangeOptions.map(([value, label]) => <Choice key={value} name="default_range" value={value} current={draft.default_range} label={label} onChange={set('default_range')} />)}
         <Choice name="default_range" value={null} current={draft.default_range} label="Page default (3M / 1Y)" onChange={set('default_range')} />
       </div>
-    </fieldset>
-    <fieldset className="page-panel" disabled aria-describedby="fluctuation-note">
-      <legend>Which historical fluctuation level would you like to explore?</legend>
-      <p id="fluctuation-note" className="preference-help">Unavailable until a reviewed measure of past price variability exists. Nothing is assumed about your risk tolerance.</p>
     </fieldset>
     <div className="preference-actions">
       <button type="submit" className="primary-button" disabled={busy}>{busy ? 'Saving…' : 'Save preferences'}</button>

@@ -208,7 +208,7 @@ from the configured issuer.
 | GET /api/me/preferences | App session or bearer token | 200 `{ "saved": false, "schema_version": 1, "purpose": null, "sectors": [], "horizon": null, "default_range": null, "updated_at": null }` |
 | PUT /api/me/preferences | App session or bearer token; JSON `{ purpose, sectors, horizon, default_range }` | 200 saved preferences (`saved: true`, ISO-UTC `updated_at`) |
 | DELETE /api/me/preferences | App session or bearer token | 204; repeated reset also 204 |
-| GET /api/me/discovery?query=&page=&page_size= | App session or bearer token | 200 Explore-shaped page plus `preference_sectors` and a `match_reason` per item |
+| GET /api/me/discovery?query=&sort=&page=&page_size= | App session or bearer token | 200 Explore-shaped page plus `preference_sectors` and a `match_reason` per item |
 
 Research preferences (issue #19 phase 4) are optional and describe interests
 only. `purpose` is `learn`/`compare`/`track`, `horizon` is `weeks`/`months`/`years`,

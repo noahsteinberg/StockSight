@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { WatchlistStar } from './AnalysisWatchlist.jsx';
 import { useAccount } from './auth-context.js';
 import CompareTray, { CompareToggle } from './CompareTray.jsx';
-import { explorePageSize, sectorNames } from './explore-api.js';
+import { explorePageSize, exploreSortOptions, sectorNames } from './explore-api.js';
 import useExplore, { useSectors } from './use-explore.js';
 import { exploreHash } from './use-page-route.js';
 
@@ -53,7 +53,7 @@ function StockRow({ stock, latestSession, watchlist, selection, onOpen }) {
   </tr>;
 }
 
-export default function Explore({ query, page, sector, mine, preferences, watchlist, selection, onOpen }) {
+export default function Explore({ query, page, sector, sort, mine, preferences, watchlist, selection, onOpen }) {
   const account = useAccount();
   // "Use my preferences" reads the private discovery list for the signed-in account.
   const personal = mine && account.isAuthenticated ? { owner: preferences.owner, authorizedFetch: account.authorizedFetch } : null;
@@ -62,7 +62,7 @@ export default function Explore({ query, page, sector, mine, preferences, watchl
   // The URL owns the applied search; the draft keeps exactly what is being typed.
   const [draft, setDraft] = useState({ source: query, value: query });
   const input = draft.source === query ? draft.value : query;
-  const explore = useExplore(query, page, mine ? null : sector, personal);
+  const explore = useExplore(query, page, mine ? null : sector, sort, personal);
   const sectors = useSectors();
   const sectorCounts = new Map(sectors.data?.sectors.map(item => [item.name, item.count]));
   const data = explore.data;
@@ -75,18 +75,18 @@ export default function Explore({ query, page, sector, mine, preferences, watchl
     // without recording one entry per keystroke.
     const timer = setTimeout(() => {
       setDraft(current => ({ ...current, source: next }));
-      window.location.hash = exploreHash({ query: next, sector, mine });
+      window.location.hash = exploreHash({ query: next, sector, sort, mine });
     }, 300);
     return () => clearTimeout(timer);
-  }, [draft, query, sector, mine]);
+  }, [draft, query, sector, sort, mine]);
 
   function applySearch(value) {
     const next = value.trim();
     setDraft({ source: next, value });
-    if (next !== query || page !== 1) window.location.hash = exploreHash({ query: next, sector, mine });
+    if (next !== query || page !== 1) window.location.hash = exploreHash({ query: next, sector, sort, mine });
   }
   function chooseSector(next) {
-    window.location.hash = exploreHash({ query, sector: next || null });
+    window.location.hash = exploreHash({ query, sector: next || null, sort });
   }
   function clearFilters() {
     setDraft({ source: '', value: '' });
@@ -98,7 +98,7 @@ export default function Explore({ query, page, sector, mine, preferences, watchl
     searchInput.current?.focus();
   }
   function goToPage(next) {
-    window.location.hash = exploreHash({ query, page: next, sector, mine });
+    window.location.hash = exploreHash({ query, page: next, sector, sort, mine });
     listTop.current?.scrollIntoView({ block: 'start' });
   }
 
@@ -116,9 +116,17 @@ export default function Explore({ query, page, sector, mine, preferences, watchl
           {sectorNames.map(name => <option key={name} value={name}>{name}{sectorCounts.has(name) ? ` (${sectorCounts.get(name)})` : ''}</option>)}
         </select>
       </label>
+      <label className="explore-sector-filter">
+        <span>Sort by</span>
+        <select value={sort} onChange={event => {
+          window.location.hash = exploreHash({ query, sector, mine, sort: event.target.value });
+        }}>
+          {exploreSortOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+        </select>
+      </label>
       {account.isAuthenticated && <button type="button" className="explore-mine" aria-pressed={mine}
-        onClick={() => { window.location.hash = exploreHash({ query, mine: !mine }); }}>Use my preferences</button>}
-      {(query || sector || mine) && <button type="button" className="explore-reset" onClick={clearFilters}>Reset filters</button>}
+        onClick={() => { window.location.hash = exploreHash({ query, sort, mine: !mine }); }}>Use my preferences</button>}
+      {(query || sector || mine || sort !== 'ticker') && <button type="button" className="explore-reset" onClick={clearFilters}>Reset filters</button>}
     </form>
     {mine && !account.isAuthenticated && <div className="page-panel unavailable-state">
       <p>Sign in to list stocks that match your saved preferences. Everything else on Explore works without an account.</p>
@@ -170,9 +178,9 @@ export default function Explore({ query, page, sector, mine, preferences, watchl
         </table>
       </div>}
       {data && totalPages > 1 && data.items.length > 0 && <nav className="explore-pages" aria-label="Stock list pages">
-        <button type="button" disabled={page <= 1 || explore.loading} onClick={() => goToPage(page - 1)}>Previous</button>
+        <button type="button" disabled={page <= 1 || explore.loading} onClick={() => goToPage(page - 1)}><span aria-hidden="true">‹ </span>Previous</button>
         <span>Page {page} of {totalPages}</span>
-        <button type="button" disabled={page >= totalPages || explore.loading} onClick={() => goToPage(page + 1)}>Next</button>
+        <button type="button" disabled={page >= totalPages || explore.loading} onClick={() => goToPage(page + 1)}>Next<span aria-hidden="true"> ›</span></button>
       </nav>}
     </div>
     </>}

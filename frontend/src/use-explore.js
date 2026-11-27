@@ -7,11 +7,11 @@ import { fetchDiscoveryPage } from './preferences-api.js';
 // rows. While the next page loads, the last settled rows stay visible and are marked busy.
 // `personal` ({ owner, authorizedFetch }) switches to the private discovery list; the
 // owner is part of the key, so another account's late response is never shown.
-export default function useExplore(query, page, sector, personal = null) {
+export default function useExplore(query, page, sector, sort, personal = null) {
   const [retry, setRetry] = useState(0);
   const owner = personal?.owner ?? null;
   const authorizedFetch = personal?.authorizedFetch ?? null;
-  const key = [query, page, sector, owner, retry].join('\n');
+  const key = [query, page, sector, sort, owner, retry].join('\n');
   const [result, setResult] = useState({ key: null, owner: null, data: null });
 
   useEffect(() => {
@@ -19,8 +19,8 @@ export default function useExplore(query, page, sector, personal = null) {
     const timeout = setTimeout(() => controller.abort(), 10000);
     let active = true;
     const request = authorizedFetch
-      ? fetchDiscoveryPage({ query, page, pageSize: explorePageSize }, authorizedFetch, controller.signal)
-      : fetchExplorePage({ query, page, sector }, controller.signal);
+      ? fetchDiscoveryPage({ query, page, pageSize: explorePageSize, sort }, authorizedFetch, controller.signal)
+      : fetchExplorePage({ query, page, sector, sort }, controller.signal);
     request
       .then(data => { if (active) setResult({ key, owner, data }); })
       .catch(error => {
@@ -28,7 +28,7 @@ export default function useExplore(query, page, sector, personal = null) {
       })
       .finally(() => clearTimeout(timeout));
     return () => { active = false; clearTimeout(timeout); controller.abort(); };
-  }, [query, page, sector, owner, authorizedFetch, key]);
+  }, [query, page, sector, sort, owner, authorizedFetch, key]);
 
   return {
     // Older rows stay visible while the next page loads, but only for the same list

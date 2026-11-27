@@ -3,10 +3,10 @@ import HistoricalChart from './HistoricalChart.jsx';
 import StockSearchInput from './StockSearchInput.jsx';
 import AnalysisWatchlist, { WatchlistStar } from './AnalysisWatchlist.jsx';
 import useIndicators from './use-indicators.js';
-import { compareHash } from './use-compare-selection.js';
 import MarketQuote from './MarketQuote.jsx';
 import useStockProfile from './use-stock-profile.js';
 import { SignalBadge } from './SignalPanel.jsx';
+import { compareHash } from './use-compare-selection.js';
 
 const ranges = [['1mo', '1M'], ['3mo', '3M'], ['1y', '1Y'], ['all', 'Max']];
 
@@ -160,9 +160,8 @@ export default function Analysis({ symbol, onSelectSymbol, watchlist, selection,
           <button type="button" onClick={() => { reload(); setRetry(value => value + 1); indicators.retry(); watchlist.retry(); }}>Refresh data</button>
           {selection && <button type="button" aria-pressed={comparing} disabled={!comparing && selection.full}
             title={!comparing && selection.full ? 'Comparison holds up to 4 stocks' : undefined}
-            onClick={() => selection.toggle(symbol)}>{comparing ? 'In comparison' : 'Add to comparison'}</button>}
-          {selection?.symbols.length >= 2 && <a href={compareHash(selection.symbols)}>Compare {selection.symbols.length} stocks <span aria-hidden="true">↗</span></a>}
-          <a href={`#/predictions?symbol=${encodeURIComponent(symbol)}`}>Predictions for {symbol} <span aria-hidden="true">↗</span></a>
+            onClick={() => selection.toggle(symbol)}>{comparing ? `Remove ${symbol} from comparison` : `Add ${symbol} to comparison`}</button>}
+          {selection?.full && !comparing && <span className="muted">Four stocks selected. Remove one in <a href={compareHash(selection.symbols)}>Compare</a>.</span>}
         </div>
       </HistoricalChart>}
       </div>

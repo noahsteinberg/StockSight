@@ -11,6 +11,7 @@ from app.explore import (
     PAGE_SIZE_DEFAULT,
     PAGE_SIZE_MAX,
     ExplorePage,
+    ExploreSort,
     SectorList,
     explore_database,
     explore_fixture,
@@ -76,13 +77,14 @@ def explore(
     page: Annotated[int, Query(ge=1, le=1000)] = 1,
     page_size: Annotated[int, Query(ge=1, le=PAGE_SIZE_MAX)] = PAGE_SIZE_DEFAULT,
     sector: Sector | None = None,
+    sort: ExploreSort = "ticker",
 ) -> ExplorePage:
     query = query.strip().upper()
     if request.app.state.engine is None:
         return explore_fixture(query, page, page_size, sector)
     try:
         return explore_database(
-            request.app.state.engine, query, page, page_size, sector
+            request.app.state.engine, query, page, page_size, sector, sort=sort
         )
     except SQLAlchemyError:
         raise unavailable() from None

@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react';
-import { sectorNames } from './explore-api.js';
+import { normalizeExploreSort, sectorNames } from './explore-api.js';
 
 function subscribe(listener) {
   window.addEventListener('hashchange', listener);
@@ -26,6 +26,7 @@ export default function usePageRoute() {
       query: (params.get('q') || '').trim().slice(0, 40),
       page: Number.isInteger(requestedPage) && requestedPage >= 1 && requestedPage <= 1000 ? requestedPage : 1,
       sector: sectorNames.includes(params.get('sector')) ? params.get('sector') : null,
+      sort: normalizeExploreSort(params.get('sort')),
       // mine=1 lists stocks matching the signed-in account's saved sectors.
       mine: params.get('mine') === '1',
     },
@@ -40,11 +41,12 @@ export default function usePageRoute() {
   };
 }
 
-export function exploreHash({ query = '', page = 1, sector = null, mine = false }) {
+export function exploreHash({ query = '', page = 1, sector = null, sort = 'ticker', mine = false }) {
   const params = new URLSearchParams();
   if (query) params.set('q', query);
   if (mine) params.set('mine', '1');
   else if (sector) params.set('sector', sector);
+  if (sort !== 'ticker') params.set('sort', sort);
   if (page > 1) params.set('page', String(page));
   const search = params.toString();
   return `#/explore${search ? `?${search}` : ''}`;

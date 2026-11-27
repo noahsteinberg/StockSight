@@ -140,6 +140,26 @@ def test_explore_pages_are_bounded_and_deterministic(explore_client):
     assert beyond["total_matching"] == 4
 
 
+@pytest.mark.parametrize(
+    "sort, reverse", [("change_desc", True), ("change_asc", False)]
+)
+def test_explore_sorts_all_matches_before_paging(explore_client, sort, reverse):
+    default = explore_client.get("/api/explore").json()["items"]
+    available = (item for item in default if item["daily_change_pct"] is not None)
+    ordered = sorted(
+        available, key=lambda item: item["daily_change_pct"], reverse=reverse
+    )
+    expected = [item["symbol"] for item in ordered] + ["MSFT"]
+    actual = []
+    for page in (1, 2):
+        response = explore_client.get(
+            "/api/explore", params={"sort": sort, "page": page, "page_size": 2}
+        )
+        assert response.status_code == 200
+        actual.extend(item["symbol"] for item in response.json()["items"])
+    assert actual == expected
+
+
 def test_explore_query_matches_symbol_or_name_and_ranks_exact_symbol_first(
     explore_client,
 ):
