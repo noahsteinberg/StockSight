@@ -32,20 +32,19 @@ function PatternChart({ data, selected }) {
   </div>;
 }
 
-export default function PatternExplorer({ symbol, history, replaying, onReloadHistory }) {
-  const [horizon, setHorizon] = useState(21);
-  const [opened, setOpened] = useState(false);
+export default function PatternExplorer({ symbol, history, horizon, onChangeHorizon, onReloadHistory }) {
   const [attempt, setAttempt] = useState(0);
   const [result, setResult] = useState(null);
-  const [selected, setSelected] = useState(null);
+  const [selection, setSelection] = useState(null);
   const key = `${symbol}:${horizon}:${attempt}`;
-  const loading = opened && result?.key !== key;
+  const selected = selection?.key === key ? selection.index : null;
+  function setSelected(index) { setSelection(index === null ? null : { key, index }); }
+  const loading = result?.key !== key;
   const data = result?.key === key ? result.data : null;
   const error = result?.key === key ? result.error : null;
   const mismatch = data && history && (data.snapshot_id !== history.snapshot_id || data.as_of !== history.as_of);
 
   useEffect(() => {
-    if (!opened) return;
     const controller = new AbortController();
     let active = true;
     const timer = setTimeout(() => controller.abort(), 10000);
@@ -54,11 +53,11 @@ export default function PatternExplorer({ symbol, history, replaying, onReloadHi
       .catch(error => { if (active) setResult({ key, error: error.name === 'AbortError' ? 'Historical patterns timed out. Try again.' : error.message }); })
       .finally(() => clearTimeout(timer));
     return () => { active = false; clearTimeout(timer); controller.abort(); };
-  }, [opened, symbol, horizon, attempt, key]);
+  }, [symbol, horizon, attempt, key]);
 
   function retry() { setSelected(null); setAttempt(value => value + 1); }
   const ready = data?.status === 'available' && !mismatch && history;
-  return <section className="pattern-explorer" aria-labelledby="pattern-title" hidden={replaying}>
+  return <section className="pattern-explorer" aria-labelledby="pattern-title">
     <div className="pattern-header">
       <div><span className="pattern-eyebrow">A CLOSER LOOK AT HISTORY</span><h2 id="pattern-title">Historical Pattern Explorer</h2>
         <p>When {symbol} looked similar before, what happened next?</p></div>
@@ -66,17 +65,14 @@ export default function PatternExplorer({ symbol, history, replaying, onReloadHi
     </div>
     <div className="pattern-controls">
       <fieldset><legend>Look ahead in past examples</legend>{[5, 21].map(value => <button key={value} type="button"
-        aria-pressed={horizon === value} onClick={() => { setHorizon(value); setSelected(null); }}>{value} sessions</button>)}</fieldset>
-      {!opened ? <button type="button" className="pattern-primary" disabled={!history} onClick={() => setOpened(true)}>Find similar periods <span aria-hidden="true">↗</span></button> :
-        <button type="button" disabled={Boolean(loading)} onClick={retry}>Refresh matches</button>}
+        aria-pressed={horizon === value} onClick={() => { if (horizon !== value) onChangeHorizon(value); }}>{value} sessions</button>)}</fieldset>
+      <button type="button" disabled={Boolean(loading)} onClick={retry}>Refresh matches</button>
     </div>
-    {!opened && <p className="pattern-intro">Explore earlier price setups using recent movement, daily variability and the 50-session average. Inspect the actual examples behind every summary.</p>}
     <div aria-live="polite" aria-busy={loading}>
       {loading && <p className="pattern-message" role="status">Finding historical comparisons for {symbol}…</p>}
       {error && <div className="pattern-message" role="alert"><p>{error}</p><button type="button" onClick={retry}>Retry patterns</button></div>}
-      {mismatch && <div className="pattern-message" role="alert"><p>The stored history changed. Refresh the chart and matches to use the same data.</p>
-        <button type="button" onClick={() => { onReloadHistory(); retry(); }}>Refresh chart and matches</button></div>}
-      {data && !history && <p className="pattern-message" role="status">Waiting for the chart’s stored-data snapshot…</p>}
+      {mismatch && <div className="pattern-message" role="alert"><p>The stored history changed. Refresh the history and matches to use the same data.</p>
+        <button type="button" onClick={onReloadHistory}>Refresh history and matches</button></div>}
       {data?.status === 'unavailable' && !mismatch && history && <p className="pattern-message">{data.reason === 'invalid_history' ?
         'This history needs a data check before comparisons can be shown.' :
         'There are not enough usable, non-overlapping examples for this setup. Try 5 sessions or another stock.'}</p>}

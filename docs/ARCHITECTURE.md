@@ -25,7 +25,7 @@ update runs. See [daily refresh](DAILY_REFRESH.md).
 | #/dashboard (#/watchlist) | Dashboard | Private watchlist with stored closes, session dates and daily change, filtering, open/remove, compare toggle, optional preferences invitation and account states |
 | #/preferences | Research preferences | Optional private form with purpose, sectors, horizon and default chart window, save/reset and guest sign-in prompt |
 | #/explore?mine=1 | Explore: Use my preferences | Private list of stocks in the account's saved sectors with a match reason per row; sector filter disabled; no URL carries the sectors or any user ID |
-| #/predictions?symbol=AAPL | Predictions | Selected stock, typed research-signal status from the API (currently "no approved model"), unavailable history and return to Analysis |
+| #/predictions?symbol=AAPL&horizon=5 | Predictions | Stock picker, full historical-pattern graph/examples for 5 or 21 stored sessions, and separate expandable ML availability/history |
 | #/performance | Model performance | Unavailable evaluation |
 | #/methodology | Data & methodology | Source, coverage, adjustment, indicator and project information |
 | #/settings | Settings | Browser-local SMA 20 and RSI 14 defaults, account details, research preferences link, recovery and sign-out |
@@ -48,11 +48,14 @@ callback returns to Dashboard (#/dashboard).
 
 ## Implementation
 
-- PatternExplorer.jsx adds an opt-in historical-comparison panel below Analysis's
-  chart. pattern-api.js validates its dated paths and summaries; app/patterns.py
+- Analysis links its 5/21-session choices to Predictions, preserving the stock
+  and horizon in the URL. Predictions.jsx hosts PatternExplorer.jsx, loads an
+  independent recent-price snapshot, and provides a supported-stock picker.
+  The Predictions sidebar entry preserves stock context. ML status remains
+  separate in an expandable section. pattern-api.js validates paths and summaries; app/patterns.py
   retrieves at most 2,500 bars plus a retention sentinel in one SELECT and
   computes descriptive setup matches. Snapshot mismatch hides results; replay
-  hides the panel. No model, provider request, persistence or schema change is
+  hides Analysis's links. No model, provider request, persistence or schema change is
   involved. See [Historical Pattern Explorer](PATTERNS.md).
 
 - App.jsx owns the selected stock, account-scoped watchlist and navigation.

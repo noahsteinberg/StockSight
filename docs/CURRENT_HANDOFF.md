@@ -2,6 +2,19 @@
 
 ## Historical Pattern Explorer — GitHub review, November 27
 
+Parth subsequently approved a specific page flow: the 5- and 21-session choices
+below Analysis must be real, bright links to Predictions, carrying the ticker
+and window. Predictions hosts the full automatically loaded graph, summaries
+and examples, with a supported-stock picker and a visible navigation entry.
+This supersedes the proposed two-page plan: Compare is not changed by this
+follow-up. The existing [PR #28](https://github.com/noahsteinberg/StockSight/pull/28)
+is being updated; merge/deployment remain unauthorized.
+
+Shareable route: `/#/predictions?symbol=AAPL&horizon=5` (or 21). A missing/invalid
+window uses 21. Back/forward and reload preserve it. Pattern results verify an
+independent recent-price snapshot before display. ML status remains separate
+in an expandable section. Analysis links hide during historical replay.
+
 Parth reviewed the working local preview and authorized a feature-branch push
 and PR for Noah on November 27. **Merge and deployment remain unauthorized.**
 Keep the feature off main until Noah reviews it and a release is approved.
@@ -9,7 +22,7 @@ Vercel's existing configuration enables deployments only for main; feature
 branches are disabled. No deployment configuration was changed.
 
 Branch `feature/historical-pattern-explorer`, based on main `8237d79`, adds an
-opt-in Analysis panel using existing stored prices. It finds similar historical
+Analysis entry and a Predictions explorer using existing stored prices. It finds similar historical
 setups, offers 5/21-session example outcomes, median/quartiles, counts, a path
 plot and inspectable dates. It does not serve an ML prediction. The existing
 model-signal unavailable state remains intact. No migration, provider ingestion
@@ -31,8 +44,12 @@ is `frontend/scripts/check-pattern-coverage.mjs`; reports stay outside Git.
 Verification: backend 207 passed/3 skipped; 17 new pattern tests passed;
 frontend three contract tests, lint and build passed. Manual browser checks
 covered both horizons, keyboard highlight, replay hiding and 320px overflow.
-The new automated Playwright cases are pending: this Mac lacks the required
-Chromium headless executable. Hosted release review is still Noah's decision.
+The original PR head passed GitHub CI: 280 backend tests, 75 public browser
+cases and 30 account browser cases. The page-flow follow-up adds route/snapshot
+unit coverage and updates browser cases for hyperlinks, horizon persistence,
+stock selection, retry, mismatch recovery and keyboard/mobile use. Local
+Playwright remains unavailable on this Mac; review the latest PR CI for the
+follow-up's automated browser result. Hosted release review is Noah's decision.
 
 The production status below describes the deployed main branch, not this local
 feature preview.

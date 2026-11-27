@@ -8,19 +8,20 @@ import Preferences from './Preferences.jsx';
 import Settings from './Settings.jsx';
 import { readChartDefaults, saveChartDefaults } from './chart-defaults.js';
 import SidebarHighlight from './SidebarHighlight.jsx';
-import { Dashboard, Methodology, ModelPerformance, Predictions } from './Pages.jsx';
+import { Dashboard, Methodology, ModelPerformance } from './Pages.jsx';
+import Predictions from './Predictions.jsx';
 import { useAccount } from './auth-context.js';
 import useCompareSelection, { compareHash } from './use-compare-selection.js';
 import useWatchlist from './use-watchlist.js';
 import usePreferences from './use-preferences.js';
 import usePageRoute from './use-page-route.js';
 
-// Predictions and Model performance stay reachable by link but leave the sidebar
-// until an approved model exists (issue #19, Phase 0 decision).
+// Predictions now hosts historical comparisons; model status remains separate.
 const pages = [
   ['dashboard', 'Dashboard', 'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z'],
   ['explore', 'Explore', 'M17 10.5a6.5 6.5 0 1 1-13 0a6.5 6.5 0 0 1 13 0M20 20l-4.9-4.9'],
   ['analysis', 'Analysis', 'M4 4v16h16M7 15l4-5 4 2 5-6'],
+  ['predictions', 'Predictions', 'M4 19h16M5 15l4-4 4 2 6-8M15 5h4v4'],
   ['compare', 'Compare', 'M4 20V10M10 20V4M16 20v-7M22 20H2'],
   ['methodology', 'Methodology', 'M6 4h9l3 3v13H6zM14 4v4h4M9 12h6m-6 4h6'],
 ];
@@ -74,7 +75,7 @@ export default function App() {
   }, [route.page, account.isAuthenticated, refreshWatchlist, watchlistError]);
   // Explore keeps its search/page in the URL; typing must not move focus away
   // from the search field, so only entering Explore counts as a navigation.
-  const focusKey = ['explore', 'compare'].includes(route.page) ? route.page : route.hash;
+  const focusKey = ['explore', 'compare', 'predictions'].includes(route.page) ? route.page : route.hash;
   useEffect(() => {
     document.title = `${pageTitles[route.page] || 'Page not found'} | StockSight`;
     main.current?.focus({ preventScroll: true });
@@ -155,7 +156,7 @@ export default function App() {
       <div className="sidebar-items">
         {pages.map(([page, label, icon], index) => {
           const href = page === 'compare' ? compareHash(compareSelection.symbols)
-            : `#/${page}${page === 'analysis' ? `?symbol=${encodeURIComponent(symbol)}` : ''}`;
+            : `#/${page}${['analysis', 'predictions'].includes(page) ? `?symbol=${encodeURIComponent(symbol)}` : ''}`;
           return <a key={page} href={href} aria-label={label} aria-current={activeIndex === index ? 'page' : undefined} onClick={() => followSidebarLink(href)}>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon} /></svg>
             <span aria-hidden="true">{label}</span>
@@ -179,7 +180,7 @@ export default function App() {
       {route.page === 'compare' && <Compare symbols={route.compare.symbols} range={route.compare.range ?? preferences.defaultRange ?? '1y'} linkRange={route.compare.range} selection={compareSelection} onOpen={selectStock} />}
       {route.page === 'dashboard' && <Dashboard watchlist={watchlist} selection={compareSelection} onOpen={selectStock}
         invite={account.isAuthenticated && preferences.data?.saved === false && !inviteDismissed} onDismissInvite={() => setInviteDismissed(true)} />}
-      {route.page === 'predictions' && <Predictions symbol={symbol} />}
+      {route.page === 'predictions' && <Predictions symbol={symbol} horizon={route.patternHorizon} />}
       {route.page === 'performance' && <ModelPerformance />}
       {route.page === 'methodology' && <Methodology />}
       {route.page === 'preferences' && <Preferences preferences={preferences} />}

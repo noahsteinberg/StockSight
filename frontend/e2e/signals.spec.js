@@ -20,14 +20,16 @@ test('Analysis and Predictions read the real typed unavailable signal', async ({
   expect(requests.at(-1).searchParams.get('horizon_sessions')).toBe('1');
   await compact.getByRole('link', { name: 'Research signal for AAPL' }).click();
   await expect(page).toHaveURL(/#\/predictions\?symbol=AAPL$/);
+  await page.locator('.model-details summary').click();
   const full = page.getByRole('region', { name: 'Research signal · AAPL' });
   await expect(full).toContainText('Nothing is generated when you open this page');
-  await expect(page.getByText(/\d+%/)).toHaveCount(0);
+  await expect(full.getByText(/\d+%/)).toHaveCount(0);
 });
 
 test('an unsupported stock shows no signal panel at all', async ({ page }) => {
   await page.goto('/#/predictions?symbol=MSFT');
   await expect(page.getByRole('heading', { name: 'MSFT', exact: true })).toBeVisible();
+  await page.locator('.model-details summary').click();
   await expect(page.getByText('Prediction history is unavailable', { exact: true })).toBeVisible();
   await expect(page.getByRole('region', { name: /Research signal/ })).toHaveCount(0);
 });
@@ -36,6 +38,7 @@ test('inconsistent responses are rejected and failures retry', async ({ page }) 
   // "Unavailable" with a probability is contradictory, so nothing may render.
   await page.route(signals, route => route.fulfill({ json: { ...unavailable('AAPL'), probability: 0.5 } }));
   await page.goto('/#/predictions?symbol=AAPL');
+  await page.locator('.model-details summary').click();
   const panel = page.getByRole('region', { name: 'Research signal · AAPL' });
   await expect(panel).toContainText('The signal response was incomplete or inconsistent, so nothing is shown.');
   await expect(panel).not.toContainText('50%');
@@ -46,6 +49,7 @@ test('inconsistent responses are rejected and failures retry', async ({ page }) 
     ? route.fulfill({ status: 503, json: { detail: { code: 'DATA_UNAVAILABLE' } } })
     : route.continue());
   await page.reload();
+  await page.locator('.model-details summary').click();
   await expect(panel).toContainText('Signal status is temporarily unavailable. Try again.');
   failing = false;
   await panel.getByRole('button', { name: 'Retry signal check' }).click();
@@ -60,6 +64,7 @@ test('a TEST-FIXTURE available signal renders only its validated, dated fields',
     universe_percentile: 79, model_version: 'test-fixture-only', data_snapshot: 'test-fixture-only', provenance: 'test_fixture',
   } }));
   await page.goto('/#/predictions?symbol=AAPL');
+  await page.locator('.model-details summary').click();
   const panel = page.getByRole('region', { name: 'Research signal · AAPL' });
   await expect(panel).toContainText('relative return over 1 session · for 2026-11-17');
   await expect(panel).toContainText('79th percentile among supported stocks (a ranking, not a probability)');

@@ -58,3 +58,19 @@ export async function fetchPatterns(symbol, horizon, signal) {
     response.status === 503 ? 'Stored history is temporarily unavailable. Try again.' : 'Could not load historical patterns. Try again.');
   return parsePatterns(await response.json(), symbol, horizon);
 }
+
+export function parsePatternSnapshot(body, symbol) {
+  if (!body || body.symbol !== symbol || typeof body.snapshot_id !== 'string' || !body.snapshot_id ||
+      typeof body.name !== 'string' || !date(body.as_of) || !Array.isArray(body.bars) ||
+      !body.bars.length || body.bars.at(-1)?.date !== body.as_of) {
+    throw new Error('The stored-history response was incomplete. Try again.');
+  }
+  return { symbol, name: body.name, snapshot_id: body.snapshot_id, as_of: body.as_of };
+}
+
+export async function fetchPatternSnapshot(symbol, signal) {
+  const response = await fetch(`/api/stocks/${encodeURIComponent(symbol)}/prices?range=1mo`, { signal });
+  if (!response.ok) throw new Error(response.status === 404 ? 'Symbol unavailable. Choose a supported stock.' :
+    'Stored history is temporarily unavailable. Try again.');
+  return parsePatternSnapshot(await response.json(), symbol);
+}

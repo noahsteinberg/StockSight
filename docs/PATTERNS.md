@@ -8,6 +8,10 @@ branches disabled by the existing configuration.
 
 ## What it does, in simple language
 
+- On Analysis, the bright **5 sessions** and **21 sessions** links open Predictions
+  for that stock and window. Predictions loads the full explorer automatically
+  and lets the user change stocks. This page flow was explicitly approved by
+  Parth after his first local review; Compare is outside this follow-up.
 - Looks for earlier periods when the selected stock's price movement looked
   similar to its latest stored setup.
 - Shows what actually happened over the next 5 or 21 stored sessions in those
@@ -66,13 +70,20 @@ the calculation is tied to one committed snapshot. No schema changes or writes
 are required. Fixture mode explicitly uses the existing Plotly AAPL history;
 database failure never falls back to it.
 
+The full explorer lives on Predictions. Its shareable route is
+`/#/predictions?symbol=AAPL&horizon=5` (or 21). Missing or invalid horizons use
+21. Both Analysis links and the navigation preserve the selected ticker; the
+on-page horizon buttons update the URL for reload/back/forward. Results load
+automatically after a lightweight recent-price snapshot check. The existing
+unavailable ML status is separate, in an expandable section.
+
 The frontend validates identity, horizon, dates, counts, non-overlapping paths,
 endpoints and all summary quartiles before display. The response must match
-the chart's snapshot ID and `as_of`; otherwise results are hidden and a joint
+the independent price response's snapshot ID and `as_of`; otherwise results are hidden and a joint
 refresh is offered. Changing ticker unmounts the panel. Changing horizon cancels
 and keys requests so an older response cannot overwrite the new choice.
-Timeout is 10 seconds, with retry. Results hide while the chart replays history.
-Changing the visible chart range does not change the calculation history.
+Timeout is 10 seconds, with retry. Analysis entry links hide during historical
+replay. Changing the visible chart range does not change the calculation history.
 
 ## Local review evidence — November 27
 
@@ -96,7 +107,13 @@ Changing the visible chart range does not change the calculation history.
   Chromium headless executable is missing. It stopped on the first launch;
   these are not reported as passing automated browser tests.
 - Review URL while local servers run:
-  `http://127.0.0.1:5188/#/analysis?symbol=AAPL`.
+  `http://127.0.0.1:5188/#/predictions?symbol=AAPL&horizon=5`.
+
+The original PR head subsequently passed GitHub CI: 280 backend tests, 75 public
+browser cases and 30 account browser cases. The approved page-flow update has
+five local Node contract/navigation tests, lint and build passing; its browser
+coverage is checked through the updated PR CI. The numerical API has not changed,
+so the 494-stock acceptance above remains evidence for the same calculation.
 
 ## Repeat the checks
 
