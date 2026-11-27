@@ -12,13 +12,13 @@ function AvailableSignal({ data }) {
   </dl>;
 }
 
-export default function SignalPanel({ symbol, compact = false }) {
+export default function SignalPanel({ symbol }) {
   const signal = useSignal(symbol);
   if (signal.data === null) return null;
   const available = signal.data?.status === 'available';
-  return <section className={`page-panel signal-panel${compact ? ' compact' : ''}`} aria-labelledby={`signal-title-${compact ? 'c' : 'f'}`} aria-busy={Boolean(signal.loading)}>
+  return <section className="page-panel signal-panel" aria-labelledby="signal-panel-title" aria-busy={Boolean(signal.loading)}>
     <div className="panel-heading">
-      <h2 id={`signal-title-${compact ? 'c' : 'f'}`}>Research signal · {symbol}</h2>
+      <h2 id="signal-panel-title">Research signal · {symbol}</h2>
       {signal.data && <span className="historical-badge">{available ? 'Available' : 'Unavailable'}</span>}
     </div>
     {signal.loading && <p role="status">Checking the signal status for {symbol}…</p>}
@@ -28,10 +28,6 @@ export default function SignalPanel({ symbol, compact = false }) {
       <p className="signal-note">A signal appears here only after a model passes evaluation on held-out data and its outputs are stored with dates and versions. Nothing is generated when you open this page, and past prices or indicators are not forecasts.</p>
     </>}
     {available && <AvailableSignal data={signal.data} />}
-    <div className="page-actions">
-      {compact && <a href={`#/predictions?symbol=${encodeURIComponent(symbol)}`}>Signal details for {symbol} <span aria-hidden="true">↗</span></a>}
-      <a href="#/performance">Model performance <span aria-hidden="true">↗</span></a>
-    </div>
   </section>;
 }
 

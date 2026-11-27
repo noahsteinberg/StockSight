@@ -69,7 +69,7 @@ test('predictions preserve stock context and never call an absent ML service', a
   await expect(page.getByRole('region', { name: 'Research signal · AAPL' })).toContainText('No approved model signal is available.');
   await expect(page.getByRole('button', { name: 'Generate prediction' })).toHaveCount(0);
   await expect(page.getByText('Prediction history is unavailable', { exact: true })).toBeVisible();
-  await page.getByRole('link', { name: 'Model performance', exact: true }).first().click();
+  await page.getByRole('link', { name: 'Model performance', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'No evaluated model is available' })).toBeVisible();
   expect(calls).toEqual([]);
 });
@@ -78,6 +78,8 @@ test('methodology and legacy links resolve; unknown pages recover', async ({ pag
   await page.goto('/#project');
   await expect(page.getByRole('heading', { name: 'Data & methodology', exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Historical data' })).toBeVisible();
+  await page.getByRole('link', { name: 'Model performance', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'No evaluated model is available' })).toBeVisible();
   await page.goto('/#watchlist');
   await expect(page.getByRole('heading', { level: 1, name: 'Dashboard', exact: true })).toBeVisible();
   await page.goto('/#/does-not-exist');

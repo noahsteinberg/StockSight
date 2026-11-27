@@ -37,6 +37,9 @@ actions are for hosted acceptance. The automated account suite uses test users.
    browser-role revocations, and existing price and watchlist reads.
    This is the only new release migration. It adds a private preferences table;
    the stock catalog, daily bars and updater keep their existing schema.
+   A disposable PostgreSQL rehearsal preserved all 506 fixture bars,
+   verified the Alembic revision and RLS, and confirmed both browser roles
+   lack read and write privileges on the new table.
 3. Merge #26 into `main` after those checks. Vercel builds production from that
    merge. The release uses the existing app settings and Auth0 configuration.
 4. Check production `/api/ready`, Explore totals and categories, a two-stock
@@ -53,6 +56,8 @@ actions are for hosted acceptance. The automated account suite uses test users.
 6. If production has a regression, follow [Vercel rollback](VERCEL.md) and
    verify the previous deployment. Retain the additive table when rolling back
    the application.
+7. Reconcile the stacked PRs #20–#24 and the quote PR #16 against what shipped.
+   Link their delivered work to #26 and record any scope that still needs review.
 
 ## Assign the next work
 
