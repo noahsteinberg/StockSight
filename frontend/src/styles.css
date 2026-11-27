@@ -46,7 +46,6 @@ input { min-width: 0; }
 .account-controls .primary-button:hover:not(:disabled) { background: #e4edfa; color: var(--navy); }
 .account-name, .account-status { font-size: 13px; color: #d0d9e9; }
 .account-name { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.account-link { color: white; font-size: 13px; text-decoration-color: #9aa9c0; text-underline-offset: 3px; }
 .app-content .primary-button { background: var(--navy); color: white; border-color: var(--navy); }
 .app-content .primary-button:hover:not(:disabled) { background: #1b2d4e; }
 .preferences-intro { max-width: 760px; margin-bottom: 20px; color: var(--muted); font-size: 14px; line-height: 1.6; }
@@ -468,7 +467,6 @@ section { scroll-margin-top: 24px; }
   .account-controls { min-width: 0; gap: 6px; }
   .account-controls button { min-height: 40px; padding-inline: 8px; font-size: 12px; white-space: nowrap; }
   .account-name { display: none; }
-  .account-link { font-size: 12px; }
   .account-status { text-align: right; }
   .analysis { padding-block: 18px 24px; }
   .section-heading h1 { font-size: 24px; }

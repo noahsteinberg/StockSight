@@ -33,6 +33,7 @@ test('guests can browse; preferences and matching need an account', async ({ pag
 test('save, explained matches, default range, reload persistence and reset', async ({ page }) => {
   await page.goto('/#/dashboard');
   await signIn(page);
+  await expect(page.getByRole('banner').getByRole('link', { name: 'Preferences', exact: true })).toHaveCount(0);
   const invite = page.getByRole('complementary', { name: 'Optional: set research preferences' });
   await expect(invite).toBeVisible();
   await invite.getByRole('button', { name: 'Not now' }).click();

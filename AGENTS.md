@@ -18,7 +18,7 @@ checkout.
 
 For the next product/frontend work, read
 [the release and next increments](docs/NEXT_RELEASE_AND_ML_HANDOFF.md) before changing application
-code, contracts, schema, dependencies or UX. Vlad (@Hab1yer) coordinates it.
+code, contracts, schema, dependencies or UX. Vlad (@Londarh) coordinates it.
 Present concrete proposed changes and a small wireframe, ask the supervising
 user concise multiple-choice questions about unresolved UX decisions, and wait
 for explicit approval of the increment before coding. Record answers; do not

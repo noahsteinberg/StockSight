@@ -42,7 +42,9 @@ export default function Watchlist({ watchlist, selection, onOpen }) {
                           {stock.last_close == null || !stock.as_of ? 'Unavailable' : <>
                             <strong>{usd.format(stock.last_close)}</strong><br />
                             <time dateTime={stock.as_of}>{stock.as_of}</time>
-                            {stock.daily_change_pct != null && <><br /><span title="Change between the latest two stored closes">
+                            {stock.daily_change_pct != null && <><br /><span
+                              className={stock.daily_change_pct > 0 ? 'positive' : stock.daily_change_pct < 0 ? 'negative' : 'muted'}
+                              title="Change between the latest two stored closes">
                               {percent.format(stock.daily_change_pct / 100)}
                             </span></>}
                           </>}

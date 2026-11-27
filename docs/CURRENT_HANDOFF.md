@@ -13,11 +13,13 @@ daily-change sorting. Analysis has a stock-specific comparison action and a
 research-signal link. Compare supports two to four stocks. The separate
 TradingView quote panel from Parth's #16 is included in the branch.
 
-Settings keeps browser-local indicator defaults and links signed-in users to
-optional private research preferences. Sectors drive Explore matches and the
-default chart window drives Analysis and Compare. Purpose and horizon are saved
-for future work. The signal API serves the typed unavailable state because
-there is no approved model.
+Dashboard colors positive and negative daily changes using the same palette as
+Explore. Settings keeps browser-local indicator defaults and links signed-in
+users to optional private research preferences. Sectors drive Explore matches
+and the default chart window drives Analysis and Compare. Purpose and horizon
+are saved for future work. The masthead carries the account name and sign-out.
+The signal API serves the typed unavailable state because there is no approved
+model.
 
 The reviewed PR passed all GitHub checks. Alembic migration
 `0007_user_preferences` was applied before merge. Verification confirmed the
@@ -33,12 +35,14 @@ Scheduled daily refresh is active. The
 passed its updater and deployed API verification steps.
 
 PRs #20–#24 are included in the release history. The TradingView panel from
-#16 shipped through the reviewed #22 integration. The original #16 branch
-should not be merged as a second quote implementation.
+#16 shipped through the reviewed #22 integration. The original #16 branch and
+the superseded stacked PRs are closed.
 
-The remaining release acceptance is real Auth0 login, watchlist and preferences
-save/reload/reset, sign-out and isolation across two authorized test accounts.
-Automated account tests used test identities. See the
+Noah confirmed that saving works on production. The remaining release acceptance
+is the recorded two-account Auth0 walkthrough covering save/reload/reset, sign-out
+and account isolation. Automated account tests used test identities. The shared
+[team tracker #27](https://github.com/noahsteinberg/StockSight/issues/27) replaces
+issue #19. See the
 [release and next-increment handoff](NEXT_RELEASE_AND_ML_HANDOFF.md) for the
 account walkthrough, assignable product work and ML gates.
 

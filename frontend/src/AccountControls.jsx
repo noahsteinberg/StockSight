@@ -8,7 +8,6 @@ export default function AccountControls() {
     <div className="account-controls">
       {account.isAuthenticated ? <>
         <span className="account-name">{account.user?.name || account.user?.email || 'Your account'}</span>
-        <a className="account-link" href="#/preferences">Preferences</a>
         <button type="button" disabled={account.pending} onClick={account.logout}>Sign out</button>
       </> : <>
         <button type="button" disabled={account.pending} onClick={() => account.login()}>Sign in</button>

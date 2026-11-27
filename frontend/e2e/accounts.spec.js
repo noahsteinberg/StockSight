@@ -149,7 +149,8 @@ test('mobile watchlist chips stay in one scrollable row and open the chosen stoc
   const symbols = ['MSFT', 'AMD', 'AMZN', 'NVDA', 'ORCL', 'AAPL'];
   await page.route('**/api/watchlist', route => route.request().method() === 'GET' ? route.fulfill({
     json: { items: symbols.map((symbol, index) => ({
-      symbol, name: symbol, daily_change_pct: index === 1 ? null : index === 0 ? 1.25 : -0.12,
+      symbol, name: symbol, last_close: 120, as_of: '2026-11-25', added_at: '2026-11-25T21:00:00Z',
+      daily_change_pct: [1.25, null, -0.12, 0, 0.25, -0.5][index],
     })) },
   }) : route.continue());
   await page.goto('/#/analysis?symbol=MSFT');
@@ -165,6 +166,11 @@ test('mobile watchlist chips stay in one scrollable row and open the chosen stoc
   await row.getByRole('link', { name: /Open AAPL/ }).click();
   await expect(page.getByRole('heading', { name: 'AAPL Apple Inc.' })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
+  await page.goto('/#/dashboard');
+  const table = page.getByRole('table', { name: 'Your saved stocks' });
+  await expect(table.getByRole('row', { name: /MSFT/ }).locator('.positive')).toHaveText('+1.25%');
+  await expect(table.getByRole('row', { name: /AMZN/ }).locator('.negative')).toHaveText('-0.12%');
+  await expect(table.getByRole('row', { name: /NVDA/ }).locator('.muted')).toHaveText('0.00%');
 });
 
 test('official Auth0 SDK sends Google directly to authorization with PKCE', async ({ page }) => {

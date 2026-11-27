@@ -65,9 +65,10 @@ schema releases and verify the current Alembic revision before each rollout.
 
 ## Assign the next work
 
-Vlad (@Hab1yer) coordinates the frontend follow-up with Gavin on hosted account
-acceptance, Parth on price and metadata inputs, and Noah on ML research approval.
-Use [issue #19](https://github.com/noahsteinberg/StockSight/issues/19) to record
+Vlad (@Londarh) coordinates the frontend follow-up with Gavin (@Hab1yer) on
+hosted account acceptance, Parth on price and metadata inputs, and Noah on ML
+research approval.
+Use [issue #27](https://github.com/noahsteinberg/StockSight/issues/27) to record
 acceptance and link follow-up work. Give the next agent this file, the current
 handoff, and the relevant specialist guide.
 

@@ -4,13 +4,13 @@ For the combined Dashboard/Explore release and future assignments, start with
 [the release handoff](NEXT_RELEASE_AND_ML_HANDOFF.md). The sections below record
 the original issue #19 plan and approval rules.
 
-Owner/coordinator: **Vladislav (Vlad), @Hab1yer**. Requested by Noah after the
+Owner/coordinator: **Vladislav (Vlad), @Londarh**. Requested by Noah after the
 daily-data rollout. This is a proposed implementation plan, **not implemented
 features and not permission for an AI to start coding**. Review checkpoint:
 main `e9a4620`, with PR #16 still open and reporting merge conflicts.
 
-Master execution tracker: [issue #19](https://github.com/noahsteinberg/StockSight/issues/19),
-assigned to @Hab1yer. Keep approved decisions and per-increment progress there.
+The original implementation tracker was [issue #19](https://github.com/noahsteinberg/StockSight/issues/19).
+Record new decisions and progress in the [team tracker](https://github.com/noahsteinberg/StockSight/issues/27).
 
 ## 1. Mandatory instruction for Vlad and his AI agent
 
