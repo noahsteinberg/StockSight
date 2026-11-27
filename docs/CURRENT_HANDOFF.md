@@ -1,5 +1,29 @@
 # StockSight current handoff
 
+## Dashboard and Explore integration
+
+[PR #26](https://github.com/noahsteinberg/StockSight/pull/26) combines PRs #20–#24
+with the Settings release (#25). Dashboard is the home and watchlist. Explore
+has 494 supported stocks, all 11 sectors, search, 10 stocks per page and catalog-wide
+daily-change sorting. Analysis has a stock-specific comparison action and a
+research-signal link. Compare supports two to four stocks. The separate
+TradingView quote panel from Parth's #16 is included in the branch.
+
+Settings keeps browser-local indicator defaults and links signed-in users to
+optional private research preferences. Sectors drive Explore matches and the
+default chart window drives Analysis and Compare. Purpose and horizon are saved
+for future work. The signal API serves the typed unavailable state because
+there is no approved model.
+
+Use the [release and next-increment handoff](NEXT_RELEASE_AND_ML_HANDOFF.md) for
+Noah's manual review, migration 0007, production acceptance, assignable product
+follow-up and ML gates. The 494-stock localhost review copy has completed
+sessions through November 25, 2026. Production stays on its existing release
+until review, the additive migration and the PR merge.
+
+The dated sections below record earlier checkpoints. Use the status above for
+release decisions.
+
 ## Settings page
 
 - Gavin approved chart defaults and account controls, with Settings at the
@@ -13,7 +37,7 @@
   26 isolated account browser cases. The local preview uses the AAPL fixture
   on port 5173. Recovery submission used intercepted Auth0 requests in tests.
 
-## Next product work: Vlad / @Hab1yer
+## Original product planning checkpoint
 
 Read [FRONTEND_PRODUCT_HANDOFF.md](FRONTEND_PRODUCT_HANDOFF.md) for the proposed
 stock-exploration product: Explore, preserved Analysis, 2–4-stock Compare, private
@@ -49,6 +73,305 @@ in #19 and the new plan. Original issue bodies remain intact. PR #16 remains ope
 No deferred prediction persistence, saved-ranking research or model serving was
 claimed completed. The plan was published in commit 4e13e71; this checkpoint
 records the subsequent issue cleanup. No application code or hosted data changed.
+
+## Review fixes after Vlad's walkthrough — November 25
+
+- **Compare crosshair:** pointer positions were measured against the first
+  `<svg>` in the card. Once hovering began, that was a readout line sample,
+  so the date jumped instead of following the cursor. A chart-wide CSS rule
+  also stretched those samples into large bars. Fixed (phase 2 branch); the
+  readout now always shows one date in a fixed space, so the chart can't move
+  under the pointer.
+- **Ticker dropdowns (Analysis and Compare's Add box):** they now use the whole
+  supported catalog, from `GET /api/stocks?limit=` (optional; the default is
+  still 50, max 1000).
+  - On focus the dropdown lists every stock A–Z in a bounded scrolling box,
+    and narrows as you type.
+  - Compare leaves out stocks already in the comparison.
+  - This replaces the old 28-ticker hard-coded list, which included
+    unsupported ETFs.
+- **Layout (phase 5 branch):**
+  - Analysis shows a compact "Model signal" box in the chart header, beside
+    the price. Details and history stay on Predictions.
+  - Compare lists signal status in the chart card header.
+  - The TradingView quote panel moved below the chart.
+- **Verification:** backend 151 passed (phase 2); public browser 70/70 and
+  accounts 28/28 on the top branch. Checked in the browser with the full local
+  data: the crosshair tracks the cursor; the dropdowns list 494/492 stocks
+  inside 318–367 px boxes.
+
+## Signal connector (issue #19, Phase 5) — November 25
+
+On local branch `feature/signal-connector`, stacked on `feature/preferences`.
+No model, training, prediction table or fixture fallback was added.
+- GET /api/stocks/{symbol}/signals?horizon_sessions=1 (app/signals.py) follows
+  the FRONTEND_ML_INTEGRATION_SPEC.md §4 schema exactly:
+  - A supported stock gets 200 `unavailable`/`model_not_approved`, with every
+    signal field null.
+  - An unknown stock gets 404; any other horizon gets 422 (no fallback);
+    storage failure gets 503.
+  - The validator forbids values on unavailable responses and requires dates
+    and provenance on available ones. There's no training, no tables and no
+    fixture fallback.
+- Frontend: signal-api.js (strict adapter), use-signal.js and SignalPanel.jsx.
+  - Compact panel under the Analysis chart.
+  - Full panel on Predictions, replacing the disabled "Generate prediction"
+    button.
+  - Per-stock status list on Compare.
+- Verification:
+  - Backend: 188 passed, 3 skipped (SQLite), including 12 new signal tests.
+  - Public browser suite: 69/69, with new signals.spec.js (4 tests) and one
+    Compare test. One found bug is fixed: MarketQuote and SignalPanel shared
+    the key `symbol`, which left a stale quote panel behind.
+  - Sign-in (accounts) browser suite: 28/28 after Phase 5.
+- Contract documented in API.md ("Research signal status") and ARCHITECTURE.md.
+- Review ask: Noah, on the meaning and wording of "no approved model". Any real
+  signal still needs the separately approved model, artifact and persistence
+  work described in FRONTEND_ML_INTEGRATION_SPEC.md.
+
+## Preferences increment (issue #19, Phase 4) — November 25
+
+Decisions (the plan's recommendations, accepted by Vlad):
+- Browsing never needs an account, and preferences are skippable.
+- The form lives at #/preferences, reached from the account menu. A small
+  "Not now"-able invitation appears on the Watchlist; logins are never
+  redirected.
+- Questions:
+  - purpose
+  - sectors (multi-select from the reviewed GICS list)
+  - research horizon (stored only; it doesn't select any forecast)
+  - default chart window (1M/3M/1Y/Max, used by Analysis and Compare until a
+    range is picked there)
+  - fluctuation level, shown disabled with its reason until a reviewed
+    variability metric exists
+- "Recommendations" are explainable matches only. Explore's "Use my
+  preferences" lists stocks in the saved sectors, A–Z, each with "Matches your
+  selected sector: X". There's no score or ranking, and no sectors means no
+  matches (never everything).
+
+Implemented on local branch `feature/preferences`, stacked on
+`feature/metadata-quote`. Not pushed.
+
+- Migration 0007_user_preferences: one additive, backend-only table keyed to
+  user_identities.id. It has RLS enabled and revokes PUBLIC/anon/authenticated,
+  the same boundary as the other tables. Readiness includes the table, so
+  deploying this code before the migration fails closed, as with 0006. **The
+  hosted DDL still needs human review and a coordinated release; it was not
+  applied to Supabase.** Locally it was applied to the Docker dev database
+  (empty table; 2,947,701 bars untouched).
+- API: owner-only GET/PUT/DELETE /api/me/preferences and GET /api/me/discovery
+  (contract in ACCOUNTS.md).
+  - Validation is strict enums with 422 for extra/owner/income fields.
+  - Saves use a single upsert.
+  - Cookie writes keep the Origin/CSRF checks.
+  - Responses send no-store, which now covers all of /api/me/*.
+- Frontend:
+  - preferences-api.js validators and an owner-keyed use-preferences.js (no
+    browser storage).
+  - Preferences.jsx.
+  - Explore mine=1 mode: the URL holds only `mine=1`, never sectors or IDs;
+    rows from another account or from the public list are never shown in
+    its place.
+  - Default ranges for Analysis and Compare. Compare URLs carry a range only
+    when one was picked.
+
+Verification on November 25:
+- Backend: 176 passed, 3 skipped on SQLite. With a disposable Docker
+  `stocksight_test` database: 243 passed, 2 skipped. That includes the
+  PostgreSQL upsert and the RLS test with user_preferences, where browser roles
+  can't select or delete. Ruff lint/format pass. The new tests cover:
+  - 401 for guests
+  - save/read/replace/reset
+  - two-account isolation
+  - 8 invalid payloads
+  - cookie CSRF/origin
+  - discovery reasons, query and no-broadening
+  - readiness failing closed
+- Frontend: lint and build pass.
+- Browser suites:
+  - Public 64/64.
+  - Accounts 28/28, including 4 new preferences cases: guest prompts; save →
+    explained matches → 1Y default on Analysis → reload persistence → reset;
+    a second account sees none of the first account's data; 320 px with no
+    overflow. A check confirmed no preference text in local/session storage.
+
+Review asks: Gavin (session/ownership and migration DDL), Noah/Parth (hosted
+migration timing). Next: Phase 5 honest signal connector.
+
+## Metadata and quote increment (issue #19, Phase 3) — November 24
+
+Vlad asked to finish all remaining phases, accepting the plan's recommended
+options. Decisions recorded for Phase 3:
+- Company name, sector and sub-industry come from one reviewed static file,
+  pinned to a public source revision. There's no schema migration and no
+  rewrite of `stocks` rows; see STOCK_METADATA.md.
+- Explore gets a GICS sector filter. Sort stays A–Z, because no other sort is
+  approved.
+- PR #16's quote panel lives on Analysis only. It is hidden (not removed)
+  during historical replay. There are no widgets on Explore or Compare.
+
+Implemented on local branch `feature/metadata-quote`, stacked on
+`feature/compare-page`. Not pushed. PR #16's three commits were cherry-picked
+with Parth's authorship kept. The only conflicts were import and Methodology
+text conflicts in Analysis.jsx and Pages.jsx, resolved by keeping both sides.
+
+- Data: Wikipedia "List of S&P 500 companies", revision 1384572480 (Nov 8,
+  2026, CC BY-SA 4.0). All 494 supported tickers matched, including BRK-B,
+  BF-B and CBOE. Every sector is one of the 11 GICS sectors (Industrials 80 …
+  Communication Services 21). backend/app/build_stock_metadata.py reproduces
+  the committed CSV byte for byte.
+- API changes:
+  - `sector` filter and `sector`/`sub_industry` fields on GET /api/explore.
+  - New GET /api/sectors (counts, unknown coverage, source).
+  - New GET /api/stocks/{symbol}/profile.
+  - Search, price history, Compare and watchlist names now use the reviewed
+    name instead of the ticker placeholder. Response shapes are unchanged
+    apart from the new fields.
+- UI changes:
+  - Explore: a Sector select (with counts) kept in the URL, a sector line on
+    each row, Reset filters, and a source note with the pinned link.
+  - Analysis: a company/sector line, and the TradingView panel hidden during
+    replay.
+  - Methodology: a "Company names and sectors" section.
+  - The chart heading no longer repeats a placeholder name.
+- PR #16 checklist: stale Nov 12/"refresh unfinished" statements were fixed in
+  TRADINGVIEW.md (and noted in Parth's handoff section). Its tests moved to
+  #/analysis, and replay-hiding coverage was added.
+
+Verification on November 24:
+- Backend: 162 passed, 3 skipped. That includes the new sector, sectors,
+  profile and company-name search tests and the metadata-file checks. Ruff
+  lint/format pass.
+- Frontend: lint and build pass.
+- Browser suites: public 64/64 (new: sector filter/URL/reset, empty sector
+  not broadened, replay hides the quote without reloading it, Analysis
+  context line) and accounts 24/24.
+- Local full data (Docker snapshot through 2026-11-12):
+  - /api/sectors reports 494 supported, 0 unknown.
+  - The Energy filter gives 21 rows; "berkshire" finds BRK-B.
+  - Filtered Explore takes about 60 ms.
+- Real vendor in the in-app browser: the BRK-B Analysis page loaded TradingView
+  NYSE:BRK.B. Starting replay hid the embed and showed the notice; exiting
+  replay showed the same iframe again. Explore at 320 px with a sector filter
+  has no horizontal overflow.
+
+Review asks: Parth (metadata source choice, widget integration), Gavin (API/UI
+contracts). Next: Phase 4 preferences.
+
+## Compare increment (issue #19, Phase 2) — November 24
+
+Vlad approved Phase 2 as recommended: 2–4 stocks, the same ranges as Analysis,
+a common-date chart indexed to 100, price change only (no volatility or
+drawdown until Parth reviews the numerics), honest split, short-history and
+cutoff states, a compare tray on Explore, and compare from the Watchlist.
+Implemented on local branch `feature/compare-page`, stacked on
+`feature/explore-page` (Phase 1 PR pending). Not pushed.
+
+- Public GET /api/compare (rules in API.md): shared cutoff, common dates only,
+  close/first × 100, and a check for each split inside the window. No schema
+  change, data writes, provider calls or ML.
+- Compare page (#/compare?symbols=&range=):
+  - Edit by chip, by "Add ticker", or by range.
+  - Native SVG chart with a dash pattern per line, a 100 baseline and a
+    keyboard/pointer readout.
+  - Summary table and disclosure notes.
+  - Separate states for under-2 symbols, links with more than 4, unknown
+    symbols (each removable), 503/retry, malformed data and no overlap.
+- Sidebar adds Compare. A + toggle on Explore and Watchlist rows and "Add to
+  comparison" on Analysis feed a tray (max 4, kept in this tab's
+  sessionStorage, public tickers only).
+- Data finding: the snapshot's closes are split-adjusted (NVDA is continuous
+  across its 2024-06-10 10:1 split), but dividends aren't included, so the
+  page labels results as price change, not total return.
+
+Verification on November 24:
+- Backend: 151 passed, 3 skipped, including 13 new compare tests (common
+  dates, cutoff, adjusted/unadjusted splits, range trimming, overlap, 422/404/503,
+  fixture mode). Ruff lint/format pass.
+- Frontend: lint and build pass.
+- Browser suites: public 56/56 (9 new compare cases, with synthetic TST
+  responses plus the real fixture 404) and accounts 24/24.
+- Local full-data check (Docker snapshot):
+  - AAPL/MSFT/NVDA 1y gives 252 common sessions (AAPL +29.77%, MSFT +2.32%,
+    NVDA −14.25%).
+  - NVDA/AAPL/TSLA/BRK-B Max gives 2000; all five recorded splits are
+    detected as adjusted.
+  - ABNB/MSFT Max gives 1,488 (ABNB's history starts 2020-12-10).
+  - Queries take 70–190 ms. MSFT's chart low (index ≈69) matches the stored
+    min close ($352.83 vs a $511.14 start).
+  - Phone layouts: at 320/390 px there is no overflow; the chart shows only
+    start/end dates and the table hides the start→end column.
+
+Next: review/merge Phase 1, then open a PR for this branch. Parth should
+review the compare numerics (API.md). Phase 3 (metadata and PR #16) needs its
+own approval.
+
+## Explore increment (issue #19, Phase 1) — November 24
+
+Vlad approved the Phase 0 direction:
+- Explore, Compare and the existing watchlist ship first.
+- Navigation is Explore · Analysis · Compare · Watchlist.
+- "Recommendations" means explainable filter matches, never ML scores.
+- Explore becomes the landing page.
+- Predictions and Model performance leave the sidebar but keep their routes.
+- The compare tray moves to Phase 2, so it ships with the Compare page.
+
+The decision record is drafted for issue #19 (paste it from Vlad's local
+issue19-phase0-comment.md). Implemented on local branch `feature/explore-page`
+(not pushed, no PR yet):
+
+- Public GET /api/explore (see API.md). It is a paginated summary of supported
+  stocks with the newest stored close/date and the change between the two newest
+  stored closes. Placeholder names (name == symbol) and UNKNOWN exchanges are
+  returned as null. No schema change, data write, provider call or ML.
+- Explore page (#/explore?q=&page=) with debounced search kept in the URL, 25 rows
+  per page, Previous/Next, and separate loading, empty, past-the-end, 503/error
+  and malformed-response states. Each row has a save star (guests are sent to
+  sign-in) and an "earlier session" note when a stock's date trails the newest
+  session. On phones, all columns fit at 320/390 px.
+- Root / and the brand now open Explore. The sidebar is Explore, Analysis,
+  Watchlist (#/dashboard, renamed) and Methodology. Predictions links to Model
+  performance.
+- Audit finding: about 490 of 494 hosted catalog names are placeholders, so
+  most Explore rows show "Name not yet available". Verified names and sectors
+  remain Phase 3 metadata work. PR #16 conflicts with main only in
+  frontend/src/Pages.jsx; it is untouched.
+
+Verification on November 24 (fixture mode, local; nothing hosted):
+- Backend: 138 passed, 3 skipped (PostgreSQL-only). This includes 11 new
+  explore tests on migrated SQLite: placeholders, paging, query, 422 and 503.
+  Ruff lint/format pass.
+- Frontend: lint and build pass. The public browser suite passed 47/47. In
+  the final full rerun, the existing analysis-chart test "null warm-up values…"
+  failed once and then passed 4/4 on repeat (timing flake, unrelated to Explore).
+- Account suite: 24/24, after one fix. Explore rows are named by their content
+  (e.g. "AAPL Apple Inc."), so they can't be confused with private watchlist
+  links ("Open AAPL analysis").
+- Explore browser cases use the real AAPL fixture plus clearly synthetic TST
+  responses for multi-page, search, error and stale-response checks.
+
+Full-data check, November 24:
+- Vlad's local Docker PostgreSQL was loaded with `app.complete_backend` from
+  the team snapshot (SHA256 matches PRICES_IMPORT.md). BACKEND VERIFIED: 494
+  symbols, 2,947,701 rows. Local history ends 2026-11-12; hosted is newer.
+- Live HTTP checks against app.main:app:
+  - All 20 pages return the 494 stocks exactly once.
+  - The first page took ~150 ms cold, later pages ~35 ms.
+  - Every name is null locally: the local snapshot has no verified names, not
+    even AAPL.
+  - MSFT's Explore close/date/revision equal its price-history response.
+- Browser checks: search and ticker ranking (e.g. "ms" puts MS first), the last
+  page, and opening a stock's real chart all work. At 375 px, neither the page
+  nor the table overflows.
+- Fixes from this pass:
+  - The summary now reads "N match(es) for “q”".
+  - An empty search explains that company names aren't stored yet and suggests
+    a ticker (searching "apple" finds nothing until Phase 3 metadata).
+- Noted for Phase 3: Analysis shows the placeholder twice ("MSFT MSFT").
+
+Not yet verified: hosted Auth0 saving from Explore, and Explore on the hosted
+deployment (it reaches production only after review/merge to main). Next: human review of the branch, then push/PR when Vlad asks; Phase 2
+(Compare + compare tray) needs its own approval.
 
 ## Daily refresh implementation — November 23
 
@@ -195,6 +518,40 @@ on a missing schema. Raw pilot evidence and downloads remain outside Git.
 Update this file when implementation, delivery state or acceptance changes.
 Use Git history for earlier checkpoints and the linked guides for setup and
 contracts.
+
+## November 23 market-price widget
+
+*Phase 3 note (November 24):* the statements below about a November 12 history
+end, unfinished refresh and the `feature/tradingview-prices` branch were true when
+written. They are superseded: the hosted refresh is complete (see Daily refresh
+above), the widget now shows the chart's actual `as_of`, and these commits were
+integrated on `feature/metadata-quote` (see the Phase 3 section). Parth's
+evidence below is preserved unchanged.
+
+- Parth approved a free TradingView widget after Alpaca's automated support reply
+  did not grant permission to publicly display/cache Basic/Paper market data.
+  Alpaca remains private testing only; no Alpaca data was written to Supabase.
+- Analysis now includes a separate latest-market-price panel with TradingView
+  attribution and a delay notice. The selected ticker controls its listing.
+  The static listing map covers all 494 imported tickers, including share classes;
+  a mapped listing does not guarantee the vendor permits that widget's display.
+- The historical database still ends November 12, 2026. The widget supplies no
+  raw API data for storage, indicators, watchlists, CSV or models. Incremental
+  refresh remains unfinished. See [integration notes](TRADINGVIEW.md).
+- This change is on `feature/tradingview-prices`, based on current main `afe8051`.
+  It is independent of migration PR #15, which was open/unmerged when work began.
+  No public deployment or merge has been performed by this task.
+- Verification: frontend lint/build and backend Ruff lint/format pass; **95 backend
+  tests passed, 2 PostgreSQL cases skipped** on this main-based branch. The four
+  new widget browser tests use a mocked provider. The local Playwright run was
+  blocked before tests could execute: its bundled Chromium is unavailable for
+  macOS 13, and the installed Chrome launch exited with SIGABRT. CI must run the
+  browser suite; do not count these launch failures as application assertions.
+- Separate real-browser checks loaded TradingView prices for AAPL and MSFT,
+  switched stocks, and confirmed a 320px page with no horizontal overflow. The
+  compact Single Ticker widget replaced Symbol Info after that larger widget
+  clipped its content on narrow screens. Historical AAPL/MSFT reads used the
+  existing hosted snapshot through November 12; no data was imported or changed.
 
 ## Frontend release
 

@@ -11,7 +11,9 @@ unchanged refresh runs leave them stable. Public HTTP requests never ingest
 provider data. See [daily refresh](DAILY_REFRESH.md).
 
 Continuation context: [CURRENT_HANDOFF.md](CURRENT_HANDOFF.md). Public stock
-contracts below are implemented; prediction/evaluation routes do not exist.
+contracts below are implemented. The research-signal route exists but always
+answers "unavailable" (no approved model); prediction-history and evaluation
+routes do not exist.
 
 The moving-average/RSI backend contract is in [INDICATORS.md](INDICATORS.md):
 `GET /api/stocks/{symbol}/indicators?range=3mo`. It returns dated SMA20 and Wilder
@@ -51,6 +53,127 @@ close, volume). The bundled AAPL fixture uses historical unadjusted Plotly OHLCV
 in USD. The [source license](../backend/app/fixtures/SOURCE_LICENSE) is tracked
 with the fixture.
 See [import policy](PRICES_IMPORT.md) for the separate team snapshot.
+
+## Explore API
+
+GET /api/explore?query=&sector=&sort=ticker&page=1&page_size=25 returns one public page of
+supported stocks (those with a stored price series), ordered by symbol. A query
+matches ticker, stored name or reviewed company name, case-insensitively, and an
+exact ticker ranks first. `sector` is optional and must be one of the 11 GICS
+sector names (for example `Information Technology`); it combines with `query`.
+`sort=change_desc` and `sort=change_asc` sort all matches by daily close change
+before pagination. Missing changes sort last; equal changes use ticker order.
+Exact ticker promotion applies to the default `ticker` order.
+`query` is at most 40 characters; `page` is 1–1000; `page_size` is 1–50 (default 25).
+Invalid values (including an unknown sector) return 422, and storage failure
+returns 503 DATA_UNAVAILABLE. A filter that matches nothing returns no items; it
+is never broadened.
+A page past the end returns an empty `items` array with the real totals.
+
+Response: `query` (normalized to uppercase), `sector` (echoed or null), `page`,
+`page_size`, `total_supported`, `total_matching`, `latest_session` (newest stored
+session across all series) and `items[]`. Each item has `symbol`, `name`,
+`exchange`, `sector`, `sub_industry`, `last_close`, `as_of`, `daily_change_pct`
+and `series_revision`.
+
+- `name`, `sector` and `sub_industry` come from the reviewed metadata file
+  ([STOCK_METADATA.md](STOCK_METADATA.md)). Without a reviewed row, `name` falls
+  back to the stored name unless it only repeats the ticker (the importer's
+  placeholder), and `sector`/`sub_industry` are null. `exchange` is null when it
+  is `UNKNOWN`. The UI shows "Name not yet available"/"Sector unknown" for nulls.
+- `daily_change_pct` is `(latest close / previous stored close − 1) × 100`, or
+  null with fewer than two stored sessions. It is price change only, not total
+  return, and not a forecast.
+- `series_revision` matches the `snapshot_id` that the stock's price history
+  reports.
+
+Each row reads only its two newest bars; no full histories, indicators or provider
+requests run. Explicit fixture mode returns the single AAPL fixture.
+`GET /api/stocks` (search, capped at 50) keeps its `{symbol, name}` shape; it now
+also matches reviewed company names and returns them instead of placeholders.
+Price/indicator histories and watchlist rows report the reviewed name the same way.
+
+## Sectors and stock profiles
+
+GET /api/sectors returns `total_supported`, `unknown` (supported stocks without a
+reviewed sector), `sectors[]` (all 11 GICS sectors with `name` and `count` over
+supported stocks) and `source` (`name`, `url` pinned to one revision,
+`revision_date`, `retrieved`, `taxonomy`, `license`). Storage failure returns 503.
+
+GET /api/stocks/{symbol}/profile returns `symbol`, `company_name`, `sector`,
+`sub_industry` (each nullable) and the same `source`. A symbol without stored
+history returns 404 UNSUPPORTED_SYMBOL. Explicit fixture mode serves AAPL only.
+No provider calls or schema changes are involved.
+
+## Compare API
+
+GET /api/compare?symbols=AAPL,MSFT&range=1y compares 2–4 supported stocks on a
+common basis. Range is 1mo, 3mo, 1y (default) or all, the same session counts as
+price history. Symbols are case-insensitive and de-duplicated. Fewer than 2 or
+more than 4 distinct symbols, or a malformed ticker, returns 422 INVALID_COMPARISON.
+Symbols without stored history return 404 UNSUPPORTED_SYMBOL, naming each one in
+`detail.symbols`. Storage failure returns 503. Explicit fixture mode stores only
+AAPL, so it always returns that 404.
+
+Numerical rules (pending Parth's review):
+- **Shared cutoff:** the window ends at the newest session every selected stock
+  has stored. `aligned_to_shared_cutoff` is true when their latest dates differ;
+  each stock's own `as_of` and `last_close` are still reported.
+- **Common dates only:** dates missing for any stock are excluded, never
+  forward-filled. The window is the last N common dates (21/63/252/2000).
+  `common_sessions` can be below `requested_sessions` when a history is shorter.
+  With fewer than 2 common dates, every stock has `metric_status`
+  `insufficient_overlap` and `dates` is empty.
+- **Indexing:** `indexed[i] = close[i] / close[first common date] × 100`.
+  `period_change_pct = last indexed − 100`. Closes exclude dividends, so this is
+  price change, not total return.
+- **Splits:** each `stock_splits` event inside the window is checked against the
+  stored closes. A move within 25% of the split factor on that day means the
+  stored prices are unadjusted there (`price_adjusted: false`). The stock's
+  `metric_status` is then `split_unadjusted` and its `period_change_pct` is null.
+  The team snapshot's recorded splits (e.g. NVDA 2021/2024, AAPL 2020) are
+  continuous, i.e. already adjusted.
+
+Response fields: `range`, `requested_sessions`, `common_sessions`, `start`, `end`,
+`aligned_to_shared_cutoff`, `dates[]` and `stocks[]`. Each stock has `symbol`,
+`name` (null for placeholders), `as_of`, `last_close`, `series_revision`,
+`start_close`, `end_close`, `period_change_pct`, `metric_status`,
+`split_events[]` (`date`, `ratio`, `price_adjusted`) and `indexed[]`, aligned
+with `dates`.
+
+## Research signal status
+
+GET /api/stocks/{symbol}/signals?horizon_sessions=1 (issue #19 phase 5) returns
+the schema in [FRONTEND_ML_INTEGRATION_SPEC.md §4](FRONTEND_ML_INTEGRATION_SPEC.md):
+`schema_version`, `ticker`, `status`, `unavailable_reason`, `message`,
+`horizon_sessions` and the signal fields `target_kind`, `as_of_session`,
+`target_session`, `published_at`, `direction`, `raw_score`, `probability`,
+`signal_strength`, `universe_percentile`, `risk_level`, `model_version`,
+`data_snapshot` and `provenance`.
+
+- No model is approved, so a supported stock always gets 200 with `status:
+  "unavailable"`, `unavailable_reason: "model_not_approved"`, the message
+  "No approved model signal is available." and every signal field null.
+  Nothing is computed, generated or stored when the route is called.
+- `horizon_sessions` must be 1 (the only horizon the research spec defines);
+  any other value returns 422 and is never mapped to another horizon.
+- A symbol without stored history returns 404 UNSUPPORTED_SYMBOL; storage
+  failure returns 503 DATA_UNAVAILABLE. Fixture mode serves AAPL only.
+- The response model rejects contradictions: an unavailable response can't carry
+  any value (zero is a value, not "unavailable"), and an available one needs
+  its target, dates, model/data versions and provenance. Available responses
+  exist only as a test fixture until a model, artifact and persistence layer
+  are separately approved.
+
+The frontend adapter (signal-api.js) applies the same checks and shows nothing
+for an inconsistent response.
+
+## Private preferences and discovery
+
+GET/PUT/DELETE /api/me/preferences and GET /api/me/discovery are private account
+routes; their contract is in [the account guide](ACCOUNTS.md#watchlist-api).
+Discovery reuses Explore pagination and sort options and adds a `match_reason`
+per item.
 
 ## Storage selection and readiness
 

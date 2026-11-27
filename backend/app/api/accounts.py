@@ -1,6 +1,6 @@
 """Private, bounded watchlists. Auth0 owns signup, login and password lifecycle."""
 
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from typing import Annotated
 from uuid import uuid4
 
@@ -13,6 +13,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app.auth import Principal, current_principal
 from app.db import DailyBar, PriceSeries, StockRecord, UserIdentity, WatchlistEntry
+from app.stock_metadata import company_name
 
 router = APIRouter(tags=["accounts"])
 WATCHLIST_LIMIT = 100
@@ -43,6 +44,8 @@ class SavedStock(BaseModel):
     symbol: str
     name: str
     added_at: datetime
+    last_close: float | None = None
+    as_of: date | None = None
     daily_change_pct: float | None = None
 
     @field_validator("added_at")
@@ -98,7 +101,7 @@ def current_user(
 
 
 def saved_query(user_id):
-    # These two index-backed lookups read only the newest stored closes per symbol.
+    # Index-backed lookups use the same session ordering for the close and date.
     recent_close = (
         select(DailyBar.close)
         .where(DailyBar.series_id == PriceSeries.id)
@@ -107,13 +110,28 @@ def saved_query(user_id):
         .correlate(PriceSeries)
     )
     latest = cast(recent_close.scalar_subquery(), Float)
+    as_of = recent_close.with_only_columns(DailyBar.session_date).scalar_subquery()
     previous = cast(recent_close.offset(1).scalar_subquery(), Float)
     change = ((latest / func.nullif(previous, 0) - 1) * 100).label("daily_change_pct")
     return (
-        select(WatchlistEntry.symbol, StockRecord.name, WatchlistEntry.added_at, change)
+        select(
+            WatchlistEntry.symbol,
+            StockRecord.name,
+            WatchlistEntry.added_at,
+            latest.label("last_close"),
+            as_of.label("as_of"),
+            change,
+        )
         .join(StockRecord, WatchlistEntry.symbol == StockRecord.symbol)
         .outerjoin(PriceSeries, WatchlistEntry.symbol == PriceSeries.symbol)
         .where(WatchlistEntry.user_id == user_id)
+    )
+
+
+def saved_stock(row) -> SavedStock:
+    # Prefer the reviewed company name over the importer's ticker placeholder.
+    return SavedStock(
+        **{**row, "name": company_name(row["symbol"], row["name"]) or row["name"]}
     )
 
 
@@ -133,7 +151,7 @@ def list_watchlist(
                 .order_by(WatchlistEntry.added_at.desc(), WatchlistEntry.symbol)
                 .limit(WATCHLIST_LIMIT)
             ).mappings()
-            return Watchlist(items=[SavedStock(**row) for row in rows])
+            return Watchlist(items=[saved_stock(row) for row in rows])
     except SQLAlchemyError:
         raise storage_unavailable() from None
 
@@ -163,7 +181,7 @@ def add_stock(
             )
             if existing:
                 response.status_code = 200
-                return SavedStock(**existing)
+                return saved_stock(existing)
             available = connection.scalar(
                 select(PriceSeries.symbol).where(PriceSeries.symbol == payload.symbol)
             )
@@ -200,7 +218,7 @@ def add_stock(
                 .mappings()
                 .one()
             )
-            return SavedStock(**row)
+            return saved_stock(row)
     except SQLAlchemyError:
         raise storage_unavailable() from None
 

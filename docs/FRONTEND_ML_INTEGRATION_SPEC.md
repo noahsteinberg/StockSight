@@ -1,15 +1,15 @@
 # StockSight frontend and ML integration specification
 
-Current reading notice: [the frontend product handoff](FRONTEND_PRODUCT_HANDOFF.md)
-now owns page priorities, Explore/Compare/preferences proposals and human approval
-before implementation. [CURRENT_HANDOFF.md](CURRENT_HANDOFF.md) owns actual state:
-494 stocks and validated daily refresh/Actions acceptance are delivered. PR #16's
-quote widget is separate and unmerged. This November 17 document preserves
-proposed ML response semantics and evaluation safeguards; its old ingestion
-status and AAPL-first priority are historical, not the next product backlog.
+Start with [the release and ML handoff](NEXT_RELEASE_AND_ML_HANDOFF.md) for current
+navigation and the next implementation sequence. The combined release branch
+includes the quote widget, a typed unavailable signal endpoint, its frontend
+adapter and contextual status views. This November 17 document defines signal
+semantics and evaluation safeguards. Older delivery and AAPL-first examples
+describe their original checkpoint.
 
 Prepared November 17, 2026 for the next implementing AI and team reviewers.
-Status: proposed implementation specification, not implemented ML functionality.
+Status: unavailable API and views implemented on PR #26. Inference, persistence
+and evaluation remain proposals.
 Read [the current handoff](CURRENT_HANDOFF.md) first. ML research is paused at Noah's request.
 
 ## 1. Product and current boundary

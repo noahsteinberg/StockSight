@@ -52,7 +52,7 @@ for (const mode of ['login', 'signup']) {
     await page.getByLabel('Username', { exact: true }).fill(username);
     await page.getByLabel('Password', { exact: true }).fill(password);
     await page.getByRole('button', { name: mode === 'signup' ? 'Create account' : 'Continue', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'My dashboard' })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: 'Dashboard', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Sign out' })).toBeVisible();
     expect(events).toEqual(mode === 'signup' ? ['signup', 'login'] : ['login']);
     expect(page.url()).toMatch(/#\/dashboard$/);
@@ -158,7 +158,7 @@ test('password accounts can request recovery and sign out from Settings', async 
   await page.getByLabel('Username', { exact: true }).fill('test-username');
   await page.getByLabel('Password', { exact: true }).fill('Synthetic-only!789');
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'My dashboard' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Dashboard', exact: true })).toBeVisible();
   await page.getByRole('link', { name: 'Settings' }).click();
   const account = page.getByRole('region', { name: 'Account' });
   await expect(account.getByText('test-username', { exact: true })).toBeVisible();
@@ -179,6 +179,9 @@ test('Google accounts see their sign-in method without a StockSight password res
     csrf_token: 'synthetic-csrf-token', expires_at: new Date(Date.now() + 300000).toISOString(),
   } }));
   await page.route('**/api/watchlist', route => route.fulfill({ json: { items: [] } }));
+  await page.route('**/api/me/preferences', route => route.fulfill({ json: {
+    saved: false, purpose: null, sectors: [], horizon: null, default_range: null, updated_at: null,
+  } }));
   await page.goto('/#/settings');
   const account = page.getByRole('region', { name: 'Account' });
   await expect(account.getByText('Google', { exact: true })).toBeVisible();

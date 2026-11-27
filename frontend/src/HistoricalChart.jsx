@@ -14,7 +14,7 @@ function downloadPrices(symbol, range, bars, replaying) {
   link.click();
 }
 
-export default function HistoricalChart({ data, range, showSma, showRsi, onToggleSma, onToggleRsi, indicators, onReload, titleAction, children }) {
+export default function HistoricalChart({ data, range, showSma, showRsi, onToggleSma, onToggleRsi, indicators, onReload, titleAction, onReplayChange, aside, children }) {
   const [choosingStart, setChoosingStart] = useState(false);
   const [replay, setReplay] = useState(null);
   const replayId = useId();
@@ -31,6 +31,11 @@ export default function HistoricalChart({ data, range, showSma, showRsi, onToggl
   useEffect(() => {
     if (replaying) nextStep.current?.focus({ preventScroll: true });
   }, [replaying]);
+  // The page hides present-day panels (the latest quote) while a past date is shown.
+  useEffect(() => {
+    onReplayChange?.(replaying);
+  }, [replaying, onReplayChange]);
+  useEffect(() => () => onReplayChange?.(false), [onReplayChange]);
 
   function startReplay(event) {
     event.preventDefault();
@@ -43,7 +48,7 @@ export default function HistoricalChart({ data, range, showSma, showRsi, onToggl
     <div className="quote">
       <div>
         <div className="quote-title">
-          <h2>{data.symbol} <span>{data.name}</span></h2>
+          <h2>{data.symbol} {data.name && data.name !== data.symbol && <span>{data.name}</span>}</h2>
           {titleAction}
         </div>
         <div className="price-value">
@@ -51,10 +56,13 @@ export default function HistoricalChart({ data, range, showSma, showRsi, onToggl
           <span className="quote-date">{latest.date}<br />{replaying ? 'Replay close' : 'Latest stored close'}</span>
         </div>
       </div>
-      {change !== null && <div className={`range-change ${change < 0 ? 'negative' : 'positive'}`}>
-        <strong>{percentage.format(change)}</strong>
-        <span>{replaying ? 'Revealed range' : 'Range change'}</span>
-      </div>}
+      <div className="quote-side">
+        {aside}
+        {change !== null && <div className={`range-change ${change < 0 ? 'negative' : 'positive'}`}>
+          <strong>{percentage.format(change)}</strong>
+          <span>{replaying ? 'Revealed range' : 'Range change'}</span>
+        </div>}
+      </div>
     </div>
     <div className="indicator-toolbar" role="group" aria-label="Chart controls">
       <span className="muted">Indicators</span>

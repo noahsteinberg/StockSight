@@ -114,6 +114,22 @@ class WatchlistEntry(Base):
     added_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
+class UserPreference(Base):
+    """Optional research interests; never income, holdings or identity data."""
+
+    __tablename__ = "user_preferences"
+    user_id: Mapped[str] = mapped_column(
+        ForeignKey("user_identities.id", ondelete="CASCADE"), primary_key=True
+    )
+    schema_version: Mapped[int]
+    purpose: Mapped[str | None] = mapped_column(String(16))
+    horizon: Mapped[str | None] = mapped_column(String(16))
+    default_range: Mapped[str | None] = mapped_column(String(8))
+    sectors: Mapped[list] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
 class AuthSession(Base):
     __tablename__ = "auth_sessions"
     token_hash: Mapped[str] = mapped_column(String(64), primary_key=True)

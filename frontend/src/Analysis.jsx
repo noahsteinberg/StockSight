@@ -3,6 +3,10 @@ import HistoricalChart from './HistoricalChart.jsx';
 import StockSearchInput from './StockSearchInput.jsx';
 import AnalysisWatchlist, { WatchlistStar } from './AnalysisWatchlist.jsx';
 import useIndicators from './use-indicators.js';
+import MarketQuote from './MarketQuote.jsx';
+import useStockProfile from './use-stock-profile.js';
+import { SignalBadge } from './SignalPanel.jsx';
+import { compareHash } from './use-compare-selection.js';
 
 const ranges = [['1mo', '1M'], ['3mo', '3M'], ['1y', '1Y'], ['all', 'Max']];
 
@@ -13,19 +17,23 @@ function responseError(status, searching = false) {
   return searching ? 'Could not search stocks. Check that the API is running.' : 'Could not load prices. Check that the API is running.';
 }
 
-export default function Analysis({ symbol, onSelectSymbol, watchlist, chartDefaults }) {
+export default function Analysis({ symbol, onSelectSymbol, watchlist, selection, defaultRange, chartDefaults }) {
+  const comparing = selection?.symbols.includes(symbol);
   const tickerInput = useRef(null);
   const [inputError, setInputError] = useState('');
   const [draft, setDraft] = useState({ symbol, value: symbol });
   const input = draft.symbol === symbol ? draft.value : symbol;
   function setInput(value) { setDraft({ symbol, value }); }
-  const [range, setRange] = useState('3mo');
+  // A range picked here wins; until then the saved default (or 3M) applies.
+  const [chosenRange, setRange] = useState(null);
+  const range = chosenRange ?? defaultRange ?? '3mo';
   const [result, setResult] = useState({ loading: true });
   const [retry, setRetry] = useState(0);
   const [searchRequest, setSearchRequest] = useState(null);
   const [search, setSearch] = useState(null);
   const [showSma, setShowSma] = useState(chartDefaults.showSma);
   const [showRsi, setShowRsi] = useState(chartDefaults.showRsi);
+  const [replaying, setReplaying] = useState(false);
   const requestKey = `${symbol}:${range}:${retry}`;
 
   useEffect(() => {
@@ -105,6 +113,7 @@ export default function Analysis({ symbol, onSelectSymbol, watchlist, chartDefau
   const loadingPrices = result.loading || result.key !== requestKey;
   const data = loadingPrices ? null : result.data;
   const indicators = useIndicators(symbol, range, showSma || showRsi, data);
+  const profile = useStockProfile(symbol);
 
   return (
     <section className="analysis" id="analysis" aria-labelledby="analysis-title">
@@ -129,6 +138,11 @@ export default function Analysis({ symbol, onSelectSymbol, watchlist, chartDefau
         {search.matches?.length > 0 && <ul>{search.matches.map(stock => <li key={stock.symbol}><button type="button" onClick={() => openStock(stock.symbol)}>{stock.symbol} <span>{stock.name}</span></button></li>)}</ul>}
       </div>}
       </div>
+      {profile.data && <p className="stock-context">
+        <strong>{profile.data.company_name || 'Company name not yet reviewed'}</strong>
+        <span>{profile.data.sector ? `${profile.data.sector} · ${profile.data.sub_industry}` : 'Sector unknown'}</span>
+        <a href="#/methodology">Sector source</a>
+      </p>}
       <div className="chart-card">
       <div className="chart-toolbar"><span>Price & volume <span className="muted">· USD</span></span><fieldset><legend className="sr-only">Price history range</legend>{ranges.map(([value, label]) => <button key={value} type="button" aria-pressed={range === value} onClick={() => { if (range !== value) { reload(); setRange(value); } }}>{label}</button>)}</fieldset></div>
       <div aria-live="polite" aria-busy={Boolean(loadingPrices)}>
@@ -138,15 +152,21 @@ export default function Analysis({ symbol, onSelectSymbol, watchlist, chartDefau
       </div>
       {data?.bars.length > 0 && <HistoricalChart
         key={requestKey} data={data} range={range} showSma={showSma} showRsi={showRsi}
-        titleAction={<WatchlistStar symbol={data.symbol} watchlist={watchlist} />}
+        titleAction={<WatchlistStar symbol={data.symbol} watchlist={watchlist} />} onReplayChange={setReplaying}
+        aside={<SignalBadge symbol={symbol} replaying={replaying} />}
         onToggleSma={() => setShowSma(value => !value)} onToggleRsi={() => setShowRsi(value => !value)}
         indicators={indicators} onReload={() => { reload(); setRetry(value => value + 1); indicators.retry(); }}>
         <div className="chart-actions">
           <button type="button" onClick={() => { reload(); setRetry(value => value + 1); indicators.retry(); watchlist.retry(); }}>Refresh data</button>
-          <a href={`#/predictions?symbol=${encodeURIComponent(symbol)}`}>Predictions for {symbol} <span aria-hidden="true">↗</span></a>
+          {selection && <button type="button" aria-pressed={comparing} disabled={!comparing && selection.full}
+            title={!comparing && selection.full ? 'Comparison holds up to 4 stocks' : undefined}
+            onClick={() => selection.toggle(symbol)}>{comparing ? `Remove ${symbol} from comparison` : `Add ${symbol} to comparison`}</button>}
+          {selection?.full && !comparing && <span className="muted">Four stocks selected. Remove one in <a href={compareHash(selection.symbols)}>Compare</a>.</span>}
         </div>
       </HistoricalChart>}
       </div>
+      {/* The delayed vendor quote is secondary to the stored history above it. */}
+      <MarketQuote key={symbol} symbol={symbol} asOf={data?.as_of} replaying={replaying} />
     </section>
   );
 }

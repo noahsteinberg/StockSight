@@ -4,7 +4,7 @@ const indicatorURL = '**/api/stocks/*/indicators?*';
 const latest = page => page.getByText(/As of.*2017-02-16/);
 
 test('real indicator API renders overlays and keeps values stable across ranges', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/#/analysis');
   await expect(latest(page)).toContainText('63 sessions');
   const response = page.waitForResponse(value => value.url().includes('/indicators?range=3mo'));
   await page.getByRole('button', { name: 'SMA 20', exact: true }).click();
@@ -24,7 +24,7 @@ test('real indicator API renders overlays and keeps values stable across ranges'
 
 test('indicator failure retries independently while preserving the chart', async ({ page }) => {
   await page.route(indicatorURL, route => route.fulfill({ status: 503, body: 'Unavailable' }));
-  await page.goto('/');
+  await page.goto('/#/analysis');
   await expect(latest(page)).toBeVisible();
   await page.getByRole('button', { name: 'SMA 20', exact: true }).click();
   await expect(page.getByRole('alert')).toContainText('Indicators are unavailable');
@@ -46,7 +46,7 @@ for (const mismatch of ['dates', 'same-date correction']) {
       }
       await route.fulfill({ json: data });
     });
-    await page.goto('/');
+    await page.goto('/#/analysis');
     await expect(latest(page)).toBeVisible();
     await page.getByRole('button', { name: 'SMA 20', exact: true }).click();
     await expect(page.getByRole('alert')).toContainText('different data snapshots');
@@ -67,7 +67,7 @@ test('null warm-up values stay unavailable and date selection updates indicator 
     data.points[0].rsi_14 = null;
     await route.fulfill({ json: data });
   });
-  await page.goto('/');
+  await page.goto('/#/analysis');
   await expect(latest(page)).toBeVisible();
   await page.getByRole('button', { name: 'SMA 20', exact: true }).click();
   await page.getByRole('button', { name: 'RSI 14', exact: true }).click();
@@ -82,7 +82,7 @@ test('null warm-up values stay unavailable and date selection updates indicator 
 });
 
 test('superseded indicator requests cannot replace the current range', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/#/analysis');
   await expect(latest(page)).toBeVisible();
   let started;
   const waiting = new Promise(resolve => { started = resolve; });
@@ -104,7 +104,7 @@ test('short histories retain nulls without drawing fabricated indicator lines', 
     const data = await (await route.fetch()).json();
     await route.fulfill({ json: { ...data, points: data.points.slice(-10).map(point => ({ ...point, sma_20: null, rsi_14: null })) } });
   });
-  await page.goto('/');
+  await page.goto('/#/analysis');
   await expect(latest(page)).toContainText('10 sessions');
   await page.getByRole('button', { name: 'SMA 20', exact: true }).click();
   await page.getByRole('button', { name: 'RSI 14', exact: true }).click();
@@ -116,7 +116,7 @@ test('short histories retain nulls without drawing fabricated indicator lines', 
 
 test('indicator timeout recovers without reloading prices', async ({ page }) => {
   await page.clock.install();
-  await page.goto('/');
+  await page.goto('/#/analysis');
   await expect(latest(page)).toBeVisible();
   let started;
   const waiting = new Promise(resolve => { started = resolve; });
@@ -132,7 +132,7 @@ test('indicator timeout recovers without reloading prices', async ({ page }) => 
 });
 
 test('desktop and mobile research workspace remain readable with indicators enabled', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/#/analysis');
   await expect(latest(page)).toBeVisible();
   await page.getByRole('button', { name: 'SMA 20', exact: true }).click();
   await page.getByRole('button', { name: 'RSI 14', exact: true }).click();

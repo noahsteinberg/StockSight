@@ -111,6 +111,8 @@ def test_watchlist_daily_change_uses_the_latest_two_stored_sessions(
     with TestClient(account_app) as client:
         saved = client.post("/api/watchlist", headers=alice, json={"symbol": "AAPL"})
         assert saved.status_code == 201
+        assert saved.json()["last_close"] == pytest.approx(latest.close)
+        assert saved.json()["as_of"] == latest.date.isoformat()
         assert saved.json()["daily_change_pct"] == pytest.approx(
             (latest.close / previous.close - 1) * 100
         )
@@ -123,6 +125,8 @@ def test_watchlist_daily_change_uses_the_latest_two_stored_sessions(
         result = client.get("/api/watchlist", headers=alice).json()["items"]
         assert len(result) == 1
         assert result[0]["symbol"] == "AAPL"
+        assert result[0]["last_close"] == pytest.approx(latest.close)
+        assert result[0]["as_of"] == latest.date.isoformat()
         assert result[0]["daily_change_pct"] is None
 
 

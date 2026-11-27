@@ -55,8 +55,11 @@ From `backend` on macOS/Linux (Windows uses `.venv\Scripts\python.exe`):
 .venv/bin/python -m alembic current
 ```
 
-The expected head is `0006_market_refresh`. Alembic owns the eight application
-tables plus its version table; do not create separate, incompatible stock tables
+The repository head is `0007_user_preferences` (issue #19 phase 4; adds the
+backend-only, RLS-enabled `user_preferences` table). The hosted project stays at
+`0006_market_refresh` until that additive migration is reviewed and applied in a
+coordinated release (code expecting 0007 fails readiness closed on 0006). Alembic
+owns the nine application tables plus its version table; do not create separate, incompatible stock tables
 manually. API startup does not run migrations.
 
 Migration 0006 adds the nullable series update timestamp and two backend-only
@@ -73,7 +76,8 @@ is not a rerunnable script for an existing database. Later changes still belong
 in Alembic migrations.
 
 An older saved bootstrap may stop at 0005. After using it on an empty project,
-run `alembic upgrade head` and verify 0006 before starting the current API.
+run `alembic upgrade head` and verify `0007_user_preferences` before starting the
+combined release API.
 
 Migration 0005 enables PostgreSQL RLS and revokes table privileges from PUBLIC and
 Supabase's `anon`/`authenticated` roles when present. No browser policies are
