@@ -52,6 +52,6 @@ export function SignalBadge({ symbol, replaying = false }) {
       : signal.error ? <span className="signal-badge-error"><strong>Status unavailable</strong> <button type="button" onClick={signal.retry}>Retry</button></span>
       : available ? <strong>{signal.data.universe_percentile !== null ? `Rank ${signal.data.universe_percentile}th pct` : 'Available'} · for {signal.data.target_session}</strong>
       : <strong>{reasonMessages[signal.data.unavailable_reason].replace(/\.$/, '')}</strong>}
-    <a className="button-link" href={`#/predictions?symbol=${encodeURIComponent(symbol)}`}>Research signal for {symbol}</a>
+    <a className="button-link" href={`#/predictions?symbol=${encodeURIComponent(symbol)}&model=1`}>Research signal for {symbol}</a>
   </div>;
 }

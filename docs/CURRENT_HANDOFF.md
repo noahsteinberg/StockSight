@@ -1,5 +1,21 @@
 # StockSight current handoff
 
+## Noah's local review follow-up
+
+The local review fixes the Predictions search menu clipping, preserves the
+selected horizon when using its sidebar link, and opens the ML disclosure when
+following Analysis's research-signal link. These changes await publication and
+release review. The matching algorithm is unchanged.
+
+Product recommendation for Noah's review is a dedicated historical-pattern
+view linked from Analysis, research ideas within Explore, and a future
+Predictions view for evaluated model outputs. Before using analog outcomes to
+rank stocks, evaluate a fixed rule on later unseen dates against simple
+baselines, including coverage, match distance, costs and stability. The current
+nearest-example method has no maximum-distance cutoff and can return distant
+matches. Page restructuring and recommendation scoring require an approved
+increment.
+
 ## Historical Pattern Explorer — GitHub review, November 27
 
 Parth subsequently approved a specific page flow: the 5- and 21-session choices

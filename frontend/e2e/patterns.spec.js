@@ -16,6 +16,8 @@ test('Analysis links to full Predictions results with shareable horizons and cli
   await panel(page).getByRole('button', { name: '5 sessions', exact: true }).click();
   await expect(panel(page).getByRole('img')).toHaveAttribute('aria-label', /5 stored sessions/);
   await expect(page).toHaveURL(/horizon=5$/);
+  await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Predictions', exact: true }).click();
+  await expect(page).toHaveURL(/horizon=5$/);
   await panel(page).locator('.pattern-examples summary').click();
   await panel(page).locator('tbody button').first().click();
   await expect(panel(page).getByRole('button', { name: 'Clear highlight' })).toBeVisible();
@@ -62,6 +64,12 @@ test('unsupported history is recoverable through the standalone stock picker', a
   await page.goto('/#/predictions?symbol=NOPE&horizon=5');
   await expect(page.getByRole('alert')).toContainText('Symbol unavailable');
   await page.getByRole('combobox', { name: 'Choose a stock' }).fill('Apple');
+  const option = page.getByRole('option', { name: /AAPL/ });
+  await expect(option).toBeVisible();
+  expect(await option.evaluate(element => {
+    const rect = element.getBoundingClientRect();
+    return element.contains(document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2));
+  })).toBe(true);
   await page.getByRole('option', { name: /AAPL/ }).click();
   await expect(page).toHaveURL(/symbol=AAPL&horizon=5$/);
   await expect(panel(page)).toContainText('12 matched periods');

@@ -10,6 +10,7 @@ import { readChartDefaults, saveChartDefaults } from './chart-defaults.js';
 import SidebarHighlight from './SidebarHighlight.jsx';
 import { Dashboard, Methodology, ModelPerformance } from './Pages.jsx';
 import Predictions from './Predictions.jsx';
+import { patternHash } from './pattern-route.js';
 import { useAccount } from './auth-context.js';
 import useCompareSelection, { compareHash } from './use-compare-selection.js';
 import useWatchlist from './use-watchlist.js';
@@ -156,6 +157,7 @@ export default function App() {
       <div className="sidebar-items">
         {pages.map(([page, label, icon], index) => {
           const href = page === 'compare' ? compareHash(compareSelection.symbols)
+            : page === 'predictions' ? patternHash(symbol, route.patternHorizon)
             : `#/${page}${['analysis', 'predictions'].includes(page) ? `?symbol=${encodeURIComponent(symbol)}` : ''}`;
           return <a key={page} href={href} aria-label={label} aria-current={activeIndex === index ? 'page' : undefined} onClick={() => followSidebarLink(href)}>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon} /></svg>
@@ -180,7 +182,7 @@ export default function App() {
       {route.page === 'compare' && <Compare symbols={route.compare.symbols} range={route.compare.range ?? preferences.defaultRange ?? '1y'} linkRange={route.compare.range} selection={compareSelection} onOpen={selectStock} />}
       {route.page === 'dashboard' && <Dashboard watchlist={watchlist} selection={compareSelection} onOpen={selectStock}
         invite={account.isAuthenticated && preferences.data?.saved === false && !inviteDismissed} onDismissInvite={() => setInviteDismissed(true)} />}
-      {route.page === 'predictions' && <Predictions symbol={symbol} horizon={route.patternHorizon} />}
+      {route.page === 'predictions' && <Predictions symbol={symbol} horizon={route.patternHorizon} showModel={route.showModel} />}
       {route.page === 'performance' && <ModelPerformance />}
       {route.page === 'methodology' && <Methodology />}
       {route.page === 'preferences' && <Preferences preferences={preferences} />}

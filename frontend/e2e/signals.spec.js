@@ -19,8 +19,8 @@ test('Analysis and Predictions read the real typed unavailable signal', async ({
   expect((await compact.boundingBox()).y).toBeLessThan((await chart.boundingBox()).y);
   expect(requests.at(-1).searchParams.get('horizon_sessions')).toBe('1');
   await compact.getByRole('link', { name: 'Research signal for AAPL' }).click();
-  await expect(page).toHaveURL(/#\/predictions\?symbol=AAPL$/);
-  await page.locator('.model-details summary').click();
+  await expect(page).toHaveURL(/#\/predictions\?symbol=AAPL&model=1$/);
+  await expect(page.locator('.model-details')).toHaveAttribute('open', '');
   const full = page.getByRole('region', { name: 'Research signal · AAPL' });
   await expect(full).toContainText('Nothing is generated when you open this page');
   await expect(full.getByText(/\d+%/)).toHaveCount(0);

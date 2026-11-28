@@ -28,7 +28,7 @@ function PatternResults({ symbol, horizon }) {
     onReloadHistory={() => setAttempt(value => value + 1)} />;
 }
 
-export default function Predictions({ symbol, horizon }) {
+export default function Predictions({ symbol, horizon, showModel = false }) {
   const [draft, setDraft] = useState({ symbol, value: symbol });
   const [error, setError] = useState('');
   const value = draft.symbol === symbol ? draft.value : symbol;
@@ -55,7 +55,7 @@ export default function Predictions({ symbol, horizon }) {
       </form>
     </div>
     <PatternResults key={symbol} symbol={symbol} horizon={horizon} />
-    <details className="page-panel help-disclosure model-details">
+    <details key={`${symbol}:${showModel}`} className="page-panel help-disclosure model-details" open={showModel}>
       <summary>ML prediction status and model information</summary>
       <div><SignalPanel key={symbol} symbol={symbol} />
         <h2>Prediction history</h2><h3>Prediction history is unavailable</h3>

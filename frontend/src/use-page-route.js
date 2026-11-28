@@ -23,6 +23,7 @@ export default function usePageRoute() {
     page: knownPages.has(page) ? page : 'not-found',
     symbol: symbol && /^[A-Z][A-Z0-9.^=-]{0,15}$/.test(symbol) ? symbol : null,
     patternHorizon: patternHorizon(params.get('horizon')),
+    showModel: params.get('model') === '1',
     // Explore list state lives in the URL so back/forward and shared links work.
     explore: {
       query: (params.get('q') || '').trim().slice(0, 40),
