@@ -1,5 +1,24 @@
 # Architecture
 
+## Research ideas and embedded patterns
+
+Explore retains the complete paginated list and adds a separate six-candidate
+Research ideas panel. Its adapter reads `/api/research-ideas` for public filters
+and `/api/me/research-ideas` for account-owned saved sectors. Both use
+`research-ideas-v1` observed momentum or variability metrics. This read path
+does not call a provider or write storage.
+
+Analysis owns the expandable pattern results. The stock, 5/21-session horizon
+and open state are encoded as `symbol`, `horizon` and `patterns=1`. Historical
+Predictions links redirect there. Changing the chart window does not change
+the bounded pattern calculation. A separate recent-price response verifies
+pattern revision and date, and a mismatch offers a joint refresh.
+
+Predictions carries model availability and future forecast history through
+the existing signal adapter. It is linked from Analysis, outside the sidebar.
+The numerical ranking diagnostic runs offline through
+`app.evaluate_patterns` and exports aggregate development evidence only.
+
 For the combined release, human approval and next increments, read the
 [release handoff](NEXT_RELEASE_AND_ML_HANDOFF.md).
 
@@ -19,13 +38,14 @@ update runs. See [daily refresh](DAILY_REFRESH.md).
 
 | URL fragment | View | Behavior |
 | --- | --- | --- |
-| #/explore?sector=Energy&sort=change_desc&page=2 | Explore stocks | Public paginated list of supported stocks (10 per page) with search, GICS sector filter, ticker or daily-change sorting, latest stored close/date, save star and compare toggle |
+| #/explore?sector=Energy&sort=change_desc&page=2 | Explore stocks | Public paginated list of supported stocks (5 per page) with search, GICS sector filter, ticker or daily-change sorting, latest stored close/date, save star and compare toggle |
 | #/analysis?symbol=AAPL | Stock analysis | Company/sector line, separate TradingView latest-quote panel (hidden during replay), price and volume, SMA20/RSI14, inspection, historical replay, CSV, watchlist chips and Add to comparison |
 | #/compare?symbols=AAPL,MSFT&range=1y | Compare stocks | 2–4 stocks indexed to 100 on common dates, keyboard/pointer readout, summary table and disclosures (shared cutoff, short overlap, splits, price-only change) |
 | #/dashboard (#/watchlist) | Dashboard | Private watchlist with stored closes, session dates and daily change, filtering, open/remove, compare toggle, optional preferences invitation and account states |
 | #/preferences | Research preferences | Optional private form with purpose, sectors, horizon and default chart window, save/reset and guest sign-in prompt |
 | #/explore?mine=1 | Explore: Use my preferences | Private list of stocks in the account's saved sectors with a match reason per row; sector filter disabled; no URL carries the sectors or any user ID |
-| #/predictions?symbol=AAPL | Predictions | Selected stock, typed research-signal status from the API (currently "no approved model"), unavailable history and return to Analysis |
+| #/analysis?symbol=AAPL&horizon=5&patterns=1 | Analysis patterns | Expanded historical-pattern graph and inspectable 5-session examples |
+| #/predictions?symbol=AAPL | Predictions | Stock picker and model availability/history |
 | #/performance | Model performance | Unavailable evaluation |
 | #/methodology | Data & methodology | Source, coverage, adjustment, indicator and project information |
 | #/settings | Settings | Browser-local SMA 20 and RSI 14 defaults, account details, research preferences link, recovery and sign-out |
@@ -47,6 +67,14 @@ the current page. Navigation retains the selected stock, and a successful Auth0
 callback returns to Dashboard (#/dashboard).
 
 ## Implementation
+
+- Analysis expands PatternResults and PatternExplorer below the chart. Their
+  independent price read verifies the pattern snapshot. The stock, horizon and
+  open state stay in the URL. Predictions retains its supported-stock picker
+  for model status. The pattern adapter validates paths and summaries; the
+  backend reads at most 2,500 bars plus a retention sentinel in one SELECT.
+  Snapshot mismatch hides results and replay hides the current pattern section.
+  See [Historical Pattern Explorer](PATTERNS.md).
 
 - App.jsx owns the selected stock, account-scoped watchlist and navigation.
   use-page-route.js subscribes to hash changes. The desktop sidebar expands on

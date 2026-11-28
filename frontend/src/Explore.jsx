@@ -5,6 +5,7 @@ import CompareTray, { CompareToggle } from './CompareTray.jsx';
 import { explorePageSize, exploreSortOptions, sectorNames } from './explore-api.js';
 import useExplore, { useSectors } from './use-explore.js';
 import { exploreHash } from './use-page-route.js';
+import ResearchIdeas from './ResearchIdeas.jsx';
 
 const price = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const percent = new Intl.NumberFormat('en-US', { style: 'percent', signDisplay: 'exceptZero', minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -185,6 +186,7 @@ export default function Explore({ query, page, sector, sort, mine, preferences, 
     </div>
     </>}
     <CompareTray selection={selection} />
+    <ResearchIdeas query={query} sector={sector} mine={mine} watchlist={watchlist} selection={selection} />
     <p className="explore-note">
       {sectors.data
         ? <>Company names and GICS sectors come from a reviewed copy of <a href={sectors.data.source.url}>{sectors.data.source.name}</a> (revision of {sectors.data.source.revision_date}, {sectors.data.source.license}).{sectors.data.unknown > 0 && ` ${count.format(sectors.data.unknown)} supported ${sectors.data.unknown === 1 ? 'stock has' : 'stocks have'} no reviewed sector yet.`} </>

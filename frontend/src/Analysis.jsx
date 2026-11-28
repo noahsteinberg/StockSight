@@ -7,6 +7,8 @@ import MarketQuote from './MarketQuote.jsx';
 import useStockProfile from './use-stock-profile.js';
 import { SignalBadge } from './SignalPanel.jsx';
 import { compareHash } from './use-compare-selection.js';
+import { patternHash } from './pattern-route.js';
+import { PatternResults } from './Predictions.jsx';
 
 const ranges = [['1mo', '1M'], ['3mo', '3M'], ['1y', '1Y'], ['all', 'Max']];
 
@@ -17,7 +19,7 @@ function responseError(status, searching = false) {
   return searching ? 'Could not search stocks. Check that the API is running.' : 'Could not load prices. Check that the API is running.';
 }
 
-export default function Analysis({ symbol, onSelectSymbol, watchlist, selection, defaultRange, chartDefaults }) {
+export default function Analysis({ symbol, onSelectSymbol, watchlist, selection, defaultRange, chartDefaults, patternHorizon = 21, patternOpen = false }) {
   const comparing = selection?.symbols.includes(symbol);
   const tickerInput = useRef(null);
   const [inputError, setInputError] = useState('');
@@ -165,6 +167,17 @@ export default function Analysis({ symbol, onSelectSymbol, watchlist, selection,
         </div>
       </HistoricalChart>}
       </div>
+      {!replaying && data?.bars.length > 0 && <details className="analysis-patterns" open={patternOpen}
+        onToggle={event => {
+          if (event.currentTarget.open === patternOpen) return;
+          window.location.hash = event.currentTarget.open ? patternHash(symbol, patternHorizon)
+            : `#/analysis?symbol=${encodeURIComponent(symbol)}&horizon=${patternHorizon}`;
+        }}>
+        <summary>Historical patterns</summary>
+        <p>See what followed similar setups over 5 trading sessions (about a week) or 21 (about a month).</p>
+        {patternOpen && <PatternResults key={symbol} symbol={symbol} horizon={patternHorizon} chartHistory={data}
+          onReloadChart={() => { reload(); setRetry(value => value + 1); indicators.retry(); }} />}
+      </details>}
       {/* The delayed vendor quote is secondary to the stored history above it. */}
       <MarketQuote key={symbol} symbol={symbol} asOf={data?.as_of} replaying={replaying} />
     </section>

@@ -1,5 +1,148 @@
 # StockSight current handoff
 
+## Active continuation and final-stage scope
+
+Read [FINAL_STAGE_HANDOFF.md](FINAL_STAGE_HANDOFF.md) for the remaining release,
+acceptance, recommendation/preferences and conditional ML-serving work.
+[Issue #29](https://github.com/noahsteinberg/StockSight/issues/29) replaces #27
+and carries its unfinished tasks. The six checks passed on PR #28 head fc508f0;
+this documentation update creates a newer head requiring its own CI result.
+PR #28 still awaits Noah's release approval; no merge, deployment, migration or
+new training was performed during this final-stage audit.
+
+Earlier checkpoints below are chronological history. Their proposed page flows
+and pending tasks are superseded by the latest sections and final-stage plan.
+
+## Explore review polish
+
+Noah requested the original search-and-stock-list grouping, five stock rows
+per page, and Research ideas below the list. Research ideas now uses the
+existing dropdown styles and inherited IBM Plex typography, with six candidates
+per page, Previous/Next controls and a metric-specific rank for each candidate.
+Coverage text describes the visible range and total candidate count.
+Open model status selects a stock and scrolls to its availability panel.
+These changes are on PR #28 for review and await merge before production.
+
+## Research ideas and Analysis patterns — approved follow-up
+
+Noah approved the two-stage plan after reviewing Parth's #28. The review branch
+now adds Research ideas below the full Explore list. Guests can search all
+494 stocks, filter sectors and choose recent 20-session momentum or lower
+20-change historical variability. Six suggestions follow those filters.
+Signed-in users can apply their saved sectors. Every suggestion explains its
+metric and links to Analysis, watchlist and Compare.
+
+Historical patterns live in an expandable section below Analysis's chart.
+They default to 21 stored sessions, also offer 5, and retain the selection
+in the URL. Old Predictions links containing a horizon redirect to Analysis
+with patterns open. Predictions is available through the research-signal link
+and shows the unavailable model status. The sidebar has no empty model page.
+Search suggestions are no longer clipped. The match table includes standardized
+distance, and short-history/event states explain why results are unavailable.
+Current pattern results are hidden during historical replay.
+Both the visible chart revision and the independent recent-price check must
+agree with the patterns. A mismatch offers a joint chart/pattern refresh.
+
+The offline ranking diagnostic is complete. It evaluated 26,211 stock/date rows
+over 58 monthly cutoffs in 2014–2018, loaded no 2019+ observations, and passed
+application/scorer parity checks. Pattern rank IC was 0.02286 and the gross
+decile spread was 0.25494 percentage points, below the historical-median
+baseline's 0.29450. Illustrative costs erased that pattern spread. Retain the
+unavailable model signal. Read the
+[diagnostic report](../ml/docs/PATTERN_RANKING_DEVELOPMENT.md).
+
+New read-only public/private ideas endpoints use existing daily history and
+account authorization. This release needs no migration or new environment
+variables. The updater's next committed data revision appears on the next
+request. Full API, account, mobile and browser checks accompany the PR.
+
+Local checks include the full backend run (285 passed, two skipped), the
+additional offline scorer causality/parity case, 61 final SQLite/PostgreSQL
+Explore/preferences cases, and all 30 account browser cases. Public cases
+were covered by the full run and targeted reruns after updating navigation
+expectations and waiting for mocked requests at test teardown. Lint, format,
+Node contracts and the production build passed. The existing bundle-size
+warning remains. GitHub checks on the published head provide the final
+release gate.
+
+The local preview is `http://127.0.0.1:5188/#/explore`. Its isolated copy covers
+494 stocks through November 25 with 260 sessions each; AAPL, MSFT, NVDA, BRK-B
+and JPM include longer verified history. Real production Auth0 acceptance
+remains a post-release check. #28 awaits Noah's review before merge/deployment.
+Issue #29 tracks remaining work.
+
+### Prior review checkpoints
+
+## Noah's local review follow-up
+
+The local review fixes the Predictions search menu clipping, preserves the
+selected horizon when using its sidebar link, and opens the ML disclosure when
+following Analysis's research-signal link. These changes await publication and
+release review. The matching algorithm is unchanged.
+
+Product recommendation for Noah's review is a dedicated historical-pattern
+view linked from Analysis, research ideas within Explore, and a future
+Predictions view for evaluated model outputs. Before using analog outcomes to
+rank stocks, evaluate a fixed rule on later unseen dates against simple
+baselines, including coverage, match distance, costs and stability. The current
+nearest-example method has no maximum-distance cutoff and can return distant
+matches. Page restructuring and recommendation scoring require an approved
+increment.
+
+## Historical Pattern Explorer — GitHub review, November 27
+
+Parth subsequently approved a specific page flow: the 5- and 21-session choices
+below Analysis must be real, bright links to Predictions, carrying the ticker
+and window. Predictions hosts the full automatically loaded graph, summaries
+and examples, with a supported-stock picker and a visible navigation entry.
+This supersedes the proposed two-page plan: Compare is not changed by this
+follow-up. The existing [PR #28](https://github.com/noahsteinberg/StockSight/pull/28)
+is being updated; merge/deployment remain unauthorized.
+
+Shareable route: `/#/predictions?symbol=AAPL&horizon=5` (or 21). A missing/invalid
+window uses 21. Back/forward and reload preserve it. Pattern results verify an
+independent recent-price snapshot before display. ML status remains separate
+in an expandable section. Analysis links hide during historical replay.
+
+Parth reviewed the working local preview and authorized a feature-branch push
+and PR for Noah on November 27. **Merge and deployment remain unauthorized.**
+Keep the feature off main until Noah reviews it and a release is approved.
+Vercel's existing configuration enables deployments only for main; feature
+branches are disabled. No deployment configuration was changed.
+
+Branch `feature/historical-pattern-explorer`, based on main `8237d79`, adds an
+Analysis entry and a Predictions explorer using existing stored prices. It finds similar historical
+setups, offers 5/21-session example outcomes, median/quartiles, counts, a path
+plot and inspectable dates. It does not serve an ML prediction. The existing
+model-signal unavailable state remains intact. No migration, provider ingestion
+or hosted write is part of this change. The separately completed ranking
+experiment remains on `research/parth-ranking-pilot` and is not bundled here.
+
+Preview while local servers run: `http://127.0.0.1:5188/#/analysis?symbol=AAPL`.
+It reads the existing hosted stock history through a local backend. Local Auth0
+is not configured, so account controls say sign-in unavailable. Configuration
+and credentials remain ignored. See [PATTERNS.md](PATTERNS.md) for numerical
+rules, exact scope, test evidence and remaining release checks.
+
+Full-catalog API acceptance passed all 494 stocks at both horizons: 988/988
+available responses, zero unavailable states/errors, with frontend contract
+validation and chart revision/date agreement. This read-only check used the
+hosted stored prices through the local feature backend. The reusable checker
+is `frontend/scripts/check-pattern-coverage.mjs`; reports stay outside Git.
+
+Verification: backend 207 passed/3 skipped; 17 new pattern tests passed;
+frontend three contract tests, lint and build passed. Manual browser checks
+covered both horizons, keyboard highlight, replay hiding and 320px overflow.
+The original PR head passed GitHub CI: 280 backend tests, 75 public browser
+cases and 30 account browser cases. The page-flow follow-up adds route/snapshot
+unit coverage and updates browser cases for hyperlinks, horizon persistence,
+stock selection, retry, mismatch recovery and keyboard/mobile use. Local
+Playwright remains unavailable on this Mac; review the latest PR CI for the
+follow-up's automated browser result. Hosted release review is Noah's decision.
+
+The production status below describes the deployed main branch, not this local
+feature preview.
+
 ## Dashboard and Explore integration
 
 [Production](https://stocksight-rose.vercel.app/) is serving the November 27,

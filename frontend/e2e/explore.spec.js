@@ -55,10 +55,10 @@ test('Explore lists the real fixture stock with its stored close', async ({ page
 });
 
 test('pages through results with URL state, browser history and honest unknown values', async ({ page }) => {
-  await mockExplore(page, 24);
+  await mockExplore(page, 12);
   await page.goto('/#/explore');
-  await expect(page.getByText('24 supported stocks · showing 1–10 · latest stored session 2026-11-23')).toBeVisible();
-  await expect(rows(page)).toHaveCount(10);
+  await expect(page.getByText('12 supported stocks · showing 1–5 · latest stored session 2026-11-23')).toBeVisible();
+  await expect(rows(page)).toHaveCount(5);
   const pages = page.getByRole('navigation', { name: 'Stock list pages' });
   await expect(pages).toContainText('Page 1 of 3');
   await expect(pages.getByRole('button', { name: 'Previous' })).toBeDisabled();
@@ -67,39 +67,39 @@ test('pages through results with URL state, browser history and honest unknown v
   await expect(rows(page).nth(1)).toContainText('2026-11-20 · earlier session');
   await expect(rows(page).nth(2).locator('td').nth(1)).toHaveText('—Unavailable');
   await expect(rows(page).nth(3)).toContainText('-1.50%');
-  await expect(rows(page).nth(5)).toContainText('+1.50%');
   await pages.getByRole('button', { name: 'Next' }).click();
   await expect(page).toHaveURL(/#\/explore\?page=2$/);
-  await expect(rows(page).first()).toContainText('TST010');
-  await expect(rows(page)).toHaveCount(10);
+  await expect(rows(page).first()).toContainText('TST005');
+  await expect(rows(page).first()).toContainText('+1.50%');
+  await expect(rows(page)).toHaveCount(5);
   await pages.getByRole('button', { name: 'Next' }).click();
-  await expect(rows(page)).toHaveCount(4);
+  await expect(rows(page)).toHaveCount(2);
   await expect(pages.getByRole('button', { name: 'Next' })).toBeDisabled();
   await page.goBack();
-  await expect(rows(page).first()).toContainText('TST010');
+  await expect(rows(page).first()).toContainText('TST005');
   await page.reload();
   await expect(pages).toContainText('Page 2 of 3');
   await page.goto('/#/explore?page=9');
   await expect(page.getByText('Page 9 is past the end of these results.')).toBeVisible();
   await page.getByRole('button', { name: 'Go to page 3' }).click();
-  await expect(rows(page).first()).toContainText('TST020');
+  await expect(rows(page).first()).toContainText('TST010');
 });
 
 test('search is debounced, keeps focus and typed text, and syncs with the URL', async ({ page }) => {
   const requests = await mockExplore(page);
   await page.goto('/#/explore?page=2');
-  await expect(rows(page).first()).toContainText('TST010');
+  await expect(rows(page).first()).toContainText('TST005');
   const search = page.getByLabel('Search ticker or company');
   await search.pressSequentially('tst01 ', { delay: 40 });
   await expect(page).toHaveURL(/#\/explore\?q=tst01$/);
   await expect(search).toBeFocused();
   await expect(search).toHaveValue('tst01 ');
-  await expect(page.getByText('60 supported stocks · 10 matches for “tst01” · showing 1–10')).toBeVisible();
+  await expect(page.getByText('60 supported stocks · 10 matches for “tst01” · showing 1–5')).toBeVisible();
   // One request for the initial page and one after typing paused, not one per key.
   expect(requests.filter(params => params.get('query') !== '').map(params => params.get('query'))).toEqual(['tst01']);
   await page.goBack();
   await expect(search).toHaveValue('');
-  await expect(rows(page).first()).toContainText('TST010');
+  await expect(rows(page).first()).toContainText('TST005');
   await page.goForward();
   await expect(search).toHaveValue(/^tst01 ?$/);
   await page.getByRole('button', { name: 'Clear', exact: true }).click();
@@ -116,9 +116,9 @@ test('changing sort retains the sector, returns to page one and follows the next
   const requests = await mockExplore(page);
   await page.goto('/#/explore?sector=Industrials&page=2');
   const pages = page.getByRole('navigation', { name: 'Stock list pages' });
-  await expect(pages).toContainText('Page 2 of 5');
+  await expect(pages).toContainText('Page 2 of 9');
   await page.getByLabel('Sort by').selectOption('change_desc');
-  await expect(pages).toContainText('Page 1 of 5');
+  await expect(pages).toContainText('Page 1 of 9');
   await expect.poll(() => requests.at(-1).get('sort')).toBe('change_desc');
   expect(requests.at(-1).get('sector')).toBe('Industrials');
   expect(requests.at(-1).get('page')).toBe('1');
@@ -127,7 +127,7 @@ test('changing sort retains the sector, returns to page one and follows the next
   expect(requests.at(-1).get('sort')).toBe('change_desc');
   await page.reload();
   await expect(page.getByLabel('Sort by')).toHaveValue('change_desc');
-  await expect(pages).toContainText('Page 2 of 5');
+  await expect(pages).toContainText('Page 2 of 9');
 });
 
 test('empty, failed and malformed responses show distinct recoverable states', async ({ page }) => {
@@ -135,7 +135,7 @@ test('empty, failed and malformed responses show distinct recoverable states', a
   await page.goto('/#/explore?q=zzz');
   await expect(page.getByText('No supported stocks match “zzz”. Try another ticker or company name.')).toBeVisible();
   await page.getByRole('button', { name: 'Reset filters' }).last().click();
-  await expect(rows(page)).toHaveCount(10);
+  await expect(rows(page)).toHaveCount(5);
 
   await page.unroute('**/api/explore?*');
   let failing = true;
@@ -147,7 +147,7 @@ test('empty, failed and malformed responses show distinct recoverable states', a
   await expect(page.getByRole('table')).toHaveCount(0);
   failing = false;
   await page.getByRole('button', { name: 'Retry' }).click();
-  await expect(rows(page)).toHaveCount(10);
+  await expect(rows(page)).toHaveCount(5);
 
   await page.unroute('**/api/explore?*');
   await page.route('**/api/explore?*', route => route.fulfill({ json: { ...syntheticPage(route.request().url()), total_matching: 'many' } }));
@@ -166,7 +166,7 @@ test('a slow earlier search never replaces newer results', async ({ page }) => {
   await expect(rows(page).first()).toContainText('TST050');
   await page.waitForTimeout(1800);
   await expect(rows(page).first()).toContainText('TST050');
-  await expect(rows(page)).toHaveCount(10);
+  await expect(rows(page)).toHaveCount(5);
 });
 
 test('Explore fits phone and desktop widths without page overflow', async ({ page }) => {
@@ -174,7 +174,7 @@ test('Explore fits phone and desktop widths without page overflow', async ({ pag
   for (const width of [320, 390, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     await page.goto('/#/explore');
-    await expect(rows(page)).toHaveCount(10);
+    await expect(rows(page)).toHaveCount(5);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     // Every column, including Save, must be reachable without sideways table scrolling.
     const star = rows(page).nth(1).getByRole('button', { name: /^Compare TST/ });
@@ -195,7 +195,7 @@ test('filters by sector with URL state, real counts, unknown sectors and a reset
   await expect(page).toHaveURL(/#\/explore\?sector=Industrials$/);
   await expect(page.getByText('12 supported stocks · 9 matches in Industrials')).toBeVisible();
   expect(requests.at(-1).get('sector')).toBe('Industrials');
-  await expect(rows(page)).toHaveCount(9);
+  await expect(rows(page)).toHaveCount(5);
   await expect(rows(page).filter({ hasText: 'Sector unknown' })).toHaveCount(0);
   await page.getByLabel('Search ticker or company').fill('TST00');
   await expect(page).toHaveURL(/#\/explore\?q=TST00&sector=Industrials$/);

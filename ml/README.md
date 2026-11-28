@@ -7,6 +7,10 @@ active. Product architecture and promotion gates are documented in the
 
 ## Frozen results
 
+- [21-session historical-pattern ranking diagnostic](docs/PATTERN_RANKING_DEVELOPMENT.md)
+  covers the newly approved 2014–2018 development check. It does not qualify
+  a serving model.
+
 - [Open-source model audit](docs/OPEN_SOURCE_MODEL_AUDIT.md)
 - [Next-session model round](docs/NEXT_SESSION_ROUND2_RESULTS.md)
 - [Continuous-target experiment protocol](docs/NEXT_SESSION_TARGET_ROUND.md)
@@ -61,6 +65,13 @@ STOCKSIGHT_DATA_DIR, STOCKSIGHT_PRIOR_NEXT_DIR and STOCKSIGHT_TARGET_DIR and use
 the pinned research environment. Frozen manifests reject source/package drift.
 
 ## Next research checkpoint
+
+The newly completed pattern-ranking diagnostic already measured turnover and
+illustrative costs for that method and did not qualify it. Do not repeat it as
+unfinished work. The older saved next-session rankings remain a separate audit.
+The active [final-stage plan](../docs/FINAL_STAGE_HANDOFF.md) requires a scope
+decision and approved bounded protocol before further fits or protected scores.
+No new training is authorized merely by this checkpoint.
 
 Audit saved rankings for stock/day concentration, turnover and realistic
 publication/next-available entry timing. Audit OHLC adjustment/alignment first.

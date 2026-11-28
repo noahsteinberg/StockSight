@@ -1,5 +1,28 @@
 # StockSight release and next increments
 
+The active forward plan is now [FINAL_STAGE_HANDOFF.md](FINAL_STAGE_HANDOFF.md)
+and [issue #29](https://github.com/noahsteinberg/StockSight/issues/29).
+This guide preserves release procedures and earlier proposals; do not restart
+completed #26 work or treat the completed pattern diagnostic as model approval.
+
+The next increment has been implemented on PR #28 for review. Explore now has
+explainable research ideas while retaining full search and pagination. Patterns
+are embedded in Analysis, with legacy links preserved. The approved 21-session
+ranking diagnostic is complete and does not qualify a serving model. Read the
+[current handoff](CURRENT_HANDOFF.md) and
+[evaluation report](../ml/docs/PATTERN_RANKING_DEVELOPMENT.md) first.
+
+For this increment, review the local Explore panel and Analysis's expanded
+patterns, wait for checks on #28, and obtain Noah's release approval before
+merge. No schema or environment change is needed. After release, verify public
+filters and both methods, then saved-sector suggestions, watchlist actions,
+preferences reset and isolation using two real authorized accounts.
+
+The remaining ML work requires an approved new protocol addressing execution
+timing, adjustment, universe bias and uncertainty. Keep model output unavailable
+while those questions remain unresolved. Earlier proposed steps below provide
+the background to this completed increment.
+
 Start with [the current handoff](CURRENT_HANDOFF.md) for branch and delivery
 status. [PR #26](https://github.com/noahsteinberg/StockSight/pull/26) shipped
 Dashboard, Explore, Compare, preferences, Settings, the quote widget and
@@ -10,7 +33,7 @@ provider-dependent freshness. No widget prices enter the stored history.
 
 ## Preview and regression checklist
 
-Open the local review preview at `http://127.0.0.1:5177/` while it is running.
+Open the local review preview at `http://127.0.0.1:5188/` while it is running.
 It uses an isolated copy of all 494 hosted series through November 25, 2026
 with up to 260 sessions per stock. It includes public market data only.
 The Max chart can show a longer history in production. Real Auth0 account
@@ -19,7 +42,7 @@ actions are for hosted acceptance. The automated account suite uses test users.
 | View | Try this |
 | --- | --- |
 | Dashboard | Open the bare URL and click the logo from another page. Both should land here. Open Explore with the main button. |
-| Explore | Confirm 494 supported stocks, 10 stocks on the first page and 50 pages. Pick a sector, sort by highest or lowest daily change, then use Next and Previous. Search by company and try Reset filters. A result should open the matching ticker in Analysis. |
+| Explore | Confirm 494 supported stocks, 5 stocks on the first page and 99 pages. Pick a sector, sort by highest or lowest daily change, then use Next and Previous. Search by company and try Reset filters. A result should open the matching ticker in Analysis. |
 | Analysis | Pick AAPL, verify the latest stored date, ranges, SMA/RSI, price inspection, Refresh data and CSV. Review the separate quote panel and historical replay. Add AAPL to comparison, and open its research signal. |
 | Compare | With one stock, the tray prompts for one more and Compare offers an empty state. With two stocks, check the indexed chart, common dates and change summary. Add up to four, remove one and revisit the link. |
 | Signals | Open AAPL's research signal from Analysis and confirm its ticker persists. Model performance is accessible from that view and Methodology. Both say that approved evidence is unavailable. Existing deep links still work. |
@@ -68,7 +91,7 @@ schema releases and verify the current Alembic revision before each rollout.
 Vlad (@Londarh) coordinates the frontend follow-up with Gavin (@Hab1yer) on
 hosted account acceptance, Parth on price and metadata inputs, and Noah on ML
 research approval.
-Use [issue #27](https://github.com/noahsteinberg/StockSight/issues/27) to record
+Use [issue #29](https://github.com/noahsteinberg/StockSight/issues/29) to record
 acceptance and link follow-up work. Give the next agent this file, the current
 handoff, and the relevant specialist guide.
 
@@ -79,6 +102,10 @@ approval.** Reuse agreed behavior and record the chosen scope, including how to
 verify it. Return the result for review before deployment.
 
 ### First increment: make exploration useful with existing data
+
+Historical proposal: this increment and its pattern-ranking diagnostic are now
+implemented in PR #28. Use FINAL_STAGE_HANDOFF.md for new tasks; do not implement
+the proposal below a second time.
 
 Start after hosted acceptance. Keep Dashboard as the watchlist home and
 Explore as the public discovery page. Consider an opt-in **Research ideas** view

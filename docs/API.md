@@ -1,5 +1,31 @@
 # Current API
 
+## Historical pattern comparisons
+
+`GET /api/stocks/{symbol}/patterns?horizon_sessions=21` returns descriptive
+historical comparisons. Supported horizons are exactly 5 and 21 stored sessions;
+default 21. The symbol is normalized to uppercase. Unknown symbols or those with
+no history return 404 `UNSUPPORTED_SYMBOL`, invalid horizons return 422, and
+storage failures return sanitized 503 `DATA_UNAVAILABLE` without fixture fallback.
+
+The response includes `methodology=historical-price-patterns-v1`, symbol/name,
+`as_of`, `snapshot_id`, source/source_url/adjustment, `horizon_sessions`,
+`calculation_start`, `calculation_sessions` (at most 2500), `has_earlier`,
+`eligible_candidates` and `excluded_event_windows`. The snapshot agrees with
+price history for the same revision. Explicit fixture mode serves AAPL only.
+
+Available responses have `reason=null`, `current_setup` (20-session change,
+daily variability and price vs. 50-session average, all percent), 8–12 matches,
+`matched_count`, `summary` (median/quartile ending changes and rose/fell/unchanged
+counts), and `points` (per-step quartiles and median, including step zero).
+Each match contains `date`, `end_date`, `setup`, `change_pct`, and `path` of
+`horizon_sessions + 1` values, starting at zero.
+
+Unavailable responses have reason `insufficient_history`, `insufficient_matches`
+or `invalid_history`, null summary, zero matched_count and empty matches/points.
+`current_setup` is null when a usable setup cannot be computed. No forecast,
+probability or provider call is generated. See [the calculation and limitations](PATTERNS.md).
+
 ## Incremental daily-history extension
 
 After migration 0006 and an explicit refresh, prices and indicators may return
@@ -55,6 +81,33 @@ with the fixture.
 See [import policy](PRICES_IMPORT.md) for the separate team snapshot.
 
 ## Explore API
+
+### Research ideas
+
+`GET /api/research-ideas?query=&sector=&method=momentum` returns up to six
+research candidates. Method is `momentum` or `variability`. Query is capped
+at 40 characters and sector uses the same reviewed taxonomy as Explore.
+`GET /api/me/research-ideas?query=&method=` requires the existing account
+session/bearer and uses only that account's saved sectors. Empty saved sectors
+yield an empty private list. Existing private cache/CSRF/ownership rules apply.
+
+Response fields are `calculation_version: research-ideas-v1`, `method`,
+`query`, `sectors`, `latest_session`, `matching_count`, `eligible_count`
+and `items`. Each item contains `symbol`, `name`, `sector`, `metric_pct`,
+`reason`, `as_of` and `series_revision`.
+
+Both research-ideas routes accept `page` (1–1000, default 1) and return
+`page` and `page_size: 6`. The complete filtered universe is ranked before
+paging. Explore's stock list pages independently with five rows per page.
+
+Eligibility requires 21 valid positive closes ending at the newest stored
+universe session and no recorded split event in that window. Momentum is
+`100 * (last / first - 1)`, descending. Variability is sample standard
+deviation of the 20 percentage close changes, ascending. Ties sort by ticker.
+Missing/stale histories are excluded and reflected in the coverage counts.
+Invalid inputs return 422 and storage failures return sanitized 503 responses.
+
+### Stock list
 
 GET /api/explore?query=&sector=&sort=ticker&page=1&page_size=25 returns one public page of
 supported stocks (those with a stored price series), ordered by symbol. A query

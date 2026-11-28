@@ -15,6 +15,7 @@ from app.config import Settings
 from app.db import DailyBar, PriceSeries, StockRecord, database_engine
 from app.factory import create_app
 from app.market import load_bars
+from app.research_ideas import make_ideas, metric
 from app.seed import seed_fixture
 
 BACKEND = Path(__file__).resolve().parents[1]
@@ -138,6 +139,70 @@ def test_explore_pages_are_bounded_and_deterministic(explore_client):
     assert [item["symbol"] for item in second["items"]] == ["MSFT", "ZZ-B"]
     assert beyond["items"] == []
     assert beyond["total_matching"] == 4
+
+
+def test_ideas_rank_complete_fresh_histories_and_exclude_events(explore_client):
+    engine = explore_client.app.state.engine
+    with engine.begin() as connection:
+        add_stock(
+            connection, "XOM", "Exxon Mobil", "NYSE", [100 + i for i in range(21)]
+        )
+        add_stock(connection, "PFE", "Pfizer", "NYSE", [100.0] * 21)
+        add_stock(
+            connection, "CVX", "Chevron", "NYSE", [100 + 2 * i for i in range(21)]
+        )
+        connection.execute(
+            DailyBar.__table__.update()
+            .where(DailyBar.series_id == "test-CVX")
+            .values(source_values={"stock_splits": 2})
+        )
+    result = explore_client.get("/api/research-ideas").json()
+    assert result["eligible_count"] == 2
+    assert [item["symbol"] for item in result["items"]] == ["XOM", "PFE"]
+    assert result["items"][0]["metric_pct"] == pytest.approx(20)
+    assert result["items"][0]["as_of"] == "2026-11-21"
+    variable = explore_client.get("/api/research-ideas?method=variability").json()
+    assert variable["items"][0]["symbol"] == "PFE"
+    assert variable["items"][0]["metric_pct"] == 0
+    energy = explore_client.get("/api/research-ideas?sector=Energy").json()
+    assert [item["symbol"] for item in energy["items"]] == ["XOM"]
+    assert (
+        explore_client.get("/api/research-ideas?query=pfizer").json()["items"][0][
+            "symbol"
+        ]
+        == "PFE"
+    )
+    assert explore_client.get("/api/research-ideas?method=profit").status_code == 422
+    assert explore_client.get("/api/research-ideas?query=NOPE").json()["items"] == []
+    next_page = explore_client.get("/api/research-ideas?page=2").json()
+    assert next_page["page"] == 2 and next_page["items"] == []
+
+
+def test_idea_pages_cover_the_complete_ranking_without_duplicates():
+    latest = date(2026, 11, 21)
+    groups = [
+        (
+            f"TEST{i}",
+            f"Test {i}",
+            "revision",
+            [(date(2026, 11, day), 100 + day * (i + 1), False) for day in range(1, 22)],
+        )
+        for i in range(14)
+    ]
+    pages = [make_ideas(groups, latest, "", [], "momentum", page) for page in (1, 2, 3)]
+    items = [item for page in pages for item in page.items]
+    assert [len(page.items) for page in pages] == [6, 6, 2]
+    assert len({item.symbol for item in items}) == 14
+    assert all(
+        a.metric_pct >= b.metric_pct for a, b in zip(items, items[1:], strict=False)
+    )
+
+
+def test_idea_metric_requires_valid_complete_history():
+    assert metric([100] * 20, [False] * 20, "momentum") is None
+    assert metric([100] * 20 + [float("nan")], [False] * 21, "momentum") is None
+    assert metric([100] * 21, [True] + [False] * 20, "variability") is None
+    assert metric([100] * 21, [False] * 21, "variability") == 0
 
 
 @pytest.mark.parametrize(

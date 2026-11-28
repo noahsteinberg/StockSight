@@ -50,7 +50,7 @@ test('navigation supports refresh, browser history, active state and page focus'
   await expect(page.getByRole('heading', { level: 1, name: 'Dashboard', exact: true })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Dashboard', exact: true })).toHaveAttribute('aria-current', 'page');
   await expect(page.locator('main')).toBeFocused();
-  await expect(page.getByRole('link', { name: /^Predictions/ })).toHaveCount(0);
+  await expect(page.getByRole('navigation').getByRole('link', { name: 'Predictions', exact: true })).toHaveCount(0);
   await page.reload();
   await expect(page).toHaveTitle('Dashboard | StockSight');
   await page.goBack();

@@ -4,7 +4,7 @@ const percent = new Intl.NumberFormat('en-US', {
   style: 'percent', signDisplay: 'exceptZero', minimumFractionDigits: 2, maximumFractionDigits: 2,
 });
 
-export function WatchlistStar({ symbol, watchlist }) {
+export function WatchlistStar({ symbol, watchlist, context = '' }) {
   const account = useAccount();
   const saved = watchlist.items.some(stock => stock.symbol === symbol);
   const disabled = !account.configured || account.isLoading || account.pending ||
@@ -14,7 +14,7 @@ export function WatchlistStar({ symbol, watchlist }) {
     account.configured ? `Sign in to save ${symbol}` : 'Sign-in unavailable';
 
   return <button type="button" className="watchlist-star" aria-pressed={account.isAuthenticated ? saved : undefined}
-    aria-label={label} title={account.isAuthenticated ? action : label} disabled={disabled}
+    aria-label={context ? `${context}: ${label}` : label} title={account.isAuthenticated ? action : label} disabled={disabled}
     onClick={() => {
       if (!account.isAuthenticated) account.login();
       else if (saved) watchlist.remove(symbol);

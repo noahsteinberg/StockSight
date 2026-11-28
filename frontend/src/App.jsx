@@ -8,15 +8,16 @@ import Preferences from './Preferences.jsx';
 import Settings from './Settings.jsx';
 import { readChartDefaults, saveChartDefaults } from './chart-defaults.js';
 import SidebarHighlight from './SidebarHighlight.jsx';
-import { Dashboard, Methodology, ModelPerformance, Predictions } from './Pages.jsx';
+import { Dashboard, Methodology, ModelPerformance } from './Pages.jsx';
+import Predictions from './Predictions.jsx';
+import { patternHash } from './pattern-route.js';
 import { useAccount } from './auth-context.js';
 import useCompareSelection, { compareHash } from './use-compare-selection.js';
 import useWatchlist from './use-watchlist.js';
 import usePreferences from './use-preferences.js';
 import usePageRoute from './use-page-route.js';
 
-// Predictions and Model performance stay reachable by link but leave the sidebar
-// until an approved model exists (issue #19, Phase 0 decision).
+// Predictions now hosts historical comparisons; model status remains separate.
 const pages = [
   ['dashboard', 'Dashboard', 'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z'],
   ['explore', 'Explore', 'M17 10.5a6.5 6.5 0 1 1-13 0a6.5 6.5 0 0 1 13 0M20 20l-4.9-4.9'],
@@ -74,7 +75,10 @@ export default function App() {
   }, [route.page, account.isAuthenticated, refreshWatchlist, watchlistError]);
   // Explore keeps its search/page in the URL; typing must not move focus away
   // from the search field, so only entering Explore counts as a navigation.
-  const focusKey = ['explore', 'compare'].includes(route.page) ? route.page : route.hash;
+  const focusKey = ['explore', 'compare', 'predictions', 'analysis'].includes(route.page) ? route.page : route.hash;
+  useEffect(() => {
+    if (route.legacyPatterns) window.location.replace(patternHash(symbol, route.patternHorizon));
+  }, [route.legacyPatterns, symbol, route.patternHorizon]);
   useEffect(() => {
     document.title = `${pageTitles[route.page] || 'Page not found'} | StockSight`;
     main.current?.focus({ preventScroll: true });
@@ -155,7 +159,7 @@ export default function App() {
       <div className="sidebar-items">
         {pages.map(([page, label, icon], index) => {
           const href = page === 'compare' ? compareHash(compareSelection.symbols)
-            : `#/${page}${page === 'analysis' ? `?symbol=${encodeURIComponent(symbol)}` : ''}`;
+            : `#/${page}${['analysis', 'predictions'].includes(page) ? `?symbol=${encodeURIComponent(symbol)}` : ''}`;
           return <a key={page} href={href} aria-label={label} aria-current={activeIndex === index ? 'page' : undefined} onClick={() => followSidebarLink(href)}>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon} /></svg>
             <span aria-hidden="true">{label}</span>
@@ -175,7 +179,7 @@ export default function App() {
     <main ref={main} id="main" className="wrap" tabIndex="-1">
       {account.error && <div role="alert" className="account-error">{account.error}</div>}
       {route.page === 'explore' && <Explore {...route.explore} preferences={preferences} watchlist={watchlist} selection={compareSelection} onOpen={selectStock} />}
-      {route.page === 'analysis' && <Analysis symbol={symbol} onSelectSymbol={selectStock} watchlist={watchlist} selection={compareSelection} defaultRange={preferences.defaultRange} chartDefaults={chartDefaults} />}
+      {route.page === 'analysis' && <Analysis symbol={symbol} onSelectSymbol={selectStock} watchlist={watchlist} selection={compareSelection} defaultRange={preferences.defaultRange} chartDefaults={chartDefaults} patternHorizon={route.patternHorizon} patternOpen={route.patternOpen} />}
       {route.page === 'compare' && <Compare symbols={route.compare.symbols} range={route.compare.range ?? preferences.defaultRange ?? '1y'} linkRange={route.compare.range} selection={compareSelection} onOpen={selectStock} />}
       {route.page === 'dashboard' && <Dashboard watchlist={watchlist} selection={compareSelection} onOpen={selectStock}
         invite={account.isAuthenticated && preferences.data?.saved === false && !inviteDismissed} onDismissInvite={() => setInviteDismissed(true)} />}

@@ -24,10 +24,36 @@ from app.explore import (
     ExploreSort,
     explore_database,
 )
+from app.research_ideas import IdeaMethod, ResearchIdeas, research_ideas
 from app.stock_metadata import SECTORS, Sector
 
 router = APIRouter(tags=["preferences"])
 SCHEMA_VERSION = 1
+
+
+@router.get("/me/research-ideas", response_model=ResearchIdeas)
+def private_ideas(
+    request: Request,
+    user: Annotated[CurrentUser, Depends(current_user)],
+    query: Annotated[str, Query(max_length=40)] = "",
+    method: IdeaMethod = "momentum",
+    page: Annotated[int, Query(ge=1, le=1000)] = 1,
+) -> ResearchIdeas:
+    try:
+        engine = account_engine(request)
+        with engine.connect() as connection:
+            preferences = read_preferences(connection, user.id)
+        return research_ideas(
+            engine,
+            query.strip().upper(),
+            preferences.sectors,
+            method,
+            private=True,
+            page=page,
+        )
+    except SQLAlchemyError:
+        raise preferences_unavailable() from None
+
 
 Purpose = Literal["learn", "compare", "track"]
 Horizon = Literal["weeks", "months", "years"]
