@@ -5,7 +5,7 @@ import StockSearchInput from './StockSearchInput.jsx';
 import { fetchPatternSnapshot } from './pattern-api.js';
 import { patternHash } from './pattern-route.js';
 
-function PatternResults({ symbol, horizon }) {
+export function PatternResults({ symbol, horizon }) {
   const [attempt, setAttempt] = useState(0);
   const [result, setResult] = useState(null);
   const key = `${symbol}:${attempt}`;
@@ -28,7 +28,7 @@ function PatternResults({ symbol, horizon }) {
     onReloadHistory={() => setAttempt(value => value + 1)} />;
 }
 
-export default function Predictions({ symbol, horizon, showModel = false }) {
+export default function Predictions({ symbol }) {
   const [draft, setDraft] = useState({ symbol, value: symbol });
   const [error, setError] = useState('');
   const value = draft.symbol === symbol ? draft.value : symbol;
@@ -38,11 +38,11 @@ export default function Predictions({ symbol, horizon, showModel = false }) {
       setError('Enter a ticker or choose a company from the suggestions.'); return;
     }
     setError(''); setDraft({ symbol: ticker, value: ticker });
-    window.location.hash = patternHash(ticker, horizon);
+    window.location.hash = `#/predictions?symbol=${encodeURIComponent(ticker)}&model=1`;
   }
   return <section className="app-page predictions-page" aria-labelledby="predictions-title">
-    <div className="page-heading"><h1 id="predictions-title">Predictions</h1><span className="historical-badge">Historical comparisons</span></div>
-    <p className="predictions-intro">Explore what followed similar price setups in the past. These examples describe history; they are not a validated forecast.</p>
+    <div className="page-heading"><h1 id="predictions-title">Predictions</h1><span className="historical-badge">Model unavailable</span></div>
+    <p className="predictions-intro">Model forecasts will appear here after evaluation and approval. Explore historical patterns within each stock’s Analysis page.</p>
     <div className="page-panel prediction-request">
       <div><span className="note-label">SELECTED STOCK</span><h2>{symbol}</h2><a href={`#/analysis?symbol=${encodeURIComponent(symbol)}`}>View {symbol} analysis ↗</a></div>
       <form className="prediction-search" onSubmit={event => { event.preventDefault(); open(value); }} noValidate>
@@ -50,12 +50,11 @@ export default function Predictions({ symbol, horizon, showModel = false }) {
         <div><StockSearchInput id="prediction-ticker" value={value} invalid={error} errorId="prediction-search-error"
           onChange={next => { setDraft({ symbol, value: next }); setError(''); }} onSelect={open}
           onClear={() => setDraft({ symbol, value: '' })} />
-          <button type="submit">Open patterns</button></div>
+          <button type="submit">Open model status</button></div>
         {error && <p id="prediction-search-error" className="validation-error" role="alert">{error}</p>}
       </form>
     </div>
-    <PatternResults key={symbol} symbol={symbol} horizon={horizon} />
-    <details key={`${symbol}:${showModel}`} className="page-panel help-disclosure model-details" open={showModel}>
+    <details key={symbol} className="page-panel help-disclosure model-details" open>
       <summary>ML prediction status and model information</summary>
       <div><SignalPanel key={symbol} symbol={symbol} />
         <h2>Prediction history</h2><h3>Prediction history is unavailable</h3>

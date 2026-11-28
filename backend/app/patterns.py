@@ -34,6 +34,7 @@ class PatternMatch(BaseModel):
     setup: Setup
     change_pct: float
     path: list[float]
+    match_distance: float
 
 
 class PatternPoint(BaseModel):
@@ -66,7 +67,12 @@ class PatternResponse(BaseModel):
     horizon_sessions: Literal[5, 21]
     status: Literal["available", "unavailable"]
     reason: (
-        Literal["insufficient_history", "insufficient_matches", "invalid_history"]
+        Literal[
+            "insufficient_history",
+            "insufficient_matches",
+            "invalid_history",
+            "current_event_window",
+        ]
         | None
     )
     current_setup: Setup | None
@@ -175,7 +181,7 @@ def calculate_patterns(
         return result
     # Current state crossing a recorded event is not presented as comparable.
     if any(bar.event for bar in bars[-LOOKBACK:]):
-        return result.model_copy(update={"reason": "insufficient_matches"})
+        return result.model_copy(update={"reason": "current_event_window"})
     current = setup_at(bars, len(bars) - 1)
     candidates, excluded = [], 0
     for index in range(LOOKBACK - 1, len(bars) - horizon):
@@ -197,6 +203,8 @@ def calculate_patterns(
     if len(selected) < MIN_MATCHES:
         return result
     matches = []
+    columns = list(zip(*(vector(state) for _, state in candidates), strict=True))
+    scales = [stdev(column) if len(column) > 1 else 0.0 for column in columns]
     for index, state in selected:
         path = [
             100 * (bar.close / bars[index].close - 1)
@@ -209,6 +217,15 @@ def calculate_patterns(
                 setup=state,
                 change_pct=path[-1],
                 path=path,
+                match_distance=sqrt(
+                    fsum(
+                        ((a - b) / scale) ** 2
+                        for a, b, scale in zip(
+                            vector(state), vector(current), scales, strict=True
+                        )
+                        if scale > 1e-12
+                    )
+                ),
             )
         )
     outcomes = [match.change_pct for match in matches]

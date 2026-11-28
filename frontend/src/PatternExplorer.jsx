@@ -73,9 +73,15 @@ export default function PatternExplorer({ symbol, history, horizon, onChangeHori
       {error && <div className="pattern-message" role="alert"><p>{error}</p><button type="button" onClick={retry}>Retry patterns</button></div>}
       {mismatch && <div className="pattern-message" role="alert"><p>The stored history changed. Refresh the history and matches to use the same data.</p>
         <button type="button" onClick={onReloadHistory}>Refresh history and matches</button></div>}
-      {data?.status === 'unavailable' && !mismatch && history && <p className="pattern-message">{data.reason === 'invalid_history' ?
-        'This history needs a data check before comparisons can be shown.' :
-        'There are not enough usable, non-overlapping examples for this setup. Try 5 sessions or another stock.'}</p>}
+      {data?.status === 'unavailable' && !mismatch && history && <div className="pattern-message">
+        <p>{{
+          invalid_history: 'Stored prices need a data check before comparisons can be shown.',
+          insufficient_history: 'This stock has too few stored sessions for this comparison.',
+          current_event_window: 'A recorded split or distribution affects the latest setup. Comparisons will resume when the 50-session setup no longer crosses that event.',
+          insufficient_matches: 'Fewer than eight usable, non-overlapping examples remain after history and event checks.',
+        }[data.reason]}</p>
+        {horizon === 21 && <button type="button" onClick={() => onChangeHorizon(5)}>Try 5 sessions</button>}
+      </div>}
     </div>
     {ready && <>
       <div className="pattern-setup"><strong>Setup as of {data.as_of}</strong>
@@ -95,17 +101,18 @@ export default function PatternExplorer({ symbol, history, horizon, onChangeHori
       <details className="pattern-examples"><summary>Inspect the {data.matched_count} historical examples</summary>
         <div className="pattern-table-scroll" tabIndex="0" role="region" aria-label="Historical pattern examples">
           <table><caption className="sr-only">Nearest historical comparisons for {symbol}, ordered by setup similarity</caption>
-            <thead><tr><th scope="col">Setup date</th><th scope="col">End date</th><th scope="col">20-session change</th><th scope="col">Daily variability</th><th scope="col">Vs. 50-session avg.</th><th scope="col">Actual later change</th></tr></thead>
+            <thead><tr><th scope="col">Setup date</th><th scope="col">End date</th><th scope="col">20-session change</th><th scope="col">Daily variability</th><th scope="col">Vs. 50-session avg.</th><th scope="col">Match distance</th><th scope="col">Actual later change</th></tr></thead>
             <tbody>{data.matches.map((match, i) => <tr key={match.date} data-highlighted={selected === i}>
               <td><button type="button" aria-pressed={selected === i} onClick={() => setSelected(selected === i ? null : i)}>{match.date}</button></td>
               <td>{match.end_date}</td><td>{percent(match.setup.change_20_pct)}</td><td>{match.setup.daily_variability_pct.toFixed(2)}%</td><td>{percent(match.setup.vs_average_50_pct)}</td>
+              <td>{match.match_distance === undefined ? 'Unavailable' : match.match_distance.toFixed(2)}</td>
               <td className={tone(match.change_pct)}>{percent(match.change_pct)}</td></tr>)}</tbody></table>
         </div>
       </details>
       <p className="pattern-source">{data.matched_count} closest non-overlapping periods from {data.calculation_sessions.toLocaleString()} stored observations · {data.calculation_start} to {data.as_of} · <a href={data.source_url} target="_blank" rel="noopener noreferrer">{data.source}</a></p>
       <details className="pattern-method"><summary>How matching works and what this can tell you</summary>
         <p>We compare 20-session price change, the sample standard deviation of 20 daily close changes, and price relative to its 50-session average. Each input uses only prices known on its setup date. Features are scaled using prior eligible setups, with equal weight. The closest examples are approximate comparisons.</p>
-        <p>We choose up to 12 examples by setup similarity, never by how well they performed afterward, and require at least 8. Their outcome windows do not share observations; this does not make them statistically independent. Recorded split-event windows are excluded; unrecorded corporate actions may still affect history.</p>
+        <p>Match distance measures separation across the three scaled features. Smaller values mean closer setups. There is no validated cutoff; even the nearest examples can be distant. We choose up to 12 examples by setup similarity and require at least 8. Their outcome windows do not share observations and may still be dependent. Recorded split-event windows are excluded; unrecorded corporate actions may still affect history.</p>
         <p>Windows count stored sessions, not calendar days. Missing observations may stretch calendar duration. Quartiles use linear interpolation. Price change excludes dividends. These historical comparisons are not a validated forecast or a probability of profit.</p>
         <p>{data.adjustment}{data.has_earlier ? ' Earlier stored observations are outside the 2,500-session calculation limit.' : ''}</p>
       </details>

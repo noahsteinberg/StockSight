@@ -7,6 +7,10 @@ active. Product architecture and promotion gates are documented in the
 
 ## Frozen results
 
+- [21-session historical-pattern ranking diagnostic](docs/PATTERN_RANKING_DEVELOPMENT.md)
+  covers the newly approved 2014–2018 development check. It does not qualify
+  a serving model.
+
 - [Open-source model audit](docs/OPEN_SOURCE_MODEL_AUDIT.md)
 - [Next-session model round](docs/NEXT_SESSION_ROUND2_RESULTS.md)
 - [Continuous-target experiment protocol](docs/NEXT_SESSION_TARGET_ROUND.md)

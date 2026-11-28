@@ -1,5 +1,32 @@
 # Historical Pattern Explorer
 
+## Current approved behavior
+
+Patterns now live in an expandable section below Analysis's chart. Use
+`/#/analysis?symbol=AAPL&horizon=21&patterns=1` to open it, or expand
+Historical patterns manually. A missing horizon defaults to 21. Old
+`/#/predictions?symbol=AAPL&horizon=5` links redirect to the corresponding
+Analysis section. Model status remains accessible from Analysis's research
+signal link. The earlier Predictions-only flow below records Parth's original
+PR checkpoint.
+
+The match table now returns `match_distance`, the Euclidean distance over the
+active standardized features. Smaller numbers mean closer setups, with no
+validated useful cutoff. The frontend accepts older responses without this
+field and displays Unavailable for distance.
+
+An unavailable `current_event_window` identifies recorded split/distribution
+events crossing the current 50-session setup. Short history and insufficient
+non-overlapping matches have separate explanations. The 21-session empty state
+offers an explicit 5-session switch. Requirements remain eight usable examples
+and at most 2,500 stored calculation sessions.
+
+The bounded ranking experiment is documented in
+[the development diagnostic](../ml/docs/PATTERN_RANKING_DEVELOPMENT.md). It does
+not qualify a serving model.
+
+## Original PR checkpoint
+
 Parth approved this increment on November 27, 2026: put a historical-comparison
 panel on Analysis and show a local working preview first. After reviewing it,
 he authorized a feature-branch push and PR for Noah. Merge and deployment remain

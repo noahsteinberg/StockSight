@@ -4,8 +4,8 @@ import { patternHash, patternHorizon } from '../src/pattern-route.js';
 import { parsePatternSnapshot } from '../src/pattern-api.js';
 
 test('historical links preserve the ticker and selected window in a shareable URL', () => {
-  assert.equal(patternHash('AAPL', 5), '#/predictions?symbol=AAPL&horizon=5');
-  assert.equal(patternHash('BRK-B', 21), '#/predictions?symbol=BRK-B&horizon=21');
+  assert.equal(patternHash('AAPL', 5), '#/analysis?symbol=AAPL&horizon=5&patterns=1');
+  assert.equal(patternHash('BRK-B', 21), '#/analysis?symbol=BRK-B&horizon=21&patterns=1');
   assert.equal(patternHorizon('5'), 5);
   for (const value of [null, undefined, '21', '0', '6', '05', 'bad']) {
     assert.equal(patternHorizon(value), 21);

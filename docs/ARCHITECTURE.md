@@ -1,5 +1,24 @@
 # Architecture
 
+## Research ideas and embedded patterns
+
+Explore retains the complete paginated list and adds a separate six-candidate
+Research ideas panel. Its adapter reads `/api/research-ideas` for public filters
+and `/api/me/research-ideas` for account-owned saved sectors. Both use
+`research-ideas-v1` observed momentum or variability metrics. This read path
+does not call a provider or write storage.
+
+Analysis owns the expandable pattern results. The stock, 5/21-session horizon
+and open state are encoded as `symbol`, `horizon` and `patterns=1`. Historical
+Predictions links redirect there. Changing the chart window does not change
+the bounded pattern calculation. A separate recent-price response verifies
+pattern revision and date, and a mismatch offers a joint refresh.
+
+Predictions carries model availability and future forecast history through
+the existing signal adapter. It is linked from Analysis, outside the sidebar.
+The numerical ranking diagnostic runs offline through
+`app.evaluate_patterns` and exports aggregate development evidence only.
+
 For the combined release, human approval and next increments, read the
 [release handoff](NEXT_RELEASE_AND_ML_HANDOFF.md).
 
@@ -25,7 +44,8 @@ update runs. See [daily refresh](DAILY_REFRESH.md).
 | #/dashboard (#/watchlist) | Dashboard | Private watchlist with stored closes, session dates and daily change, filtering, open/remove, compare toggle, optional preferences invitation and account states |
 | #/preferences | Research preferences | Optional private form with purpose, sectors, horizon and default chart window, save/reset and guest sign-in prompt |
 | #/explore?mine=1 | Explore: Use my preferences | Private list of stocks in the account's saved sectors with a match reason per row; sector filter disabled; no URL carries the sectors or any user ID |
-| #/predictions?symbol=AAPL&horizon=5 | Predictions | Stock picker, full historical-pattern graph/examples for 5 or 21 stored sessions, and separate expandable ML availability/history |
+| #/analysis?symbol=AAPL&horizon=5&patterns=1 | Analysis patterns | Expanded historical-pattern graph and inspectable 5-session examples |
+| #/predictions?symbol=AAPL | Predictions | Stock picker and model availability/history |
 | #/performance | Model performance | Unavailable evaluation |
 | #/methodology | Data & methodology | Source, coverage, adjustment, indicator and project information |
 | #/settings | Settings | Browser-local SMA 20 and RSI 14 defaults, account details, research preferences link, recovery and sign-out |
@@ -48,15 +68,13 @@ callback returns to Dashboard (#/dashboard).
 
 ## Implementation
 
-- Analysis links its 5/21-session choices to Predictions, preserving the stock
-  and horizon in the URL. Predictions.jsx hosts PatternExplorer.jsx, loads an
-  independent recent-price snapshot, and provides a supported-stock picker.
-  The Predictions sidebar entry preserves stock context. ML status remains
-  separate in an expandable section. pattern-api.js validates paths and summaries; app/patterns.py
-  retrieves at most 2,500 bars plus a retention sentinel in one SELECT and
-  computes descriptive setup matches. Snapshot mismatch hides results; replay
-  hides Analysis's links. No model, provider request, persistence or schema change is
-  involved. See [Historical Pattern Explorer](PATTERNS.md).
+- Analysis expands PatternResults and PatternExplorer below the chart. Their
+  independent price read verifies the pattern snapshot. The stock, horizon and
+  open state stay in the URL. Predictions retains its supported-stock picker
+  for model status. The pattern adapter validates paths and summaries; the
+  backend reads at most 2,500 bars plus a retention sentinel in one SELECT.
+  Snapshot mismatch hides results and replay hides the current pattern section.
+  See [Historical Pattern Explorer](PATTERNS.md).
 
 - App.jsx owns the selected stock, account-scoped watchlist and navigation.
   use-page-route.js subscribes to hash changes. The desktop sidebar expands on

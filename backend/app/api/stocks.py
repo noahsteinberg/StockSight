@@ -32,6 +32,7 @@ from app.market import (
 )
 from app.patterns import PatternResponse, patterns_database, patterns_fixture
 from app.repository import database_history, search_database, supported_symbol
+from app.research_ideas import IdeaMethod, ResearchIdeas, research_ideas
 from app.signals import SUPPORTED_HORIZONS, SignalResponse, unavailable_signal
 from app.stock_metadata import SOURCE as METADATA_SOURCE
 from app.stock_metadata import MetadataSource, Sector, profile_for
@@ -97,6 +98,24 @@ def sectors(request: Request) -> SectorList:
         return sectors_fixture()
     try:
         return sectors_database(request.app.state.engine)
+    except SQLAlchemyError:
+        raise unavailable() from None
+
+
+@router.get("/research-ideas", response_model=ResearchIdeas)
+def ideas(
+    request: Request,
+    query: Annotated[str, Query(max_length=40)] = "",
+    sector: Sector | None = None,
+    method: IdeaMethod = "momentum",
+) -> ResearchIdeas:
+    try:
+        return research_ideas(
+            request.app.state.engine,
+            query.strip().upper(),
+            [sector] if sector else [],
+            method,
+        )
     except SQLAlchemyError:
         raise unavailable() from None
 

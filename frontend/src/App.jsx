@@ -22,7 +22,6 @@ const pages = [
   ['dashboard', 'Dashboard', 'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z'],
   ['explore', 'Explore', 'M17 10.5a6.5 6.5 0 1 1-13 0a6.5 6.5 0 0 1 13 0M20 20l-4.9-4.9'],
   ['analysis', 'Analysis', 'M4 4v16h16M7 15l4-5 4 2 5-6'],
-  ['predictions', 'Predictions', 'M4 19h16M5 15l4-4 4 2 6-8M15 5h4v4'],
   ['compare', 'Compare', 'M4 20V10M10 20V4M16 20v-7M22 20H2'],
   ['methodology', 'Methodology', 'M6 4h9l3 3v13H6zM14 4v4h4M9 12h6m-6 4h6'],
 ];
@@ -76,7 +75,10 @@ export default function App() {
   }, [route.page, account.isAuthenticated, refreshWatchlist, watchlistError]);
   // Explore keeps its search/page in the URL; typing must not move focus away
   // from the search field, so only entering Explore counts as a navigation.
-  const focusKey = ['explore', 'compare', 'predictions'].includes(route.page) ? route.page : route.hash;
+  const focusKey = ['explore', 'compare', 'predictions', 'analysis'].includes(route.page) ? route.page : route.hash;
+  useEffect(() => {
+    if (route.legacyPatterns) window.location.replace(patternHash(symbol, route.patternHorizon));
+  }, [route.legacyPatterns, symbol, route.patternHorizon]);
   useEffect(() => {
     document.title = `${pageTitles[route.page] || 'Page not found'} | StockSight`;
     main.current?.focus({ preventScroll: true });
@@ -157,7 +159,6 @@ export default function App() {
       <div className="sidebar-items">
         {pages.map(([page, label, icon], index) => {
           const href = page === 'compare' ? compareHash(compareSelection.symbols)
-            : page === 'predictions' ? patternHash(symbol, route.patternHorizon)
             : `#/${page}${['analysis', 'predictions'].includes(page) ? `?symbol=${encodeURIComponent(symbol)}` : ''}`;
           return <a key={page} href={href} aria-label={label} aria-current={activeIndex === index ? 'page' : undefined} onClick={() => followSidebarLink(href)}>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon} /></svg>
@@ -178,11 +179,11 @@ export default function App() {
     <main ref={main} id="main" className="wrap" tabIndex="-1">
       {account.error && <div role="alert" className="account-error">{account.error}</div>}
       {route.page === 'explore' && <Explore {...route.explore} preferences={preferences} watchlist={watchlist} selection={compareSelection} onOpen={selectStock} />}
-      {route.page === 'analysis' && <Analysis symbol={symbol} onSelectSymbol={selectStock} watchlist={watchlist} selection={compareSelection} defaultRange={preferences.defaultRange} chartDefaults={chartDefaults} />}
+      {route.page === 'analysis' && <Analysis symbol={symbol} onSelectSymbol={selectStock} watchlist={watchlist} selection={compareSelection} defaultRange={preferences.defaultRange} chartDefaults={chartDefaults} patternHorizon={route.patternHorizon} patternOpen={route.patternOpen} />}
       {route.page === 'compare' && <Compare symbols={route.compare.symbols} range={route.compare.range ?? preferences.defaultRange ?? '1y'} linkRange={route.compare.range} selection={compareSelection} onOpen={selectStock} />}
       {route.page === 'dashboard' && <Dashboard watchlist={watchlist} selection={compareSelection} onOpen={selectStock}
         invite={account.isAuthenticated && preferences.data?.saved === false && !inviteDismissed} onDismissInvite={() => setInviteDismissed(true)} />}
-      {route.page === 'predictions' && <Predictions symbol={symbol} horizon={route.patternHorizon} showModel={route.showModel} />}
+      {route.page === 'predictions' && <Predictions symbol={symbol} />}
       {route.page === 'performance' && <ModelPerformance />}
       {route.page === 'methodology' && <Methodology />}
       {route.page === 'preferences' && <Preferences preferences={preferences} />}

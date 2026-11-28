@@ -82,6 +82,29 @@ See [import policy](PRICES_IMPORT.md) for the separate team snapshot.
 
 ## Explore API
 
+### Research ideas
+
+`GET /api/research-ideas?query=&sector=&method=momentum` returns up to six
+research candidates. Method is `momentum` or `variability`. Query is capped
+at 40 characters and sector uses the same reviewed taxonomy as Explore.
+`GET /api/me/research-ideas?query=&method=` requires the existing account
+session/bearer and uses only that account's saved sectors. Empty saved sectors
+yield an empty private list. Existing private cache/CSRF/ownership rules apply.
+
+Response fields are `calculation_version: research-ideas-v1`, `method`,
+`query`, `sectors`, `latest_session`, `matching_count`, `eligible_count`
+and `items`. Each item contains `symbol`, `name`, `sector`, `metric_pct`,
+`reason`, `as_of` and `series_revision`.
+
+Eligibility requires 21 valid positive closes ending at the newest stored
+universe session and no recorded split event in that window. Momentum is
+`100 * (last / first - 1)`, descending. Variability is sample standard
+deviation of the 20 percentage close changes, ascending. Ties sort by ticker.
+Missing/stale histories are excluded and reflected in the coverage counts.
+Invalid inputs return 422 and storage failures return sanitized 503 responses.
+
+### Stock list
+
 GET /api/explore?query=&sector=&sort=ticker&page=1&page_size=25 returns one public page of
 supported stocks (those with a stored price series), ordered by symbol. A query
 matches ticker, stored name or reviewed company name, case-insensitively, and an

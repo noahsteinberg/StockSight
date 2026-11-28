@@ -50,7 +50,7 @@ test('navigation supports refresh, browser history, active state and page focus'
   await expect(page.getByRole('heading', { level: 1, name: 'Dashboard', exact: true })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Dashboard', exact: true })).toHaveAttribute('aria-current', 'page');
   await expect(page.locator('main')).toBeFocused();
-  await expect(page.getByRole('navigation').getByRole('link', { name: 'Predictions', exact: true })).toBeVisible();
+  await expect(page.getByRole('navigation').getByRole('link', { name: 'Predictions', exact: true })).toHaveCount(0);
   await page.reload();
   await expect(page).toHaveTitle('Dashboard | StockSight');
   await page.goBack();
@@ -65,7 +65,6 @@ test('predictions preserve stock context and never call an absent ML service', a
   await page.goto('/#/analysis?symbol=AAPL');
   await page.getByRole('link', { name: 'Research signal for AAPL' }).click();
   await expect(page.getByRole('heading', { name: 'AAPL', exact: true })).toBeVisible();
-  await page.locator('.model-details summary').click();
   // The typed signal API answers "unavailable"; no disabled generate button remains.
   await expect(page.getByRole('region', { name: 'Research signal · AAPL' })).toContainText('No approved model signal is available.');
   await expect(page.getByRole('button', { name: 'Generate prediction' })).toHaveCount(0);
@@ -135,7 +134,7 @@ test('the desktop rail expands from icons, resizes the content, and stays fixed 
   const active = nav.getByRole('link', { name: 'Analysis', exact: true });
   const label = active.locator('span');
   await expect(active).toHaveAttribute('aria-current', 'page');
-  await expect(nav.locator('a svg')).toHaveCount(7);
+  await expect(nav.locator('a svg')).toHaveCount(6);
   await expect(label).toHaveCSS('opacity', '0');
   const before = await page.locator('main').boundingBox();
   const rail = await nav.boundingBox();

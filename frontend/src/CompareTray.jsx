@@ -1,11 +1,11 @@
 import { compareLimit } from './compare-api.js';
 import { compareHash } from './use-compare-selection.js';
 
-export function CompareToggle({ symbol, selection }) {
+export function CompareToggle({ symbol, selection, context = '' }) {
   const selected = selection.symbols.includes(symbol);
   const blocked = !selected && selection.full;
   return <button type="button" className="compare-toggle" aria-pressed={selected} disabled={blocked}
-    aria-label={`Compare ${symbol}`}
+    aria-label={`${context ? `${context}: ` : ''}Compare ${symbol}`}
     title={blocked ? `Comparison holds up to ${compareLimit} stocks` : selected ? `Remove ${symbol} from comparison` : `Add ${symbol} to comparison`}
     onClick={() => selection.toggle(symbol)}>
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d={selected ? 'm5 12 4.5 4.5L19 7' : 'M12 5v14M5 12h14'} /></svg>

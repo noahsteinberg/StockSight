@@ -1,0 +1,1516 @@
+{
+  "protocol": "historical-pattern-ranking-development-v1",
+  "source_sha256": "ee0b2ed66c8abb87e0cf36798a32258bc902c0e1687ddee2a485c80b44216e89",
+  "horizon_sessions": 21,
+  "development_period": [
+    "2014-01-01",
+    "2018-12-31"
+  ],
+  "parity_checks": 6,
+  "rejected_source_bars": 235,
+  "eligible_observations": 26211,
+  "possible_observations": 26682,
+  "coverage": 0.9823476501011918,
+  "stock_count": 474,
+  "mean_match_distance": 0.3178380350908874,
+  "limitations": [
+    "Current snapshot universe has survivorship bias.",
+    "Price adjustment is unverified; price-only returns exclude dividends.",
+    "Recorded corporate-action outcomes are excluded, conditioning coverage.",
+    "Monthly 21-session outcomes can overlap and are not independent.",
+    "Same-close diagnostic cannot establish executable next-entry returns.",
+    "40bps is illustrative roundtrip long-short cost, not measured execution.",
+    "This reused development period cannot approve a serving model."
+  ],
+  "results": {
+    "patterns": {
+      "mean_rank_ic": 0.022863867913776825,
+      "mean_gross_decile_spread_pct": 0.2549431535884997,
+      "mean_illustrative_spread_after_40bps_pct": -0.14505684641150032,
+      "mean_top_decile_turnover": 0.7504720591506706,
+      "by_year": {
+        "2014": {
+          "mean_rank_ic": -0.011811977349799782,
+          "mean_gross_decile_spread_pct": -0.49502487883397306
+        },
+        "2015": {
+          "mean_rank_ic": 0.037845376985022335,
+          "mean_gross_decile_spread_pct": 0.7716918642949366
+        },
+        "2016": {
+          "mean_rank_ic": 0.03000282975979594,
+          "mean_gross_decile_spread_pct": 0.08913958068776251
+        },
+        "2017": {
+          "mean_rank_ic": 0.03827770185114464,
+          "mean_gross_decile_spread_pct": 0.31880444954389203
+        },
+        "2018": {
+          "mean_rank_ic": 0.01943371640450985,
+          "mean_gross_decile_spread_pct": 0.6571370719821568
+        }
+      },
+      "dates": [
+        {
+          "date": "2014-01-31",
+          "stocks": 435,
+          "rank_ic": 0.02664268001288748,
+          "gross_decile_spread_pct": 0.35520804513330706,
+          "illustrative_spread_after_40bps_pct": -0.04479195486669296,
+          "top_decile_turnover": null
+        },
+        {
+          "date": "2014-02-28",
+          "stocks": 435,
+          "rank_ic": -0.09958830038327135,
+          "gross_decile_spread_pct": -1.424896472037071,
+          "illustrative_spread_after_40bps_pct": -1.824896472037071,
+          "top_decile_turnover": 0.6818181818181819
+        },
+        {
+          "date": "2014-03-31",
+          "stocks": 435,
+          "rank_ic": -0.07052601040620347,
+          "gross_decile_spread_pct": -1.494358933082572,
+          "illustrative_spread_after_40bps_pct": -1.894358933082572,
+          "top_decile_turnover": 0.6818181818181819
+        },
+        {
+          "date": "2014-04-30",
+          "stocks": 436,
+          "rank_ic": 0.055145558141217625,
+          "gross_decile_spread_pct": 0.91971993453273,
+          "illustrative_spread_after_40bps_pct": 0.51971993453273,
+          "top_decile_turnover": 0.6136363636363636
+        },
+        {
+          "date": "2014-05-30",
+          "stocks": 438,
+          "rank_ic": -0.036915103024812164,
+          "gross_decile_spread_pct": -0.8025016816920556,
+          "illustrative_spread_after_40bps_pct": -1.2025016816920555,
+          "top_decile_turnover": 0.6363636363636364
+        },
+        {
+          "date": "2014-06-30",
+          "stocks": 438,
+          "rank_ic": 0.01935436789458046,
+          "gross_decile_spread_pct": 1.3562524739690915,
+          "illustrative_spread_after_40bps_pct": 0.9562524739690915,
+          "top_decile_turnover": 0.6818181818181819
+        },
+        {
+          "date": "2014-07-31",
+          "stocks": 440,
+          "rank_ic": 0.03668243027175666,
+          "gross_decile_spread_pct": 0.12169370730332929,
+          "illustrative_spread_after_40bps_pct": -0.27830629269667073,
+          "top_decile_turnover": 0.8409090909090909
+        },
+        {
+          "date": "2014-08-29",
+          "stocks": 443,
+          "rank_ic": -0.08605125150072701,
+          "gross_decile_spread_pct": -0.9898872814536144,
+          "illustrative_spread_after_40bps_pct": -1.3898872814536145,
+          "top_decile_turnover": 0.7777777777777778
+        },
+        {
+          "date": "2014-09-30",
+          "stocks": 443,
+          "rank_ic": 0.07471984818950694,
+          "gross_decile_spread_pct": 1.2162231604427702,
+          "illustrative_spread_after_40bps_pct": 0.8162231604427702,
+          "top_decile_turnover": 0.7333333333333334
+        },
+        {
+          "date": "2014-10-31",
+          "stocks": 441,
+          "rank_ic": -0.01386834454061345,
+          "gross_decile_spread_pct": -2.9269970498129005,
+          "illustrative_spread_after_40bps_pct": -3.3269970498129005,
+          "top_decile_turnover": 0.7555555555555555
+        },
+        {
+          "date": "2014-11-28",
+          "stocks": 441,
+          "rank_ic": -0.09218428630193336,
+          "gross_decile_spread_pct": -2.5912494335487595,
+          "illustrative_spread_after_40bps_pct": -2.9912494335487594,
+          "top_decile_turnover": 0.7333333333333334
+        },
+        {
+          "date": "2014-12-31",
+          "stocks": 445,
+          "rank_ic": 0.04484468345001423,
+          "gross_decile_spread_pct": 0.320494984238068,
+          "illustrative_spread_after_40bps_pct": -0.07950501576193203,
+          "top_decile_turnover": 0.7777777777777778
+        },
+        {
+          "date": "2015-01-30",
+          "stocks": 447,
+          "rank_ic": 0.2460071735980635,
+          "gross_decile_spread_pct": 5.436250608334356,
+          "illustrative_spread_after_40bps_pct": 5.036250608334355,
+          "top_decile_turnover": 0.8
+        },
+        {
+          "date": "2015-02-27",
+          "stocks": 446,
+          "rank_ic": 0.03297501050824038,
+          "gross_decile_spread_pct": 0.7979514835294714,
+          "illustrative_spread_after_40bps_pct": 0.3979514835294714,
+          "top_decile_turnover": 0.8
+        },
+        {
+          "date": "2015-03-31",
+          "stocks": 444,
+          "rank_ic": 0.06106201059912982,
+          "gross_decile_spread_pct": 2.3271401018230704,
+          "illustrative_spread_after_40bps_pct": 1.9271401018230705,
+          "top_decile_turnover": 0.7777777777777778
+        },
+        {
+          "date": "2015-04-30",
+          "stocks": 444,
+          "rank_ic": 0.08821050741054798,
+          "gross_decile_spread_pct": 2.03509947304748,
+          "illustrative_spread_after_40bps_pct": 1.6350994730474802,
+          "top_decile_turnover": 0.8222222222222222
+        },
+        {
+          "date": "2015-05-29",
+          "stocks": 441,
+          "rank_ic": -0.019253995304415475,
+          "gross_decile_spread_pct": 0.38258212245834455,
+          "illustrative_spread_after_40bps_pct": -0.01741787754165547,
+          "top_decile_turnover": 0.7777777777777778
+        },
+        {
+          "date": "2015-06-30",
+          "stocks": 438,
+          "rank_ic": 0.026757824730967578,
+          "gross_decile_spread_pct": 2.3569761020428297,
+          "illustrative_spread_after_40bps_pct": 1.9569761020428298,
+          "top_decile_turnover": 0.7555555555555555
+        },
+        {
+          "date": "2015-07-31",
+          "stocks": 438,
+          "rank_ic": -0.055823115634152605,
+          "gross_decile_spread_pct": -1.9060934872108302,
+          "illustrative_spread_after_40bps_pct": -2.30609348721083,
+          "top_decile_turnover": 0.75
+        },
+        {
+          "date": "2015-08-31",
+          "stocks": 444,
+          "rank_ic": -0.0943785949949239,
+          "gross_decile_spread_pct": -1.57816659004565,
+          "illustrative_spread_after_40bps_pct": -1.97816659004565,
+          "top_decile_turnover": 0.7777777777777778
+        },
+        {
+          "date": "2015-09-30",
+          "stocks": 451,
+          "rank_ic": 0.09044103892366355,
+          "gross_decile_spread_pct": -0.4064229766335874,
+          "illustrative_spread_after_40bps_pct": -0.8064229766335874,
+          "top_decile_turnover": 0.6521739130434783
+        },
+        {
+          "date": "2015-10-30",
+          "stocks": 450,
+          "rank_ic": 0.08446099322301182,
+          "gross_decile_spread_pct": 3.2514881735362615,
+          "illustrative_spread_after_40bps_pct": 2.8514881735362616,
+          "top_decile_turnover": 0.6086956521739131
+        },
+        {
+          "date": "2015-11-30",
+          "stocks": 449,
+          "rank_ic": 0.01385446494856294,
+          "gross_decile_spread_pct": -1.8082767212356394,
+          "illustrative_spread_after_40bps_pct": -2.2082767212356393,
+          "top_decile_turnover": 0.8
+        },
+        {
+          "date": "2015-12-31",
+          "stocks": 448,
+          "rank_ic": -0.020168794188427673,
+          "gross_decile_spread_pct": -1.6282259181068657,
+          "illustrative_spread_after_40bps_pct": -2.0282259181068656,
+          "top_decile_turnover": 0.7111111111111111
+        },
+        {
+          "date": "2016-01-29",
+          "stocks": 449,
+          "rank_ic": 0.06329806978470674,
+          "gross_decile_spread_pct": -0.0030831487369100685,
+          "illustrative_spread_after_40bps_pct": -0.4030831487369101,
+          "top_decile_turnover": 0.6888888888888889
+        },
+        {
+          "date": "2016-02-29",
+          "stocks": 450,
+          "rank_ic": 0.0921642082183122,
+          "gross_decile_spread_pct": 1.7441212903699785,
+          "illustrative_spread_after_40bps_pct": 1.3441212903699786,
+          "top_decile_turnover": 0.6888888888888889
+        },
+        {
+          "date": "2016-03-31",
+          "stocks": 452,
+          "rank_ic": 0.04273740733603252,
+          "gross_decile_spread_pct": -0.5220504594349987,
+          "illustrative_spread_after_40bps_pct": -0.9220504594349987,
+          "top_decile_turnover": 0.8478260869565217
+        },
+        {
+          "date": "2016-04-29",
+          "stocks": 453,
+          "rank_ic": 0.08762293454601128,
+          "gross_decile_spread_pct": 0.015994093448475688,
+          "illustrative_spread_after_40bps_pct": -0.38400590655152433,
+          "top_decile_turnover": 0.7173913043478262
+        },
+        {
+          "date": "2016-05-31",
+          "stocks": 454,
+          "rank_ic": 0.017174942220891398,
+          "gross_decile_spread_pct": 1.2109857942726896,
+          "illustrative_spread_after_40bps_pct": 0.8109857942726896,
+          "top_decile_turnover": 0.6739130434782609
+        },
+        {
+          "date": "2016-06-30",
+          "stocks": 453,
+          "rank_ic": 0.1875649478313201,
+          "gross_decile_spread_pct": 4.371758053498217,
+          "illustrative_spread_after_40bps_pct": 3.9717580534982173,
+          "top_decile_turnover": 0.782608695652174
+        },
+        {
+          "date": "2016-07-29",
+          "stocks": 453,
+          "rank_ic": 0.010436964547419016,
+          "gross_decile_spread_pct": -0.3321426601770392,
+          "illustrative_spread_after_40bps_pct": -0.7321426601770392,
+          "top_decile_turnover": 0.8043478260869565
+        },
+        {
+          "date": "2016-08-31",
+          "stocks": 454,
+          "rank_ic": -0.005175867478608224,
+          "gross_decile_spread_pct": 1.2625457430111593,
+          "illustrative_spread_after_40bps_pct": 0.8625457430111593,
+          "top_decile_turnover": 0.8478260869565217
+        },
+        {
+          "date": "2016-09-30",
+          "stocks": 452,
+          "rank_ic": -0.09251186388566798,
+          "gross_decile_spread_pct": -0.7610210406792253,
+          "illustrative_spread_after_40bps_pct": -1.1610210406792252,
+          "top_decile_turnover": 0.7391304347826086
+        },
+        {
+          "date": "2016-10-31",
+          "stocks": 449,
+          "rank_ic": -0.16225381800827235,
+          "gross_decile_spread_pct": -5.410237509199703,
+          "illustrative_spread_after_40bps_pct": -5.810237509199704,
+          "top_decile_turnover": 0.7173913043478262
+        },
+        {
+          "date": "2016-11-30",
+          "stocks": 452,
+          "rank_ic": 0.0031274474807265057,
+          "gross_decile_spread_pct": -1.0015818731952906,
+          "illustrative_spread_after_40bps_pct": -1.4015818731952905,
+          "top_decile_turnover": 0.7173913043478262
+        },
+        {
+          "date": "2016-12-30",
+          "stocks": 455,
+          "rank_ic": 0.11584858452468005,
+          "gross_decile_spread_pct": 0.49438668507579653,
+          "illustrative_spread_after_40bps_pct": 0.0943866850757965,
+          "top_decile_turnover": 0.7173913043478262
+        },
+        {
+          "date": "2017-01-31",
+          "stocks": 459,
+          "rank_ic": 0.12665964303574728,
+          "gross_decile_spread_pct": 2.211652532698952,
+          "illustrative_spread_after_40bps_pct": 1.811652532698952,
+          "top_decile_turnover": 0.7608695652173914
+        },
+        {
+          "date": "2017-02-28",
+          "stocks": 459,
+          "rank_ic": -0.0030277309328895783,
+          "gross_decile_spread_pct": 0.17765081540408256,
+          "illustrative_spread_after_40bps_pct": -0.22234918459591746,
+          "top_decile_turnover": 0.8260869565217391
+        },
+        {
+          "date": "2017-03-31",
+          "stocks": 458,
+          "rank_ic": 0.04737180307482386,
+          "gross_decile_spread_pct": -0.18207579406160598,
+          "illustrative_spread_after_40bps_pct": -0.582075794061606,
+          "top_decile_turnover": 0.8260869565217391
+        },
+        {
+          "date": "2017-04-28",
+          "stocks": 457,
+          "rank_ic": -0.08476534230668069,
+          "gross_decile_spread_pct": -2.60767500817892,
+          "illustrative_spread_after_40bps_pct": -3.00767500817892,
+          "top_decile_turnover": 0.6521739130434783
+        },
+        {
+          "date": "2017-05-31",
+          "stocks": 458,
+          "rank_ic": 0.2133670007742362,
+          "gross_decile_spread_pct": 4.591700729656079,
+          "illustrative_spread_after_40bps_pct": 4.191700729656079,
+          "top_decile_turnover": 0.7173913043478262
+        },
+        {
+          "date": "2017-06-30",
+          "stocks": 460,
+          "rank_ic": -0.053945023575150464,
+          "gross_decile_spread_pct": -2.048314005897631,
+          "illustrative_spread_after_40bps_pct": -2.4483140058976307,
+          "top_decile_turnover": 0.782608695652174
+        },
+        {
+          "date": "2017-07-31",
+          "stocks": 460,
+          "rank_ic": 0.02706140018332462,
+          "gross_decile_spread_pct": -0.246199507676662,
+          "illustrative_spread_after_40bps_pct": -0.646199507676662,
+          "top_decile_turnover": 0.6304347826086957
+        },
+        {
+          "date": "2017-08-31",
+          "stocks": 460,
+          "rank_ic": 0.025645103525392683,
+          "gross_decile_spread_pct": -1.0774489441293174,
+          "illustrative_spread_after_40bps_pct": -1.4774489441293173,
+          "top_decile_turnover": 0.7173913043478262
+        },
+        {
+          "date": "2017-09-29",
+          "stocks": 460,
+          "rank_ic": 0.05623577986005935,
+          "gross_decile_spread_pct": 0.8667464500081117,
+          "illustrative_spread_after_40bps_pct": 0.46674645000811166,
+          "top_decile_turnover": 0.7608695652173914
+        },
+        {
+          "date": "2017-10-31",
+          "stocks": 461,
+          "rank_ic": 0.03038689123759387,
+          "gross_decile_spread_pct": 0.6029503026664527,
+          "illustrative_spread_after_40bps_pct": 0.20295030266645264,
+          "top_decile_turnover": 0.6808510638297872
+        },
+        {
+          "date": "2017-11-30",
+          "stocks": 462,
+          "rank_ic": -0.010675133255869095,
+          "gross_decile_spread_pct": -2.041055418080864,
+          "illustrative_spread_after_40bps_pct": -2.441055418080864,
+          "top_decile_turnover": 0.7234042553191489
+        },
+        {
+          "date": "2017-12-29",
+          "stocks": 464,
+          "rank_ic": 0.08501803059314765,
+          "gross_decile_spread_pct": 3.5777212421180273,
+          "illustrative_spread_after_40bps_pct": 3.1777212421180274,
+          "top_decile_turnover": 0.7659574468085106
+        },
+        {
+          "date": "2018-01-31",
+          "stocks": 464,
+          "rank_ic": -0.08082726907987517,
+          "gross_decile_spread_pct": -3.245664640926636,
+          "illustrative_spread_after_40bps_pct": -3.645664640926636,
+          "top_decile_turnover": 0.7659574468085106
+        },
+        {
+          "date": "2018-02-28",
+          "stocks": 462,
+          "rank_ic": 0.046183138039043364,
+          "gross_decile_spread_pct": 1.324065453400861,
+          "illustrative_spread_after_40bps_pct": 0.9240654534008609,
+          "top_decile_turnover": 0.7872340425531915
+        },
+        {
+          "date": "2018-03-29",
+          "stocks": 463,
+          "rank_ic": -0.032903874631364016,
+          "gross_decile_spread_pct": -0.16618835316547043,
+          "illustrative_spread_after_40bps_pct": -0.5661883531654704,
+          "top_decile_turnover": 0.7872340425531915
+        },
+        {
+          "date": "2018-04-30",
+          "stocks": 462,
+          "rank_ic": 0.1617799234821109,
+          "gross_decile_spread_pct": 4.5800379535651725,
+          "illustrative_spread_after_40bps_pct": 4.180037953565172,
+          "top_decile_turnover": 0.851063829787234
+        },
+        {
+          "date": "2018-05-31",
+          "stocks": 466,
+          "rank_ic": -0.08550102115505992,
+          "gross_decile_spread_pct": -1.2153026240149707,
+          "illustrative_spread_after_40bps_pct": -1.6153026240149706,
+          "top_decile_turnover": 0.8085106382978724
+        },
+        {
+          "date": "2018-06-29",
+          "stocks": 467,
+          "rank_ic": 0.11351828823867496,
+          "gross_decile_spread_pct": 1.9753843687415,
+          "illustrative_spread_after_40bps_pct": 1.5753843687415001,
+          "top_decile_turnover": 0.7872340425531915
+        },
+        {
+          "date": "2018-07-31",
+          "stocks": 468,
+          "rank_ic": 0.12019952944878637,
+          "gross_decile_spread_pct": 5.045434971358164,
+          "illustrative_spread_after_40bps_pct": 4.6454349713581635,
+          "top_decile_turnover": 0.7659574468085106
+        },
+        {
+          "date": "2018-08-31",
+          "stocks": 469,
+          "rank_ic": 0.024504727487903243,
+          "gross_decile_spread_pct": 0.8519756488219313,
+          "illustrative_spread_after_40bps_pct": 0.4519756488219313,
+          "top_decile_turnover": 0.8723404255319149
+        },
+        {
+          "date": "2018-09-28",
+          "stocks": 469,
+          "rank_ic": -0.059463030882529154,
+          "gross_decile_spread_pct": -0.8042711856695419,
+          "illustrative_spread_after_40bps_pct": -1.2042711856695418,
+          "top_decile_turnover": 0.8723404255319149
+        },
+        {
+          "date": "2018-10-31",
+          "stocks": 467,
+          "rank_ic": -0.013153246902592099,
+          "gross_decile_spread_pct": -1.7741008722894436,
+          "illustrative_spread_after_40bps_pct": -2.1741008722894435,
+          "top_decile_turnover": 0.7446808510638299
+        }
+      ]
+    },
+    "momentum": {
+      "mean_rank_ic": -0.03379246434899197,
+      "mean_gross_decile_spread_pct": -0.3459397779538824,
+      "mean_illustrative_spread_after_40bps_pct": -0.7459397779538826,
+      "mean_top_decile_turnover": 0.8807732780029388,
+      "by_year": {
+        "2014": {
+          "mean_rank_ic": -0.037882810408525085,
+          "mean_gross_decile_spread_pct": 0.246913047451727
+        },
+        "2015": {
+          "mean_rank_ic": -0.0066412509182593865,
+          "mean_gross_decile_spread_pct": 0.033599438518809345
+        },
+        "2016": {
+          "mean_rank_ic": -0.05233239798952654,
+          "mean_gross_decile_spread_pct": -1.088168185671128
+        },
+        "2017": {
+          "mean_rank_ic": -0.03592309376588556,
+          "mean_gross_decile_spread_pct": -0.25561866108275727
+        },
+        "2018": {
+          "mean_rank_ic": -0.03666082952551754,
+          "mean_gross_decile_spread_pct": -0.7305214791924998
+        }
+      },
+      "dates": [
+        {
+          "date": "2014-01-31",
+          "stocks": 435,
+          "rank_ic": 0.11199599963261932,
+          "gross_decile_spread_pct": 2.182622148913417,
+          "illustrative_spread_after_40bps_pct": 1.782622148913417,
+          "top_decile_turnover": null
+        },
+        {
+          "date": "2014-02-28",
+          "stocks": 435,
+          "rank_ic": -0.1614842179383821,
+          "gross_decile_spread_pct": -2.257697054671419,
+          "illustrative_spread_after_40bps_pct": -2.6576970546714187,
+          "top_decile_turnover": 0.7954545454545454
+        },
+        {
+          "date": "2014-03-31",
+          "stocks": 435,
+          "rank_ic": 0.04088567900550633,
+          "gross_decile_spread_pct": 0.7979547210500186,
+          "illustrative_spread_after_40bps_pct": 0.3979547210500186,
+          "top_decile_turnover": 0.9545454545454546
+        },
+        {
+          "date": "2014-04-30",
+          "stocks": 436,
+          "rank_ic": -0.14669104897181,
+          "gross_decile_spread_pct": -0.34393941323592947,
+          "illustrative_spread_after_40bps_pct": -0.7439394132359295,
+          "top_decile_turnover": 0.9545454545454546
+        },
+        {
+          "date": "2014-05-30",
+          "stocks": 438,
+          "rank_ic": 0.022738556406605027,
+          "gross_decile_spread_pct": 1.255225271758729,
+          "illustrative_spread_after_40bps_pct": 0.8552252717587291,
+          "top_decile_turnover": 0.9318181818181819
+        },
+        {
+          "date": "2014-06-30",
+          "stocks": 438,
+          "rank_ic": -0.1346865469830888,
+          "gross_decile_spread_pct": -2.8675803271984126,
+          "illustrative_spread_after_40bps_pct": -3.2675803271984125,
+          "top_decile_turnover": 0.7954545454545454
+        },
+        {
+          "date": "2014-07-31",
+          "stocks": 440,
+          "rank_ic": -0.10154395989085217,
+          "gross_decile_spread_pct": -0.7518550901470409,
+          "illustrative_spread_after_40bps_pct": -1.1518550901470408,
+          "top_decile_turnover": 0.9318181818181819
+        },
+        {
+          "date": "2014-08-29",
+          "stocks": 443,
+          "rank_ic": -0.02155208230098683,
+          "gross_decile_spread_pct": -1.2055673099828499,
+          "illustrative_spread_after_40bps_pct": -1.6055673099828498,
+          "top_decile_turnover": 0.8444444444444444
+        },
+        {
+          "date": "2014-09-30",
+          "stocks": 443,
+          "rank_ic": -0.11382322436631294,
+          "gross_decile_spread_pct": -1.5963777540966995,
+          "illustrative_spread_after_40bps_pct": -1.9963777540966996,
+          "top_decile_turnover": 0.9777777777777777
+        },
+        {
+          "date": "2014-10-31",
+          "stocks": 441,
+          "rank_ic": 0.09622744202576136,
+          "gross_decile_spread_pct": 4.531897757352934,
+          "illustrative_spread_after_40bps_pct": 4.131897757352934,
+          "top_decile_turnover": 0.8888888888888888
+        },
+        {
+          "date": "2014-11-28",
+          "stocks": 441,
+          "rank_ic": -0.0718162789591361,
+          "gross_decile_spread_pct": 2.025069461511839,
+          "illustrative_spread_after_40bps_pct": 1.6250694615118393,
+          "top_decile_turnover": 0.9333333333333333
+        },
+        {
+          "date": "2014-12-31",
+          "stocks": 445,
+          "rank_ic": 0.02515595743777594,
+          "gross_decile_spread_pct": 1.193204158166137,
+          "illustrative_spread_after_40bps_pct": 0.793204158166137,
+          "top_decile_turnover": 0.8
+        },
+        {
+          "date": "2015-01-30",
+          "stocks": 447,
+          "rank_ic": -0.3151491203367313,
+          "gross_decile_spread_pct": -6.603873599108203,
+          "illustrative_spread_after_40bps_pct": -7.0038735991082035,
+          "top_decile_turnover": 0.9333333333333333
+        },
+        {
+          "date": "2015-02-27",
+          "stocks": 446,
+          "rank_ic": -0.022369180927948804,
+          "gross_decile_spread_pct": -1.1239593198860478,
+          "illustrative_spread_after_40bps_pct": -1.523959319886048,
+          "top_decile_turnover": 0.9111111111111111
+        },
+        {
+          "date": "2015-03-31",
+          "stocks": 444,
+          "rank_ic": -0.2980627214578567,
+          "gross_decile_spread_pct": -5.270470300417212,
+          "illustrative_spread_after_40bps_pct": -5.670470300417213,
+          "top_decile_turnover": 0.9555555555555556
+        },
+        {
+          "date": "2015-04-30",
+          "stocks": 444,
+          "rank_ic": -0.09910330347086882,
+          "gross_decile_spread_pct": -2.9798772442506203,
+          "illustrative_spread_after_40bps_pct": -3.37987724425062,
+          "top_decile_turnover": 0.8888888888888888
+        },
+        {
+          "date": "2015-05-29",
+          "stocks": 441,
+          "rank_ic": 0.17343650747012093,
+          "gross_decile_spread_pct": 2.0086694413611026,
+          "illustrative_spread_after_40bps_pct": 1.6086694413611027,
+          "top_decile_turnover": 0.8666666666666667
+        },
+        {
+          "date": "2015-06-30",
+          "stocks": 438,
+          "rank_ic": 0.08236608145402,
+          "gross_decile_spread_pct": 1.9210980241991655,
+          "illustrative_spread_after_40bps_pct": 1.5210980241991656,
+          "top_decile_turnover": 0.8444444444444444
+        },
+        {
+          "date": "2015-07-31",
+          "stocks": 438,
+          "rank_ic": 0.12804498598632913,
+          "gross_decile_spread_pct": 1.2553203017751455,
+          "illustrative_spread_after_40bps_pct": 0.8553203017751455,
+          "top_decile_turnover": 0.9090909090909091
+        },
+        {
+          "date": "2015-08-31",
+          "stocks": 444,
+          "rank_ic": 0.14204122706418085,
+          "gross_decile_spread_pct": 2.694638725629998,
+          "illustrative_spread_after_40bps_pct": 2.2946387256299983,
+          "top_decile_turnover": 0.9111111111111111
+        },
+        {
+          "date": "2015-09-30",
+          "stocks": 451,
+          "rank_ic": -0.13059069424846445,
+          "gross_decile_spread_pct": -4.127890658445197,
+          "illustrative_spread_after_40bps_pct": -4.527890658445197,
+          "top_decile_turnover": 0.9130434782608696
+        },
+        {
+          "date": "2015-10-30",
+          "stocks": 450,
+          "rank_ic": 0.002801594081946084,
+          "gross_decile_spread_pct": 0.9212725980267782,
+          "illustrative_spread_after_40bps_pct": 0.5212725980267782,
+          "top_decile_turnover": 0.9347826086956522
+        },
+        {
+          "date": "2015-11-30",
+          "stocks": 449,
+          "rank_ic": -0.01861809311697953,
+          "gross_decile_spread_pct": 3.7879567888301535,
+          "illustrative_spread_after_40bps_pct": 3.3879567888301536,
+          "top_decile_turnover": 0.8666666666666667
+        },
+        {
+          "date": "2015-12-31",
+          "stocks": 448,
+          "rank_ic": 0.2755077064831402,
+          "gross_decile_spread_pct": 7.920308504510647,
+          "illustrative_spread_after_40bps_pct": 7.520308504510647,
+          "top_decile_turnover": 0.8888888888888888
+        },
+        {
+          "date": "2016-01-29",
+          "stocks": 449,
+          "rank_ic": -0.112089037546699,
+          "gross_decile_spread_pct": -3.904489228244583,
+          "illustrative_spread_after_40bps_pct": -4.3044892282445835,
+          "top_decile_turnover": 0.8
+        },
+        {
+          "date": "2016-02-29",
+          "stocks": 450,
+          "rank_ic": -0.14302246760066306,
+          "gross_decile_spread_pct": -4.385005167609419,
+          "illustrative_spread_after_40bps_pct": -4.78500516760942,
+          "top_decile_turnover": 0.9777777777777777
+        },
+        {
+          "date": "2016-03-31",
+          "stocks": 452,
+          "rank_ic": -0.09109894426718877,
+          "gross_decile_spread_pct": 0.2788544423497896,
+          "illustrative_spread_after_40bps_pct": -0.1211455576502104,
+          "top_decile_turnover": 0.9565217391304348
+        },
+        {
+          "date": "2016-04-29",
+          "stocks": 453,
+          "rank_ic": -0.06217422813254122,
+          "gross_decile_spread_pct": -0.7039040050403167,
+          "illustrative_spread_after_40bps_pct": -1.1039040050403166,
+          "top_decile_turnover": 0.8043478260869565
+        },
+        {
+          "date": "2016-05-31",
+          "stocks": 454,
+          "rank_ic": -0.04541827458068668,
+          "gross_decile_spread_pct": -0.7513961695082931,
+          "illustrative_spread_after_40bps_pct": -1.1513961695082933,
+          "top_decile_turnover": 0.8695652173913043
+        },
+        {
+          "date": "2016-06-30",
+          "stocks": 453,
+          "rank_ic": -0.3723121440858844,
+          "gross_decile_spread_pct": -7.079681714503045,
+          "illustrative_spread_after_40bps_pct": -7.479681714503045,
+          "top_decile_turnover": 0.9347826086956522
+        },
+        {
+          "date": "2016-07-29",
+          "stocks": 453,
+          "rank_ic": 0.17607993492888194,
+          "gross_decile_spread_pct": 0.8354617652923786,
+          "illustrative_spread_after_40bps_pct": 0.43546176529237857,
+          "top_decile_turnover": 0.9130434782608696
+        },
+        {
+          "date": "2016-08-31",
+          "stocks": 454,
+          "rank_ic": 0.1168483677868606,
+          "gross_decile_spread_pct": 2.2100289394427164,
+          "illustrative_spread_after_40bps_pct": 1.8100289394427165,
+          "top_decile_turnover": 0.8043478260869565
+        },
+        {
+          "date": "2016-09-30",
+          "stocks": 452,
+          "rank_ic": 0.04038431725496734,
+          "gross_decile_spread_pct": 0.5822326827669344,
+          "illustrative_spread_after_40bps_pct": 0.18223268276693438,
+          "top_decile_turnover": 0.782608695652174
+        },
+        {
+          "date": "2016-10-31",
+          "stocks": 449,
+          "rank_ic": 0.0566877452540036,
+          "gross_decile_spread_pct": 1.6590259641274514,
+          "illustrative_spread_after_40bps_pct": 1.2590259641274515,
+          "top_decile_turnover": 0.8913043478260869
+        },
+        {
+          "date": "2016-11-30",
+          "stocks": 452,
+          "rank_ic": -0.10815131039750563,
+          "gross_decile_spread_pct": -2.1261984839590093,
+          "illustrative_spread_after_40bps_pct": -2.5261984839590093,
+          "top_decile_turnover": 0.7391304347826086
+        },
+        {
+          "date": "2016-12-30",
+          "stocks": 455,
+          "rank_ic": -0.08372273448786319,
+          "gross_decile_spread_pct": 0.32705274683186225,
+          "illustrative_spread_after_40bps_pct": -0.07294725316813777,
+          "top_decile_turnover": 0.9130434782608696
+        },
+        {
+          "date": "2017-01-31",
+          "stocks": 459,
+          "rank_ic": -0.06579255966673739,
+          "gross_decile_spread_pct": -3.373326306014831,
+          "illustrative_spread_after_40bps_pct": -3.7733263060148308,
+          "top_decile_turnover": 0.782608695652174
+        },
+        {
+          "date": "2017-02-28",
+          "stocks": 459,
+          "rank_ic": -0.040280026952873416,
+          "gross_decile_spread_pct": -1.1782282338921035,
+          "illustrative_spread_after_40bps_pct": -1.5782282338921036,
+          "top_decile_turnover": 0.9347826086956522
+        },
+        {
+          "date": "2017-03-31",
+          "stocks": 458,
+          "rank_ic": 0.19052375328888013,
+          "gross_decile_spread_pct": 2.41153165096321,
+          "illustrative_spread_after_40bps_pct": 2.01153165096321,
+          "top_decile_turnover": 0.8478260869565217
+        },
+        {
+          "date": "2017-04-28",
+          "stocks": 457,
+          "rank_ic": 0.2702054961584827,
+          "gross_decile_spread_pct": 5.400744928944867,
+          "illustrative_spread_after_40bps_pct": 5.000744928944867,
+          "top_decile_turnover": 0.782608695652174
+        },
+        {
+          "date": "2017-05-31",
+          "stocks": 458,
+          "rank_ic": -0.35983627684073133,
+          "gross_decile_spread_pct": -4.645777497753448,
+          "illustrative_spread_after_40bps_pct": -5.045777497753448,
+          "top_decile_turnover": 0.8260869565217391
+        },
+        {
+          "date": "2017-06-30",
+          "stocks": 460,
+          "rank_ic": -0.10488916997840667,
+          "gross_decile_spread_pct": -2.180075228399023,
+          "illustrative_spread_after_40bps_pct": -2.5800752283990227,
+          "top_decile_turnover": 0.9782608695652174
+        },
+        {
+          "date": "2017-07-31",
+          "stocks": 460,
+          "rank_ic": 0.011648078389455693,
+          "gross_decile_spread_pct": 0.43005435397420877,
+          "illustrative_spread_after_40bps_pct": 0.030054353974208747,
+          "top_decile_turnover": 0.8913043478260869
+        },
+        {
+          "date": "2017-08-31",
+          "stocks": 460,
+          "rank_ic": -0.17800548494414276,
+          "gross_decile_spread_pct": -0.8243658135779826,
+          "illustrative_spread_after_40bps_pct": -1.2243658135779825,
+          "top_decile_turnover": 0.8478260869565217
+        },
+        {
+          "date": "2017-09-29",
+          "stocks": 460,
+          "rank_ic": 0.007276643248704432,
+          "gross_decile_spread_pct": 1.0091717700552338,
+          "illustrative_spread_after_40bps_pct": 0.6091717700552338,
+          "top_decile_turnover": 0.8478260869565217
+        },
+        {
+          "date": "2017-10-31",
+          "stocks": 461,
+          "rank_ic": -0.14454534430956198,
+          "gross_decile_spread_pct": -1.7422803212530629,
+          "illustrative_spread_after_40bps_pct": -2.142280321253063,
+          "top_decile_turnover": 0.851063829787234
+        },
+        {
+          "date": "2017-11-30",
+          "stocks": 462,
+          "rank_ic": -0.022475966240812124,
+          "gross_decile_spread_pct": -0.5928759342838186,
+          "illustrative_spread_after_40bps_pct": -0.9928759342838186,
+          "top_decile_turnover": 0.8723404255319149
+        },
+        {
+          "date": "2017-12-29",
+          "stocks": 464,
+          "rank_ic": 0.005093732657116017,
+          "gross_decile_spread_pct": 2.2180026982436614,
+          "illustrative_spread_after_40bps_pct": 1.8180026982436615,
+          "top_decile_turnover": 0.9148936170212766
+        },
+        {
+          "date": "2018-01-31",
+          "stocks": 464,
+          "rank_ic": 0.1633431194247508,
+          "gross_decile_spread_pct": 3.9254968506287637,
+          "illustrative_spread_after_40bps_pct": 3.525496850628764,
+          "top_decile_turnover": 0.8723404255319149
+        },
+        {
+          "date": "2018-02-28",
+          "stocks": 462,
+          "rank_ic": 0.07006797824486856,
+          "gross_decile_spread_pct": 1.2969705152260305,
+          "illustrative_spread_after_40bps_pct": 0.8969705152260304,
+          "top_decile_turnover": 0.7234042553191489
+        },
+        {
+          "date": "2018-03-29",
+          "stocks": 463,
+          "rank_ic": 0.025083934517958095,
+          "gross_decile_spread_pct": -0.6969339417832879,
+          "illustrative_spread_after_40bps_pct": -1.096933941783288,
+          "top_decile_turnover": 0.8297872340425532
+        },
+        {
+          "date": "2018-04-30",
+          "stocks": 462,
+          "rank_ic": -0.0716954695347053,
+          "gross_decile_spread_pct": -0.27990316569382223,
+          "illustrative_spread_after_40bps_pct": -0.6799031656938223,
+          "top_decile_turnover": 0.9148936170212766
+        },
+        {
+          "date": "2018-05-31",
+          "stocks": 466,
+          "rank_ic": -0.12595779423392026,
+          "gross_decile_spread_pct": -3.6922649962634098,
+          "illustrative_spread_after_40bps_pct": -4.09226499626341,
+          "top_decile_turnover": 0.851063829787234
+        },
+        {
+          "date": "2018-06-29",
+          "stocks": 467,
+          "rank_ic": -0.13722382423157164,
+          "gross_decile_spread_pct": -3.018155017023334,
+          "illustrative_spread_after_40bps_pct": -3.418155017023334,
+          "top_decile_turnover": 0.9361702127659575
+        },
+        {
+          "date": "2018-07-31",
+          "stocks": 468,
+          "rank_ic": -0.1723785711768709,
+          "gross_decile_spread_pct": -2.404211884568143,
+          "illustrative_spread_after_40bps_pct": -2.8042118845681427,
+          "top_decile_turnover": 0.9787234042553191
+        },
+        {
+          "date": "2018-08-31",
+          "stocks": 469,
+          "rank_ic": 0.028576024151397112,
+          "gross_decile_spread_pct": -0.5527244154466422,
+          "illustrative_spread_after_40bps_pct": -0.9527244154466422,
+          "top_decile_turnover": 0.9787234042553191
+        },
+        {
+          "date": "2018-09-28",
+          "stocks": 469,
+          "rank_ic": -0.11418241967622725,
+          "gross_decile_spread_pct": -2.035325285552677,
+          "illustrative_spread_after_40bps_pct": -2.435325285552677,
+          "top_decile_turnover": 0.7872340425531915
+        },
+        {
+          "date": "2018-10-31",
+          "stocks": 467,
+          "rank_ic": -0.03224127274085459,
+          "gross_decile_spread_pct": 0.15183654855152406,
+          "illustrative_spread_after_40bps_pct": -0.24816345144847596,
+          "top_decile_turnover": 0.9361702127659575
+        }
+      ]
+    },
+    "unconditional": {
+      "mean_rank_ic": 0.0178029401097082,
+      "mean_gross_decile_spread_pct": 0.2945047206269891,
+      "mean_illustrative_spread_after_40bps_pct": -0.10549527937301098,
+      "mean_top_decile_turnover": 0.0696398803098253,
+      "by_year": {
+        "2014": {
+          "mean_rank_ic": -0.011127681331503908,
+          "mean_gross_decile_spread_pct": 0.32099118481833727
+        },
+        "2015": {
+          "mean_rank_ic": 0.03654456081228976,
+          "mean_gross_decile_spread_pct": 0.5105203697189671
+        },
+        "2016": {
+          "mean_rank_ic": -0.03492279671789924,
+          "mean_gross_decile_spread_pct": -1.4376313290954839
+        },
+        "2017": {
+          "mean_rank_ic": 0.08585853650320859,
+          "mean_gross_decile_spread_pct": 1.4910505325383905
+        },
+        "2018": {
+          "mean_rank_ic": 0.011633909516993328,
+          "mean_gross_decile_spread_pct": 0.6462104700602843
+        }
+      },
+      "dates": [
+        {
+          "date": "2014-01-31",
+          "stocks": 435,
+          "rank_ic": 0.18986976938115308,
+          "gross_decile_spread_pct": 5.210734709291557,
+          "illustrative_spread_after_40bps_pct": 4.810734709291556,
+          "top_decile_turnover": null
+        },
+        {
+          "date": "2014-02-28",
+          "stocks": 435,
+          "rank_ic": -0.25064240593523895,
+          "gross_decile_spread_pct": -4.77562177252106,
+          "illustrative_spread_after_40bps_pct": -5.17562177252106,
+          "top_decile_turnover": 0.06818181818181823
+        },
+        {
+          "date": "2014-03-31",
+          "stocks": 435,
+          "rank_ic": -0.14949267022673632,
+          "gross_decile_spread_pct": -1.6338788665200759,
+          "illustrative_spread_after_40bps_pct": -2.0338788665200758,
+          "top_decile_turnover": 0.045454545454545414
+        },
+        {
+          "date": "2014-04-30",
+          "stocks": 436,
+          "rank_ic": 0.13477740130818477,
+          "gross_decile_spread_pct": 3.807657088076963,
+          "illustrative_spread_after_40bps_pct": 3.407657088076963,
+          "top_decile_turnover": 0.06818181818181823
+        },
+        {
+          "date": "2014-05-30",
+          "stocks": 438,
+          "rank_ic": 0.04225237411429161,
+          "gross_decile_spread_pct": 1.5812506919460922,
+          "illustrative_spread_after_40bps_pct": 1.1812506919460923,
+          "top_decile_turnover": 0.06818181818181823
+        },
+        {
+          "date": "2014-06-30",
+          "stocks": 438,
+          "rank_ic": 0.0801133946805961,
+          "gross_decile_spread_pct": 1.7561212084838052,
+          "illustrative_spread_after_40bps_pct": 1.3561212084838052,
+          "top_decile_turnover": 0.022727272727272707
+        },
+        {
+          "date": "2014-07-31",
+          "stocks": 440,
+          "rank_ic": 0.08057498418708962,
+          "gross_decile_spread_pct": 2.1294121352916546,
+          "illustrative_spread_after_40bps_pct": 1.7294121352916547,
+          "top_decile_turnover": 0.045454545454545414
+        },
+        {
+          "date": "2014-08-29",
+          "stocks": 443,
+          "rank_ic": -0.11017456469939116,
+          "gross_decile_spread_pct": -0.792610432661325,
+          "illustrative_spread_after_40bps_pct": -1.1926104326613252,
+          "top_decile_turnover": 0.11111111111111116
+        },
+        {
+          "date": "2014-09-30",
+          "stocks": 443,
+          "rank_ic": 0.03265677309452094,
+          "gross_decile_spread_pct": 1.0148662282000798,
+          "illustrative_spread_after_40bps_pct": 0.6148662282000797,
+          "top_decile_turnover": 0.0444444444444444
+        },
+        {
+          "date": "2014-10-31",
+          "stocks": 441,
+          "rank_ic": -0.08221519664562323,
+          "gross_decile_spread_pct": -3.174312138059104,
+          "illustrative_spread_after_40bps_pct": -3.574312138059104,
+          "top_decile_turnover": 0.0888888888888889
+        },
+        {
+          "date": "2014-11-28",
+          "stocks": 441,
+          "rank_ic": -0.13882895815668925,
+          "gross_decile_spread_pct": -1.8271752546884295,
+          "illustrative_spread_after_40bps_pct": -2.2271752546884294,
+          "top_decile_turnover": 0.06666666666666665
+        },
+        {
+          "date": "2014-12-31",
+          "stocks": 445,
+          "rank_ic": 0.0375769229197959,
+          "gross_decile_spread_pct": 0.5554506209798896,
+          "illustrative_spread_after_40bps_pct": 0.1554506209798896,
+          "top_decile_turnover": 0.022222222222222254
+        },
+        {
+          "date": "2015-01-30",
+          "stocks": 447,
+          "rank_ic": 0.11827663281582532,
+          "gross_decile_spread_pct": 0.26244119231749075,
+          "illustrative_spread_after_40bps_pct": -0.13755880768250928,
+          "top_decile_turnover": 0.06666666666666665
+        },
+        {
+          "date": "2015-02-27",
+          "stocks": 446,
+          "rank_ic": 0.14350120705274547,
+          "gross_decile_spread_pct": 1.7791390244142242,
+          "illustrative_spread_after_40bps_pct": 1.3791390244142243,
+          "top_decile_turnover": 0.0888888888888889
+        },
+        {
+          "date": "2015-03-31",
+          "stocks": 444,
+          "rank_ic": 0.02983282925998817,
+          "gross_decile_spread_pct": 2.7139614203901545,
+          "illustrative_spread_after_40bps_pct": 2.3139614203901546,
+          "top_decile_turnover": 0.0444444444444444
+        },
+        {
+          "date": "2015-04-30",
+          "stocks": 444,
+          "rank_ic": 0.12462498260555427,
+          "gross_decile_spread_pct": 3.253912411213914,
+          "illustrative_spread_after_40bps_pct": 2.8539124112139143,
+          "top_decile_turnover": 0.022222222222222254
+        },
+        {
+          "date": "2015-05-29",
+          "stocks": 441,
+          "rank_ic": 0.07993589044009212,
+          "gross_decile_spread_pct": -0.32722157781591243,
+          "illustrative_spread_after_40bps_pct": -0.7272215778159125,
+          "top_decile_turnover": 0.022222222222222254
+        },
+        {
+          "date": "2015-06-30",
+          "stocks": 438,
+          "rank_ic": 0.007680295652716593,
+          "gross_decile_spread_pct": 1.8279571923613918,
+          "illustrative_spread_after_40bps_pct": 1.4279571923613918,
+          "top_decile_turnover": 0.06666666666666665
+        },
+        {
+          "date": "2015-07-31",
+          "stocks": 438,
+          "rank_ic": -0.07286530459874473,
+          "gross_decile_spread_pct": -1.1308018676549008,
+          "illustrative_spread_after_40bps_pct": -1.5308018676549007,
+          "top_decile_turnover": 0.022727272727272707
+        },
+        {
+          "date": "2015-08-31",
+          "stocks": 444,
+          "rank_ic": -0.03146135965270061,
+          "gross_decile_spread_pct": 0.601560139137542,
+          "illustrative_spread_after_40bps_pct": 0.201560139137542,
+          "top_decile_turnover": 0.0888888888888889
+        },
+        {
+          "date": "2015-09-30",
+          "stocks": 451,
+          "rank_ic": -0.007486608176082266,
+          "gross_decile_spread_pct": -4.025334301511524,
+          "illustrative_spread_after_40bps_pct": -4.4253343015115245,
+          "top_decile_turnover": 0.08695652173913049
+        },
+        {
+          "date": "2015-10-30",
+          "stocks": 450,
+          "rank_ic": 0.08425188394370862,
+          "gross_decile_spread_pct": 3.4233083355933087,
+          "illustrative_spread_after_40bps_pct": 3.023308335593309,
+          "top_decile_turnover": 0.08695652173913049
+        },
+        {
+          "date": "2015-11-30",
+          "stocks": 449,
+          "rank_ic": -0.0200489182309895,
+          "gross_decile_spread_pct": -0.6657590155515278,
+          "illustrative_spread_after_40bps_pct": -1.065759015551528,
+          "top_decile_turnover": 0.022222222222222254
+        },
+        {
+          "date": "2015-12-31",
+          "stocks": 448,
+          "rank_ic": -0.01770680136463639,
+          "gross_decile_spread_pct": -1.5869185162665556,
+          "illustrative_spread_after_40bps_pct": -1.9869185162665555,
+          "top_decile_turnover": 0.06666666666666665
+        },
+        {
+          "date": "2016-01-29",
+          "stocks": 449,
+          "rank_ic": -0.1374152879414572,
+          "gross_decile_spread_pct": -3.7803103701636935,
+          "illustrative_spread_after_40bps_pct": -4.180310370163694,
+          "top_decile_turnover": 0.11111111111111116
+        },
+        {
+          "date": "2016-02-29",
+          "stocks": 450,
+          "rank_ic": -0.0716060161613967,
+          "gross_decile_spread_pct": -1.5228564792490715,
+          "illustrative_spread_after_40bps_pct": -1.9228564792490714,
+          "top_decile_turnover": 0.0444444444444444
+        },
+        {
+          "date": "2016-03-31",
+          "stocks": 452,
+          "rank_ic": -0.048185589525396186,
+          "gross_decile_spread_pct": -3.6693096418670743,
+          "illustrative_spread_after_40bps_pct": -4.069309641867075,
+          "top_decile_turnover": 0.06521739130434778
+        },
+        {
+          "date": "2016-04-29",
+          "stocks": 453,
+          "rank_ic": 0.042541621556833,
+          "gross_decile_spread_pct": -0.3599512093385022,
+          "illustrative_spread_after_40bps_pct": -0.7599512093385022,
+          "top_decile_turnover": 0.06521739130434778
+        },
+        {
+          "date": "2016-05-31",
+          "stocks": 454,
+          "rank_ic": -0.035324170534369786,
+          "gross_decile_spread_pct": -0.9838600490699942,
+          "illustrative_spread_after_40bps_pct": -1.3838600490699942,
+          "top_decile_turnover": 0.06521739130434778
+        },
+        {
+          "date": "2016-06-30",
+          "stocks": 453,
+          "rank_ic": 0.0197241344945998,
+          "gross_decile_spread_pct": -1.6771139006537883,
+          "illustrative_spread_after_40bps_pct": -2.077113900653788,
+          "top_decile_turnover": 0.06521739130434778
+        },
+        {
+          "date": "2016-07-29",
+          "stocks": 453,
+          "rank_ic": -0.06303061174830149,
+          "gross_decile_spread_pct": -1.5685316106201481,
+          "illustrative_spread_after_40bps_pct": -1.9685316106201483,
+          "top_decile_turnover": 0.08695652173913049
+        },
+        {
+          "date": "2016-08-31",
+          "stocks": 454,
+          "rank_ic": 0.0888913254059971,
+          "gross_decile_spread_pct": 1.3247002834092538,
+          "illustrative_spread_after_40bps_pct": 0.9247002834092538,
+          "top_decile_turnover": 0.10869565217391308
+        },
+        {
+          "date": "2016-09-30",
+          "stocks": 452,
+          "rank_ic": -0.1421341518642339,
+          "gross_decile_spread_pct": -2.061774372632229,
+          "illustrative_spread_after_40bps_pct": -2.4617743726322288,
+          "top_decile_turnover": 0.10869565217391308
+        },
+        {
+          "date": "2016-10-31",
+          "stocks": 449,
+          "rank_ic": -0.11920157201240578,
+          "gross_decile_spread_pct": -4.417971209387295,
+          "illustrative_spread_after_40bps_pct": -4.817971209387295,
+          "top_decile_turnover": 0.10869565217391308
+        },
+        {
+          "date": "2016-11-30",
+          "stocks": 452,
+          "rank_ic": -0.1448629391122931,
+          "gross_decile_spread_pct": -2.314471849921461,
+          "illustrative_spread_after_40bps_pct": -2.714471849921461,
+          "top_decile_turnover": 0.13043478260869568
+        },
+        {
+          "date": "2016-12-30",
+          "stocks": 455,
+          "rank_ic": 0.1915296968276333,
+          "gross_decile_spread_pct": 3.7798744603481924,
+          "illustrative_spread_after_40bps_pct": 3.3798744603481925,
+          "top_decile_turnover": 0.06521739130434778
+        },
+        {
+          "date": "2017-01-31",
+          "stocks": 459,
+          "rank_ic": 0.10166817438955834,
+          "gross_decile_spread_pct": 1.298267415260134,
+          "illustrative_spread_after_40bps_pct": 0.8982674152601339,
+          "top_decile_turnover": 0.10869565217391308
+        },
+        {
+          "date": "2017-02-28",
+          "stocks": 459,
+          "rank_ic": 0.1832342455367059,
+          "gross_decile_spread_pct": 3.4670544557344076,
+          "illustrative_spread_after_40bps_pct": 3.0670544557344077,
+          "top_decile_turnover": 0.04347826086956519
+        },
+        {
+          "date": "2017-03-31",
+          "stocks": 458,
+          "rank_ic": 0.23160492605847308,
+          "gross_decile_spread_pct": 4.277123688691566,
+          "illustrative_spread_after_40bps_pct": 3.8771236886915657,
+          "top_decile_turnover": 0.06521739130434778
+        },
+        {
+          "date": "2017-04-28",
+          "stocks": 457,
+          "rank_ic": 0.22695152451183287,
+          "gross_decile_spread_pct": 4.884480153287704,
+          "illustrative_spread_after_40bps_pct": 4.484480153287704,
+          "top_decile_turnover": 0.021739130434782594
+        },
+        {
+          "date": "2017-05-31",
+          "stocks": 458,
+          "rank_ic": -0.06729909594165193,
+          "gross_decile_spread_pct": -0.8223872964164975,
+          "illustrative_spread_after_40bps_pct": -1.2223872964164975,
+          "top_decile_turnover": 0.06521739130434778
+        },
+        {
+          "date": "2017-06-30",
+          "stocks": 460,
+          "rank_ic": 0.04119181955532379,
+          "gross_decile_spread_pct": -0.1267378670355308,
+          "illustrative_spread_after_40bps_pct": -0.5267378670355308,
+          "top_decile_turnover": 0.06521739130434778
+        },
+        {
+          "date": "2017-07-31",
+          "stocks": 460,
+          "rank_ic": 0.0987318301208377,
+          "gross_decile_spread_pct": 2.0073234827324926,
+          "illustrative_spread_after_40bps_pct": 1.6073234827324927,
+          "top_decile_turnover": 0.021739130434782594
+        },
+        {
+          "date": "2017-08-31",
+          "stocks": 460,
+          "rank_ic": -0.08713972306518258,
+          "gross_decile_spread_pct": -3.7825535307208793,
+          "illustrative_spread_after_40bps_pct": -4.182553530720879,
+          "top_decile_turnover": 0.08695652173913049
+        },
+        {
+          "date": "2017-09-29",
+          "stocks": 460,
+          "rank_ic": 0.19660313180571046,
+          "gross_decile_spread_pct": 3.7842552470471222,
+          "illustrative_spread_after_40bps_pct": 3.3842552470471223,
+          "top_decile_turnover": 0.06521739130434778
+        },
+        {
+          "date": "2017-10-31",
+          "stocks": 461,
+          "rank_ic": -0.03306929795659401,
+          "gross_decile_spread_pct": -0.9363105500850719,
+          "illustrative_spread_after_40bps_pct": -1.3363105500850718,
+          "top_decile_turnover": 0.06382978723404253
+        },
+        {
+          "date": "2017-11-30",
+          "stocks": 462,
+          "rank_ic": -0.09777548809983698,
+          "gross_decile_spread_pct": -2.9335114150388053,
+          "illustrative_spread_after_40bps_pct": -3.333511415038805,
+          "top_decile_turnover": 0.08510638297872342
+        },
+        {
+          "date": "2017-12-29",
+          "stocks": 464,
+          "rank_ic": 0.23560039112332634,
+          "gross_decile_spread_pct": 6.775602607004041,
+          "illustrative_spread_after_40bps_pct": 6.375602607004041,
+          "top_decile_turnover": 0.1063829787234043
+        },
+        {
+          "date": "2018-01-31",
+          "stocks": 464,
+          "rank_ic": 0.18174585632704443,
+          "gross_decile_spread_pct": 5.5891020676158005,
+          "illustrative_spread_after_40bps_pct": 5.1891020676158,
+          "top_decile_turnover": 0.04255319148936165
+        },
+        {
+          "date": "2018-02-28",
+          "stocks": 462,
+          "rank_ic": -0.00891548587654808,
+          "gross_decile_spread_pct": -0.34374590382368625,
+          "illustrative_spread_after_40bps_pct": -0.7437459038236862,
+          "top_decile_turnover": 0.04255319148936165
+        },
+        {
+          "date": "2018-03-29",
+          "stocks": 463,
+          "rank_ic": -0.09673702145028575,
+          "gross_decile_spread_pct": -2.412771877079505,
+          "illustrative_spread_after_40bps_pct": -2.8127718770795047,
+          "top_decile_turnover": 0.06382978723404253
+        },
+        {
+          "date": "2018-04-30",
+          "stocks": 462,
+          "rank_ic": 0.22420128467644662,
+          "gross_decile_spread_pct": 5.371862815993559,
+          "illustrative_spread_after_40bps_pct": 4.971862815993559,
+          "top_decile_turnover": 0.06382978723404253
+        },
+        {
+          "date": "2018-05-31",
+          "stocks": 466,
+          "rank_ic": -0.046507928367062024,
+          "gross_decile_spread_pct": -0.46230637154429965,
+          "illustrative_spread_after_40bps_pct": -0.8623063715442997,
+          "top_decile_turnover": 0.06382978723404253
+        },
+        {
+          "date": "2018-06-29",
+          "stocks": 467,
+          "rank_ic": -0.053882421563077924,
+          "gross_decile_spread_pct": -1.932292806123936,
+          "illustrative_spread_after_40bps_pct": -2.332292806123936,
+          "top_decile_turnover": 0.08510638297872342
+        },
+        {
+          "date": "2018-07-31",
+          "stocks": 468,
+          "rank_ic": 0.27004949837255116,
+          "gross_decile_spread_pct": 9.890545449739049,
+          "illustrative_spread_after_40bps_pct": 9.490545449739049,
+          "top_decile_turnover": 0.04255319148936165
+        },
+        {
+          "date": "2018-08-31",
+          "stocks": 469,
+          "rank_ic": -0.0019033311901833834,
+          "gross_decile_spread_pct": -0.21461651405640572,
+          "illustrative_spread_after_40bps_pct": -0.6146165140564057,
+          "top_decile_turnover": 0.1063829787234043
+        },
+        {
+          "date": "2018-09-28",
+          "stocks": 469,
+          "rank_ic": -0.31284226517633956,
+          "gross_decile_spread_pct": -9.63931270267248,
+          "illustrative_spread_after_40bps_pct": -10.03931270267248,
+          "top_decile_turnover": 0.14893617021276595
+        },
+        {
+          "date": "2018-10-31",
+          "stocks": 467,
+          "rank_ic": -0.03886909058261219,
+          "gross_decile_spread_pct": 0.6156405425547468,
+          "illustrative_spread_after_40bps_pct": 0.21564054255474674,
+          "top_decile_turnover": 0.14893617021276595
+        }
+      ]
+    }
+  },
+  "environment": {
+    "numpy": "2.5.5",
+    "pandas": "3.1.1",
+    "pyarrow": "26.0.1",
+    "pydantic": "2.14.1",
+    "SQLAlchemy": "2.1.8"
+  }
+}

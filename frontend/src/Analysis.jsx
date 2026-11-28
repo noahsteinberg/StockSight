@@ -8,6 +8,7 @@ import useStockProfile from './use-stock-profile.js';
 import { SignalBadge } from './SignalPanel.jsx';
 import { compareHash } from './use-compare-selection.js';
 import { patternHash } from './pattern-route.js';
+import { PatternResults } from './Predictions.jsx';
 
 const ranges = [['1mo', '1M'], ['3mo', '3M'], ['1y', '1Y'], ['all', 'Max']];
 
@@ -18,7 +19,7 @@ function responseError(status, searching = false) {
   return searching ? 'Could not search stocks. Check that the API is running.' : 'Could not load prices. Check that the API is running.';
 }
 
-export default function Analysis({ symbol, onSelectSymbol, watchlist, selection, defaultRange, chartDefaults }) {
+export default function Analysis({ symbol, onSelectSymbol, watchlist, selection, defaultRange, chartDefaults, patternHorizon = 21, patternOpen = false }) {
   const comparing = selection?.symbols.includes(symbol);
   const tickerInput = useRef(null);
   const [inputError, setInputError] = useState('');
@@ -166,16 +167,16 @@ export default function Analysis({ symbol, onSelectSymbol, watchlist, selection,
         </div>
       </HistoricalChart>}
       </div>
-      <section className="pattern-launch" aria-labelledby="pattern-launch-title" hidden={replaying}>
-        <div><span className="pattern-eyebrow">A CLOSER LOOK AT HISTORY</span>
-          <h2 id="pattern-launch-title">What happened after similar periods?</h2>
-          <p>Explore {symbol}’s past setups, actual outcomes and the examples behind them on Predictions.</p></div>
-        <div className="pattern-launch-links" aria-label="Open historical patterns on Predictions">
-          {[5, 21].map(horizon => <a key={horizon} className="button-link primary-link" href={patternHash(symbol, horizon)}>
-            {horizon} sessions <span aria-hidden="true">↗</span>
-          </a>)}
-        </div>
-      </section>
+      {!replaying && data?.bars.length > 0 && <details className="analysis-patterns" open={patternOpen}
+        onToggle={event => {
+          if (event.currentTarget.open === patternOpen) return;
+          window.location.hash = event.currentTarget.open ? patternHash(symbol, patternHorizon)
+            : `#/analysis?symbol=${encodeURIComponent(symbol)}&horizon=${patternHorizon}`;
+        }}>
+        <summary>Historical patterns</summary>
+        <p>See what followed similar setups over 5 trading sessions (about a week) or 21 (about a month).</p>
+        {patternOpen && <PatternResults key={symbol} symbol={symbol} horizon={patternHorizon} />}
+      </details>}
       {/* The delayed vendor quote is secondary to the stored history above it. */}
       <MarketQuote key={symbol} symbol={symbol} asOf={data?.as_of} replaying={replaying} />
     </section>

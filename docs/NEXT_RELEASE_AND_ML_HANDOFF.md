@@ -1,5 +1,23 @@
 # StockSight release and next increments
 
+The next increment has been implemented on PR #28 for review. Explore now has
+explainable research ideas while retaining full search and pagination. Patterns
+are embedded in Analysis, with legacy links preserved. The approved 21-session
+ranking diagnostic is complete and does not qualify a serving model. Read the
+[current handoff](CURRENT_HANDOFF.md) and
+[evaluation report](../ml/docs/PATTERN_RANKING_DEVELOPMENT.md) first.
+
+For this increment, review the local Explore panel and Analysis's expanded
+patterns, wait for checks on #28, and obtain Noah's release approval before
+merge. No schema or environment change is needed. After release, verify public
+filters and both methods, then saved-sector suggestions, watchlist actions,
+preferences reset and isolation using two real authorized accounts.
+
+The remaining ML work requires an approved new protocol addressing execution
+timing, adjustment, universe bias and uncertainty. Keep model output unavailable
+while those questions remain unresolved. Earlier proposed steps below provide
+the background to this completed increment.
+
 Start with [the current handoff](CURRENT_HANDOFF.md) for branch and delivery
 status. [PR #26](https://github.com/noahsteinberg/StockSight/pull/26) shipped
 Dashboard, Explore, Compare, preferences, Settings, the quote widget and

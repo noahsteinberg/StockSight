@@ -5,6 +5,7 @@ import CompareTray, { CompareToggle } from './CompareTray.jsx';
 import { explorePageSize, exploreSortOptions, sectorNames } from './explore-api.js';
 import useExplore, { useSectors } from './use-explore.js';
 import { exploreHash } from './use-page-route.js';
+import ResearchIdeas from './ResearchIdeas.jsx';
 
 const price = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const percent = new Intl.NumberFormat('en-US', { style: 'percent', signDisplay: 'exceptZero', minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -128,6 +129,7 @@ export default function Explore({ query, page, sector, sort, mine, preferences, 
         onClick={() => { window.location.hash = exploreHash({ query, sort, mine: !mine }); }}>Use my preferences</button>}
       {(query || sector || mine || sort !== 'ticker') && <button type="button" className="explore-reset" onClick={clearFilters}>Reset filters</button>}
     </form>
+    <ResearchIdeas query={query} sector={sector} mine={mine} watchlist={watchlist} selection={selection} />
     {mine && !account.isAuthenticated && <div className="page-panel unavailable-state">
       <p>Sign in to list stocks that match your saved preferences. Everything else on Explore works without an account.</p>
       <div className="page-actions">

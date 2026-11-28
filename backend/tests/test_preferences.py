@@ -72,6 +72,27 @@ def test_preferences_require_an_account(account_app):
         assert client.put("/api/me/preferences", json={}).status_code == 401
         assert client.delete("/api/me/preferences").status_code == 401
         assert client.get("/api/me/discovery").status_code == 401
+        assert client.get("/api/me/research-ideas").status_code == 401
+
+
+def test_research_ideas_use_only_the_signed_in_accounts_sectors(account_app, token):
+    engine = account_app.state.engine
+    add_stock(engine, "XOM", [100 + i for i in range(21)])
+    add_stock(engine, "PFE", [100 + i for i in range(21)])
+    alice, bob = headers(token()), headers(token("auth0|bob"))
+    with TestClient(account_app) as client:
+        client.put("/api/me/preferences", headers=alice, json=ENERGY_AND_TECH)
+        client.put(
+            "/api/me/preferences", headers=bob, json={"sectors": ["Health Care"]}
+        )
+        one = client.get("/api/me/research-ideas", headers=alice)
+        assert one.status_code == 200
+        assert one.headers["cache-control"] == "no-store"
+        assert [item["symbol"] for item in one.json()["items"]] == ["XOM"]
+        two = client.get("/api/me/research-ideas", headers=bob).json()
+        assert [item["symbol"] for item in two["items"]] == ["PFE"]
+        client.delete("/api/me/preferences", headers=bob)
+        assert client.get("/api/me/research-ideas", headers=bob).json()["items"] == []
 
 
 def test_save_read_reset_and_two_account_isolation(account_app, token):

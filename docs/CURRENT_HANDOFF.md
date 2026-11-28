@@ -1,5 +1,53 @@
 # StockSight current handoff
 
+## Research ideas and Analysis patterns — approved follow-up
+
+Noah approved the two-stage plan after reviewing Parth's #28. The review branch
+now adds Research ideas above the full Explore list. Guests can search all
+494 stocks, filter sectors and choose recent 20-session momentum or lower
+20-change historical variability. Six suggestions follow those filters.
+Signed-in users can apply their saved sectors. Every suggestion explains its
+metric and links to Analysis, watchlist and Compare.
+
+Historical patterns live in an expandable section below Analysis's chart.
+They default to 21 stored sessions, also offer 5, and retain the selection
+in the URL. Old Predictions links containing a horizon redirect to Analysis
+with patterns open. Predictions is available through the research-signal link
+and shows the unavailable model status. The sidebar has no empty model page.
+Search suggestions are no longer clipped. The match table includes standardized
+distance, and short-history/event states explain why results are unavailable.
+Current pattern results are hidden during historical replay.
+
+The offline ranking diagnostic is complete. It evaluated 26,211 stock/date rows
+over 58 monthly cutoffs in 2014–2018, loaded no 2019+ observations, and passed
+application/scorer parity checks. Pattern rank IC was 0.02286 and the gross
+decile spread was 0.25494 percentage points, below the historical-median
+baseline's 0.29450. Illustrative costs erased that pattern spread. Retain the
+unavailable model signal. Read the
+[diagnostic report](../ml/docs/PATTERN_RANKING_DEVELOPMENT.md).
+
+New read-only public/private ideas endpoints use existing daily history and
+account authorization. This release needs no migration or new environment
+variables. The updater's next committed data revision appears on the next
+request. Full API, account, mobile and browser checks accompany the PR.
+
+Local checks include the full backend run (285 passed, two skipped), the
+additional offline scorer causality/parity case, 61 final SQLite/PostgreSQL
+Explore/preferences cases, and all 30 account browser cases. Public cases
+were covered by the full run and targeted reruns after updating navigation
+expectations and waiting for mocked requests at test teardown. Lint, format,
+Node contracts and the production build passed. The existing bundle-size
+warning remains. GitHub checks on the published head provide the final
+release gate.
+
+The local preview is `http://127.0.0.1:5188/#/explore`. Its isolated copy covers
+494 stocks through November 25 with 260 sessions each; AAPL, MSFT, NVDA, BRK-B
+and JPM include longer verified history. Real production Auth0 acceptance
+remains a post-release check. #28 awaits Noah's review before merge/deployment.
+Issue #27 tracks remaining work.
+
+### Prior review checkpoints
+
 ## Noah's local review follow-up
 
 The local review fixes the Predictions search menu clipping, preserves the

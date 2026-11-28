@@ -1,4 +1,4 @@
-const reasons = ['insufficient_history', 'insufficient_matches', 'invalid_history'];
+const reasons = ['insufficient_history', 'insufficient_matches', 'invalid_history', 'current_event_window'];
 const finite = value => typeof value === 'number' && Number.isFinite(value);
 const integer = (value, min, max) => Number.isInteger(value) && value >= min && value <= max;
 const date = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) &&
@@ -31,7 +31,7 @@ export function parsePatterns(body, symbol, horizon) {
       body.matched_count < 8 || body.matches.length !== body.matched_count ||
       body.eligible_candidates < body.matched_count || body.points.length !== horizon + 1) fail();
   for (const [i, match] of body.matches.entries()) {
-    if (!match || !date(match.date) || !date(match.end_date) || match.date >= match.end_date || match.end_date > body.as_of ||
+    if (!match || (match.match_distance !== undefined && (!finite(match.match_distance) || match.match_distance < 0)) || !date(match.date) || !date(match.end_date) || match.date >= match.end_date || match.end_date > body.as_of ||
         match.date < body.calculation_start || !setup(match.setup) || !Array.isArray(match.path) ||
         match.path.length !== horizon + 1 || !match.path.every(value => finite(value) && value > -100) ||
         !near(match.path[0], 0) || !near(match.path[horizon], match.change_pct) ||

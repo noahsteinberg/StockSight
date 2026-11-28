@@ -14,8 +14,10 @@ const aliases = { watchlist: 'dashboard', project: 'methodology', main: 'analysi
 export default function usePageRoute() {
   const hash = useSyncExternalStore(subscribe, snapshot);
   const [path, query = ''] = hash.replace(/^#\/?/, '').split('?');
-  const page = aliases[path] || path || 'dashboard';
+  const requestedView = aliases[path] || path || 'dashboard';
   const params = new URLSearchParams(query);
+  const legacyPatterns = requestedView === 'predictions' && params.has('horizon') && params.get('model') !== '1';
+  const page = legacyPatterns ? 'analysis' : requestedView;
   const requestedSymbol = params.get('symbol');
   const symbol = requestedSymbol?.trim().toUpperCase();
   const requestedPage = Number(params.get('page'));
@@ -23,7 +25,8 @@ export default function usePageRoute() {
     page: knownPages.has(page) ? page : 'not-found',
     symbol: symbol && /^[A-Z][A-Z0-9.^=-]{0,15}$/.test(symbol) ? symbol : null,
     patternHorizon: patternHorizon(params.get('horizon')),
-    showModel: params.get('model') === '1',
+    patternOpen: legacyPatterns || params.get('patterns') === '1',
+    legacyPatterns,
     // Explore list state lives in the URL so back/forward and shared links work.
     explore: {
       query: (params.get('q') || '').trim().slice(0, 40),
