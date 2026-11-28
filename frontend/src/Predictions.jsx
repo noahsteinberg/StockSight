@@ -49,6 +49,11 @@ export default function Predictions({ symbol }) {
     }
     setError(''); setDraft({ symbol: ticker, value: ticker });
     window.location.hash = `#/predictions?symbol=${encodeURIComponent(ticker)}&model=1`;
+    const status = document.getElementById('model-status');
+    if (status) {
+      status.open = true;
+      status.scrollIntoView({ block: 'start' });
+    }
   }
   return <section className="app-page predictions-page" aria-labelledby="predictions-title">
     <div className="page-heading"><h1 id="predictions-title">Predictions</h1><span className="historical-badge">Model unavailable</span></div>
@@ -64,11 +69,11 @@ export default function Predictions({ symbol }) {
         {error && <p id="prediction-search-error" className="validation-error" role="alert">{error}</p>}
       </form>
     </div>
-    <details key={symbol} className="page-panel help-disclosure model-details" open>
+    <details id="model-status" key={symbol} className="page-panel help-disclosure model-details" open>
       <summary>ML prediction status and model information</summary>
       <div><SignalPanel key={symbol} symbol={symbol} />
         <h2>Prediction history</h2><h3>Prediction history is unavailable</h3>
-        <p>Saved model forecasts and their outcomes will appear here after a model is approved. Historical matches above are a separate research tool.</p>
+        <p>Saved model forecasts and their outcomes will appear here after a model is approved. Explore offers research suggestions now, and Analysis includes historical comparisons.</p>
         <a href="#/performance">Model performance</a>
       </div>
     </details>

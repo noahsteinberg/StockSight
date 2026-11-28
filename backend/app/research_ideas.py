@@ -36,6 +36,8 @@ class ResearchIdeas(BaseModel):
     latest_session: date | None
     matching_count: int
     eligible_count: int
+    page: int = 1
+    page_size: int = 6
     items: list[ResearchIdea]
 
 
@@ -51,7 +53,7 @@ def metric(closes, events, method):
     return stdev(100 * (b / a - 1) for a, b in zip(closes, closes[1:], strict=False))
 
 
-def make_ideas(groups, latest, query, sectors, method):
+def make_ideas(groups, latest, query, sectors, method, page=1):
     items = []
     for symbol, name, revision, bars in groups:
         if not bars or bars[-1][0] != latest:
@@ -89,11 +91,12 @@ def make_ideas(groups, latest, query, sectors, method):
         latest_session=latest,
         matching_count=len(groups),
         eligible_count=len(items),
-        items=items[:6],
+        page=page,
+        items=items[(page - 1) * 6 : page * 6],
     )
 
 
-def research_ideas(engine, query, sectors, method, *, private=False):
+def research_ideas(engine, query, sectors, method, *, private=False, page=1):
     if engine is None:
         profile = profile_for("AAPL")
         bars = load_bars()
@@ -112,7 +115,7 @@ def research_ideas(engine, query, sectors, method, *, private=False):
             if matches and not (private and not sectors)
             else []
         )
-        return make_ideas(groups, bars[-1].date, query, sectors, method)
+        return make_ideas(groups, bars[-1].date, query, sectors, method, page)
     recent = aliased(DailyBar)
     lower_bound = (
         select(recent.session_date)
@@ -174,4 +177,4 @@ def research_ideas(engine, query, sectors, method, *, private=False):
             grouped[series.symbol][3].append(
                 (row.session_date, float(row.close), recorded_event(row.source_values))
             )
-    return make_ideas(list(grouped.values()), latest, query, sectors, method)
+    return make_ideas(list(grouped.values()), latest, query, sectors, method, page)

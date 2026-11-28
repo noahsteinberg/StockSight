@@ -38,7 +38,7 @@ update runs. See [daily refresh](DAILY_REFRESH.md).
 
 | URL fragment | View | Behavior |
 | --- | --- | --- |
-| #/explore?sector=Energy&sort=change_desc&page=2 | Explore stocks | Public paginated list of supported stocks (10 per page) with search, GICS sector filter, ticker or daily-change sorting, latest stored close/date, save star and compare toggle |
+| #/explore?sector=Energy&sort=change_desc&page=2 | Explore stocks | Public paginated list of supported stocks (5 per page) with search, GICS sector filter, ticker or daily-change sorting, latest stored close/date, save star and compare toggle |
 | #/analysis?symbol=AAPL | Stock analysis | Company/sector line, separate TradingView latest-quote panel (hidden during replay), price and volume, SMA20/RSI14, inspection, historical replay, CSV, watchlist chips and Add to comparison |
 | #/compare?symbols=AAPL,MSFT&range=1y | Compare stocks | 2–4 stocks indexed to 100 on common dates, keyboard/pointer readout, summary table and disclosures (shared cutoff, short overlap, splits, price-only change) |
 | #/dashboard (#/watchlist) | Dashboard | Private watchlist with stored closes, session dates and daily change, filtering, open/remove, compare toggle, optional preferences invitation and account states |

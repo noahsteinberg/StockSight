@@ -96,6 +96,10 @@ Response fields are `calculation_version: research-ideas-v1`, `method`,
 and `items`. Each item contains `symbol`, `name`, `sector`, `metric_pct`,
 `reason`, `as_of` and `series_revision`.
 
+Both research-ideas routes accept `page` (1–1000, default 1) and return
+`page` and `page_size: 6`. The complete filtered universe is ranked before
+paging. Explore's stock list pages independently with five rows per page.
+
 Eligibility requires 21 valid positive closes ending at the newest stored
 universe session and no recorded split event in that window. Momentum is
 `100 * (last / first - 1)`, descending. Variability is sample standard

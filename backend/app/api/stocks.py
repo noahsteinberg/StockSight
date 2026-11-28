@@ -108,6 +108,7 @@ def ideas(
     query: Annotated[str, Query(max_length=40)] = "",
     sector: Sector | None = None,
     method: IdeaMethod = "momentum",
+    page: Annotated[int, Query(ge=1, le=1000)] = 1,
 ) -> ResearchIdeas:
     try:
         return research_ideas(
@@ -115,6 +116,7 @@ def ideas(
             query.strip().upper(),
             [sector] if sector else [],
             method,
+            page=page,
         )
     except SQLAlchemyError:
         raise unavailable() from None

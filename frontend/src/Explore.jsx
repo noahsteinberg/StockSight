@@ -129,7 +129,6 @@ export default function Explore({ query, page, sector, sort, mine, preferences, 
         onClick={() => { window.location.hash = exploreHash({ query, sort, mine: !mine }); }}>Use my preferences</button>}
       {(query || sector || mine || sort !== 'ticker') && <button type="button" className="explore-reset" onClick={clearFilters}>Reset filters</button>}
     </form>
-    <ResearchIdeas query={query} sector={sector} mine={mine} watchlist={watchlist} selection={selection} />
     {mine && !account.isAuthenticated && <div className="page-panel unavailable-state">
       <p>Sign in to list stocks that match your saved preferences. Everything else on Explore works without an account.</p>
       <div className="page-actions">
@@ -187,6 +186,7 @@ export default function Explore({ query, page, sector, sort, mine, preferences, 
     </div>
     </>}
     <CompareTray selection={selection} />
+    <ResearchIdeas query={query} sector={sector} mine={mine} watchlist={watchlist} selection={selection} />
     <p className="explore-note">
       {sectors.data
         ? <>Company names and GICS sectors come from a reviewed copy of <a href={sectors.data.source.url}>{sectors.data.source.name}</a> (revision of {sectors.data.source.revision_date}, {sectors.data.source.license}).{sectors.data.unknown > 0 && ` ${count.format(sectors.data.unknown)} supported ${sectors.data.unknown === 1 ? 'stock has' : 'stocks have'} no reviewed sector yet.`} </>

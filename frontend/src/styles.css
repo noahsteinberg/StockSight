@@ -556,7 +556,10 @@ section { scroll-margin-top: 24px; }
 .research-ideas > p { margin: 12px 0; font-size: 13px; }
 .research-ideas .panel-heading { flex-wrap: wrap; gap: 12px; }
 .research-ideas label { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; }
-.research-ideas select { max-width: 100%; }
+.research-ideas { font-family: inherit; }
+.research-ideas .explore-sector-filter { flex-wrap: wrap; }
+.research-ideas .explore-sector-filter select { font-family: inherit; }
+.idea-rank { display: block; margin-bottom: 8px; color: var(--muted); font-size: 12px; }
 .idea-grid { list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding: 0; margin: 16px 0 0; }
 .idea-grid li { min-width: 0; padding: 14px; border: 1px solid var(--line); border-radius: 8px; font-size: 13px; overflow-wrap: anywhere; }
 .idea-grid li > span { display: block; margin-top: 5px; }

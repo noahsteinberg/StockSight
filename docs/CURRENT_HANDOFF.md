@@ -1,9 +1,19 @@
 # StockSight current handoff
 
+## Explore review polish
+
+Noah requested the original search-and-stock-list grouping, five stock rows
+per page, and Research ideas below the list. Research ideas now uses the
+existing dropdown styles and inherited IBM Plex typography, with six candidates
+per page, Previous/Next controls and a metric-specific rank for each candidate.
+Coverage text describes the visible range and total candidate count.
+Open model status selects a stock and scrolls to its availability panel.
+These changes are on PR #28 for review and await merge before production.
+
 ## Research ideas and Analysis patterns — approved follow-up
 
 Noah approved the two-stage plan after reviewing Parth's #28. The review branch
-now adds Research ideas above the full Explore list. Guests can search all
+now adds Research ideas below the full Explore list. Guests can search all
 494 stocks, filter sectors and choose recent 20-session momentum or lower
 20-change historical variability. Six suggestions follow those filters.
 Signed-in users can apply their saved sectors. Every suggestion explains its

@@ -37,13 +37,19 @@ def private_ideas(
     user: Annotated[CurrentUser, Depends(current_user)],
     query: Annotated[str, Query(max_length=40)] = "",
     method: IdeaMethod = "momentum",
+    page: Annotated[int, Query(ge=1, le=1000)] = 1,
 ) -> ResearchIdeas:
     try:
         engine = account_engine(request)
         with engine.connect() as connection:
             preferences = read_preferences(connection, user.id)
         return research_ideas(
-            engine, query.strip().upper(), preferences.sectors, method, private=True
+            engine,
+            query.strip().upper(),
+            preferences.sectors,
+            method,
+            private=True,
+            page=page,
         )
     except SQLAlchemyError:
         raise preferences_unavailable() from None

@@ -86,6 +86,9 @@ test('model stock picker is clickable beyond its panel', async ({ page }) => {
   await option.click();
   await expect(page.getByRole('heading', { name: 'AAPL', exact: true })).toBeVisible();
   await expect(page.getByText('No approved model signal is available.', { exact: true })).toBeVisible();
+  await page.locator('#model-status summary').click();
+  await page.getByRole('button', { name: 'Open model status', exact: true }).click();
+  await expect(page.locator('#model-status')).toHaveAttribute('open', '');
 });
 
 test('an older visible chart blocks patterns until a joint refresh', async ({ page }) => {

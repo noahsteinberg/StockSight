@@ -15,7 +15,7 @@ from app.config import Settings
 from app.db import DailyBar, PriceSeries, StockRecord, database_engine
 from app.factory import create_app
 from app.market import load_bars
-from app.research_ideas import metric
+from app.research_ideas import make_ideas, metric
 from app.seed import seed_fixture
 
 BACKEND = Path(__file__).resolve().parents[1]
@@ -174,6 +174,28 @@ def test_ideas_rank_complete_fresh_histories_and_exclude_events(explore_client):
     )
     assert explore_client.get("/api/research-ideas?method=profit").status_code == 422
     assert explore_client.get("/api/research-ideas?query=NOPE").json()["items"] == []
+    next_page = explore_client.get("/api/research-ideas?page=2").json()
+    assert next_page["page"] == 2 and next_page["items"] == []
+
+
+def test_idea_pages_cover_the_complete_ranking_without_duplicates():
+    latest = date(2026, 11, 21)
+    groups = [
+        (
+            f"TEST{i}",
+            f"Test {i}",
+            "revision",
+            [(date(2026, 11, day), 100 + day * (i + 1), False) for day in range(1, 22)],
+        )
+        for i in range(14)
+    ]
+    pages = [make_ideas(groups, latest, "", [], "momentum", page) for page in (1, 2, 3)]
+    items = [item for page in pages for item in page.items]
+    assert [len(page.items) for page in pages] == [6, 6, 2]
+    assert len({item.symbol for item in items}) == 14
+    assert all(
+        a.metric_pct >= b.metric_pct for a, b in zip(items, items[1:], strict=False)
+    )
 
 
 def test_idea_metric_requires_valid_complete_history():
