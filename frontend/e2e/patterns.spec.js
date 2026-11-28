@@ -88,6 +88,19 @@ test('model stock picker is clickable beyond its panel', async ({ page }) => {
   await expect(page.getByText('No approved model signal is available.', { exact: true })).toBeVisible();
 });
 
+test('an older visible chart blocks patterns until a joint refresh', async ({ page }) => {
+  await page.route('**/api/stocks/AAPL/prices?range=1mo', async route => {
+    const response = await route.fetch();
+    await route.fulfill({ json: { ...await response.json(), snapshot_id: 'different-price-revision' } });
+  });
+  await page.goto('/#/analysis?symbol=AAPL&patterns=1');
+  await expect(page.getByRole('alert')).toContainText('Refresh the chart and patterns together');
+  await expect(panel(page)).toHaveCount(0);
+  await page.unroute('**/api/stocks/AAPL/prices?range=1mo');
+  await page.getByRole('button', { name: 'Refresh chart and patterns', exact: true }).click();
+  await expect(panel(page)).toContainText('12 matched periods');
+});
+
 test('phone layout keeps patterns and examples inside the viewport', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 740 });
   await open(page);

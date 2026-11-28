@@ -5,11 +5,15 @@ import StockSearchInput from './StockSearchInput.jsx';
 import { fetchPatternSnapshot } from './pattern-api.js';
 import { patternHash } from './pattern-route.js';
 
-export function PatternResults({ symbol, horizon }) {
+export function PatternResults({ symbol, horizon, chartHistory, onReloadChart }) {
   const [attempt, setAttempt] = useState(0);
   const [result, setResult] = useState(null);
   const key = `${symbol}:${attempt}`;
   const current = result?.key === key ? result : null;
+  function reloadHistory() {
+    onReloadChart?.();
+    setAttempt(value => value + 1);
+  }
   useEffect(() => {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 10000);
@@ -22,10 +26,16 @@ export function PatternResults({ symbol, horizon }) {
   }, [symbol, key]);
   if (!current) return <div className="page-panel analysis-message" role="status">Loading stored history for {symbol}…</div>;
   if (current.error) return <div className="page-panel analysis-message" role="alert"><p>{current.error}</p>
-    <button type="button" onClick={() => setAttempt(value => value + 1)}>Retry stored history</button></div>;
+    <button type="button" onClick={reloadHistory}>Retry stored history</button></div>;
+  if (chartHistory && (chartHistory.snapshot_id !== current.data.snapshot_id || chartHistory.as_of !== current.data.as_of)) {
+    return <div className="page-panel analysis-message" role="alert">
+      <p>The stored history changed. Refresh the chart and patterns together.</p>
+      <button type="button" onClick={reloadHistory}>Refresh chart and patterns</button>
+    </div>;
+  }
   return <PatternExplorer symbol={symbol} horizon={horizon} history={current.data}
     onChangeHorizon={value => { window.location.hash = patternHash(symbol, value); }}
-    onReloadHistory={() => setAttempt(value => value + 1)} />;
+    onReloadHistory={reloadHistory} />;
 }
 
 export default function Predictions({ symbol }) {

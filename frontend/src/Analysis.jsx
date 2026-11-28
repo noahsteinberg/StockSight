@@ -175,7 +175,8 @@ export default function Analysis({ symbol, onSelectSymbol, watchlist, selection,
         }}>
         <summary>Historical patterns</summary>
         <p>See what followed similar setups over 5 trading sessions (about a week) or 21 (about a month).</p>
-        {patternOpen && <PatternResults key={symbol} symbol={symbol} horizon={patternHorizon} />}
+        {patternOpen && <PatternResults key={symbol} symbol={symbol} horizon={patternHorizon} chartHistory={data}
+          onReloadChart={() => { reload(); setRetry(value => value + 1); indicators.retry(); }} />}
       </details>}
       {/* The delayed vendor quote is secondary to the stored history above it. */}
       <MarketQuote key={symbol} symbol={symbol} asOf={data?.as_of} replaying={replaying} />

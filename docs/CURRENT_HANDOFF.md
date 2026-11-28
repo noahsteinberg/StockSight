@@ -17,6 +17,8 @@ and shows the unavailable model status. The sidebar has no empty model page.
 Search suggestions are no longer clipped. The match table includes standardized
 distance, and short-history/event states explain why results are unavailable.
 Current pattern results are hidden during historical replay.
+Both the visible chart revision and the independent recent-price check must
+agree with the patterns. A mismatch offers a joint chart/pattern refresh.
 
 The offline ranking diagnostic is complete. It evaluated 26,211 stock/date rows
 over 58 monthly cutoffs in 2014–2018, loaded no 2019+ observations, and passed
