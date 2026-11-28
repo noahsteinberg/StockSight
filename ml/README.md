@@ -66,6 +66,13 @@ the pinned research environment. Frozen manifests reject source/package drift.
 
 ## Next research checkpoint
 
+The newly completed pattern-ranking diagnostic already measured turnover and
+illustrative costs for that method and did not qualify it. Do not repeat it as
+unfinished work. The older saved next-session rankings remain a separate audit.
+The active [final-stage plan](../docs/FINAL_STAGE_HANDOFF.md) requires a scope
+decision and approved bounded protocol before further fits or protected scores.
+No new training is authorized merely by this checkpoint.
+
 Audit saved rankings for stock/day concentration, turnover and realistic
 publication/next-available entry timing. Audit OHLC adjustment/alignment first.
 No broad model sweep or confidence-cutoff tuning. If this survives, predeclare

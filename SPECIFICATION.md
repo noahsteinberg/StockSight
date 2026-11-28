@@ -6,11 +6,20 @@ Build an educational full-stack stock analysis and prediction platform for stude
 
 ## Current deliverable
 
-The current app supports PostgreSQL-backed historical search and charts,
-repeatable snapshot imports, SMA20 and Wilder RSI14, chart inspection and
-replay, Auth0 accounts, restored sessions and private watchlists. Inference,
-prediction history and evaluation remain planned. See the
+The current main app supports PostgreSQL-backed historical search and charts,
+repeatable imports and scheduled completed-session updates, SMA20 and Wilder
+RSI14, chart inspection and replay, Auth0 accounts, restored sessions, private
+watchlists, Explore, Compare, Settings and private research preferences.
+PR #28 adds descriptive research ideas and Analysis historical patterns; it
+awaits release approval. Offline ML evaluation exists, but no serving model
+qualifies. Inference, stored forecasts/outcomes and product model-performance
+reporting remain planned. See the
 [current handoff](docs/CURRENT_HANDOFF.md) for delivery and verification status.
+
+The [final-stage plan](docs/FINAL_STAGE_HANDOFF.md) distinguishes the original
+predictive MVP below from a smaller discovery-plus-offline-research deliverable.
+The latter requires explicit scope agreement; passing app CI does not complete
+the predictive requirements.
 
 ## Planned MVP
 
@@ -39,12 +48,14 @@ The original Phase 0 was a scaffold; its exclusions are not the current implemen
 
 ## Unresolved decisions
 
-- Provider usage rights, reproducible cleaning, adjustments/calendar and incremental refresh
+- Provider usage rights and historical adjustment/universe limitations; existing
+  cleaning/calendar and incremental refresh procedures are documented, not a new ingestion task
 - Production password-reset acceptance and provider-driven session revocation (Auth0 and app sessions are implemented)
 - Operational recovery and backup policy for the Vercel and Supabase deployment
 - Exact prediction definition: close-to-close or another horizon, cutoff time, timezone, neutral/unchanged prices, and adjusted-price policy
 - Baseline, model comparison metrics, probability calibration, and retraining cadence
 - Prediction-history visibility and data retention
-- Deployment services, budget, and demo acceptance criteria
+- Final demo scope and acceptance evidence; Vercel hosting and scheduled data
+  refresh are implemented, with procedures in the current handoff
 
 See [ML research](ml/README.md) for experiment results and promotion criteria.

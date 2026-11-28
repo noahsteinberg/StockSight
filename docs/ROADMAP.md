@@ -1,9 +1,15 @@
 # Proposed StockSight team roadmap
 
+Current final-stage tasks and scope decisions are in
+[FINAL_STAGE_HANDOFF.md](FINAL_STAGE_HANDOFF.md) and
+[issue #29](https://github.com/noahsteinberg/StockSight/issues/29).
+The historical proposed MVP below has not been silently waived: stored
+forecasts and held-out model reporting remain unfinished.
+
 Historical team proposal: completed milestones below are not the current backlog.
 Noah's newer [frontend product plan](FRONTEND_PRODUCT_HANDOFF.md) defines the
 proposed Explore/Compare/preferences sequence and human approval gates, with Vlad
-(@Hab1yer) coordinating. Read CURRENT_HANDOFF.md for delivered infrastructure and
+(@Londarh) coordinating. Read CURRENT_HANDOFF.md for delivered infrastructure and
 paused ML; preserve this roadmap as team/project context rather than restarting
 old ingestion, deployment or model work from its milestones.
 

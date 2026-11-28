@@ -1,5 +1,18 @@
 # StockSight current handoff
 
+## Active continuation and final-stage scope
+
+Read [FINAL_STAGE_HANDOFF.md](FINAL_STAGE_HANDOFF.md) for the remaining release,
+acceptance, recommendation/preferences and conditional ML-serving work.
+[Issue #29](https://github.com/noahsteinberg/StockSight/issues/29) replaces #27
+and carries its unfinished tasks. The six checks passed on PR #28 head fc508f0;
+this documentation update creates a newer head requiring its own CI result.
+PR #28 still awaits Noah's release approval; no merge, deployment, migration or
+new training was performed during this final-stage audit.
+
+Earlier checkpoints below are chronological history. Their proposed page flows
+and pending tasks are superseded by the latest sections and final-stage plan.
+
 ## Explore review polish
 
 Noah requested the original search-and-stock-list grouping, five stock rows
@@ -56,7 +69,7 @@ The local preview is `http://127.0.0.1:5188/#/explore`. Its isolated copy covers
 494 stocks through November 25 with 260 sessions each; AAPL, MSFT, NVDA, BRK-B
 and JPM include longer verified history. Real production Auth0 acceptance
 remains a post-release check. #28 awaits Noah's review before merge/deployment.
-Issue #27 tracks remaining work.
+Issue #29 tracks remaining work.
 
 ### Prior review checkpoints
 

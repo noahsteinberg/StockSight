@@ -1,5 +1,10 @@
 # StockSight release and next increments
 
+The active forward plan is now [FINAL_STAGE_HANDOFF.md](FINAL_STAGE_HANDOFF.md)
+and [issue #29](https://github.com/noahsteinberg/StockSight/issues/29).
+This guide preserves release procedures and earlier proposals; do not restart
+completed #26 work or treat the completed pattern diagnostic as model approval.
+
 The next increment has been implemented on PR #28 for review. Explore now has
 explainable research ideas while retaining full search and pagination. Patterns
 are embedded in Analysis, with legacy links preserved. The approved 21-session
@@ -28,7 +33,7 @@ provider-dependent freshness. No widget prices enter the stored history.
 
 ## Preview and regression checklist
 
-Open the local review preview at `http://127.0.0.1:5177/` while it is running.
+Open the local review preview at `http://127.0.0.1:5188/` while it is running.
 It uses an isolated copy of all 494 hosted series through November 25, 2026
 with up to 260 sessions per stock. It includes public market data only.
 The Max chart can show a longer history in production. Real Auth0 account
@@ -86,7 +91,7 @@ schema releases and verify the current Alembic revision before each rollout.
 Vlad (@Londarh) coordinates the frontend follow-up with Gavin (@Hab1yer) on
 hosted account acceptance, Parth on price and metadata inputs, and Noah on ML
 research approval.
-Use [issue #27](https://github.com/noahsteinberg/StockSight/issues/27) to record
+Use [issue #29](https://github.com/noahsteinberg/StockSight/issues/29) to record
 acceptance and link follow-up work. Give the next agent this file, the current
 handoff, and the relevant specialist guide.
 
@@ -97,6 +102,10 @@ approval.** Reuse agreed behavior and record the chosen scope, including how to
 verify it. Return the result for review before deployment.
 
 ### First increment: make exploration useful with existing data
+
+Historical proposal: this increment and its pattern-ranking diagnostic are now
+implemented in PR #28. Use FINAL_STAGE_HANDOFF.md for new tasks; do not implement
+the proposal below a second time.
 
 Start after hosted acceptance. Keep Dashboard as the watchlist home and
 Explore as the public discovery page. Consider an opt-in **Research ideas** view
